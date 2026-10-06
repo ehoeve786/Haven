@@ -7,7 +7,7 @@ log="$(mktemp)"
 "$@" 2>&1 | tee "$log"
 status=$?
 if [ $status -ne 0 ]; then
-    errors="$(grep -E '^e: |^w: .*unresolved|FAILED$|tests completed|What went wrong|^> |Unresolved reference|Execution failed' "$log" | head -80)"
+    errors="$(grep -E '^e: |^w: .*unresolved|FAILED$|tests completed|What went wrong|^> |Unresolved reference|Execution failed' "$log" | head -200)"
     errors="${errors//'%'/'%25'}"
     errors="${errors//$'\r'/}"
     errors="${errors//$'\n'/'%0A'}"

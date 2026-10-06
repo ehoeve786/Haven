@@ -1,0 +1,48 @@
+name: Compile check
+
+# Fork maintenance: compile every Kotlin source set (main + unit tests) on each
+# push to a removal branch, with `--continue` so one run reports every module's
+# errors, surfaced as a check annotation by ci-run-annotated.sh.
+on:
+  push:
+    branches: [ 'remove/**' ]
+  workflow_dispatch:
+
+concurrency:
+  group: compile-check-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  compile:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+        with:
+          submodules: false
+      - uses: ./.github/actions/init-submodules-with-retry
+        with:
+          paths: |
+            termlib
+            mosh-kotlin
+            et-kotlin
+            reticulum-kt
+            rnsh-kt
+            spice-kotlin
+            prns
+            build-proot/proot-termux
+      - uses: ./.github/actions/setup-toolchain
+      - name: Compile all Kotlin
+        run: >-
+          ./scripts/ci-run-annotated.sh ./gradlew --continue
+          compileDebugUnitTestKotlin
+          :app:compileArm64FullDebugUnitTestKotlin
+          :app:compileArm64FullDebugJavaWithJavac
+          -PexcludeSshlibContractTests=true
+          -PskipWaylandNatives=true
+          -PskipFfmpegNatives=true
+          -PskipUml=true
+          -PskipQemuLoaders=true
