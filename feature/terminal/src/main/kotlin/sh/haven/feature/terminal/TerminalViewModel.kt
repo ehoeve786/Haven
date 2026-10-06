@@ -277,19 +277,6 @@ data class TerminalTab(
     val multiplexerName: String? = null,
 )
 
-/** VNC connection info for the active terminal's host. */
-data class VncInfo(
-    val host: String,
-    val port: Int,
-    val username: String?,
-    val password: String?,
-    val sshForward: Boolean,
-    val profileId: String,
-    val sessionId: String,
-    val stored: Boolean,
-    val colorDepth: String = "BPP_24_TRUE",
-)
-
 @HiltViewModel
 class TerminalViewModel @Inject constructor(
     @dagger.hilt.android.qualifiers.ApplicationContext private val appContext: android.content.Context,
@@ -908,49 +895,6 @@ class TerminalViewModel @Inject constructor(
         }
     }
 
-    /** True when any PRoot desktop environment is installed. */
-    val isLocalDesktopInstalled: Boolean
-        get() = localSessionManager.prootManager.hasAnyDesktopInstalled
-
-    /** Start the first installed desktop via DesktopManager. */
-    suspend fun startLocalVncServer() {
-        val de = localSessionManager.prootManager.installedDesktop ?: return
-        withContext(Dispatchers.IO) {
-            localSessionManager.desktopManager.startDesktop(de)
-        }
-    }
-
-    /** No-op — VNC profiles are no longer needed for local desktops. */
-    suspend fun ensureLocalVncProfile() { }
-
-    /** Get the stored VNC password for local desktop (localhost:5901). */
-    suspend fun getLocalVncPassword(): String? =
-        connectionRepository.getAll()
-            .find { it.connectionType == "VNC" && it.host == "localhost" && it.vncPort == 5901 }
-            ?.vncPassword
-
-    /** Get VNC connection info for the active terminal tab's SSH host. */
-    suspend fun getActiveVncInfo(): VncInfo? {
-        val tab = _tabs.value.getOrNull(_activeTabIndex.value) ?: return null
-        val profile = connectionRepository.getById(tab.profileId)
-
-        // For SSH tabs, use the stored connection config; for mosh/ET, use the profile directly
-        val host = sessionManager.getConnectionConfigForProfile(tab.profileId)?.first?.host
-            ?: profile?.host
-            ?: return null
-        return VncInfo(
-            host = host,
-            port = profile?.vncPort ?: 5900,
-            username = profile?.vncUsername,
-            password = profile?.vncPassword,
-            sshForward = profile?.vncSshForward ?: true,
-            profileId = tab.profileId,
-            sessionId = tab.sessionId,
-            stored = profile?.vncPort != null,
-            colorDepth = profile?.vncColorDepth ?: "BPP_24_TRUE",
-        )
-    }
-
     // sendRedrawIfZellij (auto Ctrl+L on keyboard hide, from abc8b1b2b) was
     // REMOVED for #554: it injected 0x0C into whatever the pane was running on
     // every IME visible->hidden transition — including app backgrounding and
@@ -1007,28 +951,6 @@ class TerminalViewModel @Inject constructor(
     fun copyLastCommandOutput(): String? {
         val tab = _tabs.value.getOrNull(_activeTabIndex.value) ?: return null
         return tab.emulator.getLastCommandOutput()
-    }
-
-    /** Save VNC settings for a profile. */
-    fun saveVncSettings(
-        profileId: String,
-        port: Int,
-        username: String?,
-        password: String?,
-        sshForward: Boolean,
-        colorDepth: String = "BPP_24_TRUE",
-    ) {
-        viewModelScope.launch(Dispatchers.IO) {
-            connectionRepository.updateVncSettings(profileId, port, username, password, sshForward)
-            // Colour depth lives on the profile but isn't part of the
-            // single-call updateVncSettings signature in
-            // ConnectionRepository — patch it via a fresh getById/upsert
-            // so the VNC-on-SSH save path doesn't lose the new setting.
-            val existing = connectionRepository.getById(profileId)
-            if (existing != null && existing.vncColorDepth != colorDepth) {
-                connectionRepository.save(existing.copy(vncColorDepth = colorDepth))
-            }
-        }
     }
 
     /**

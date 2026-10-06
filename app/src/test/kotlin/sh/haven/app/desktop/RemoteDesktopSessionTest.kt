@@ -1,12 +1,10 @@
 package sh.haven.app.desktop
 
-import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import io.mockk.verifyOrder
 import org.junit.Test
 import sh.haven.core.rdp.RdpSession
-import sh.haven.core.vnc.VncClient
 import sh.haven.rdp.MouseButton
 
 /**
@@ -17,85 +15,6 @@ import sh.haven.rdp.MouseButton
  * surfaces here long before it reaches a connected VNC/RDP server.
  */
 class RemoteDesktopSessionTest {
-
-    // --- VncDesktopSession -------------------------------------------------
-
-    @Test
-    fun `vnc adapter forwards mouse move`() {
-        val client = mockk<VncClient>(relaxed = true)
-        VncDesktopSession(client).sendMouseMove(120, 240)
-        verify(exactly = 1) { client.moveMouse(120, 240) }
-    }
-
-    @Test
-    fun `vnc adapter forwards button press and release`() {
-        val client = mockk<VncClient>(relaxed = true)
-        val s = VncDesktopSession(client)
-        s.sendMouseButton(button = 1, pressed = true)
-        s.sendMouseButton(button = 1, pressed = false)
-        verifyOrder {
-            client.updateMouseButton(1, true)
-            client.updateMouseButton(1, false)
-        }
-    }
-
-    @Test
-    fun `vnc adapter click is move plus click`() {
-        val client = mockk<VncClient>(relaxed = true)
-        VncDesktopSession(client).sendMouseClick(50, 75, button = 3)
-        verifyOrder {
-            client.moveMouse(50, 75)
-            client.click(3)
-        }
-    }
-
-    @Test
-    fun `vnc adapter scroll up synthesises click on button 4`() {
-        val client = mockk<VncClient>(relaxed = true)
-        VncDesktopSession(client).sendMouseWheel(deltaY = 1)
-        verify(exactly = 1) { client.click(4) }
-    }
-
-    @Test
-    fun `vnc adapter scroll down synthesises click on button 5`() {
-        val client = mockk<VncClient>(relaxed = true)
-        VncDesktopSession(client).sendMouseWheel(deltaY = -1)
-        verify(exactly = 1) { client.click(5) }
-    }
-
-    @Test
-    fun `vnc adapter zero scroll is a no-op`() {
-        val client = mockk<VncClient>(relaxed = true)
-        VncDesktopSession(client).sendMouseWheel(deltaY = 0)
-        verify(exactly = 0) { client.click(any()) }
-    }
-
-    @Test
-    fun `vnc adapter forwards clipboard text`() {
-        val client = mockk<VncClient>(relaxed = true)
-        VncDesktopSession(client).sendClipboardText("hello")
-        verify(exactly = 1) { client.copyText("hello") }
-    }
-
-    @Test
-    fun `vnc adapter pause toggles paused property`() {
-        val client = mockk<VncClient>(relaxed = true)
-        every { client.paused = any() } returns Unit
-        val s = VncDesktopSession(client)
-        s.pause()
-        s.resume()
-        verifyOrder {
-            client.paused = true
-            client.paused = false
-        }
-    }
-
-    @Test
-    fun `vnc adapter close stops the client`() {
-        val client = mockk<VncClient>(relaxed = true)
-        VncDesktopSession(client).close()
-        verify(exactly = 1) { client.stop() }
-    }
 
     // --- RdpDesktopSession -------------------------------------------------
 

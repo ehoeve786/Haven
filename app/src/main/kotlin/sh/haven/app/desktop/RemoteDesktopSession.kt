@@ -5,11 +5,10 @@ import java.io.Closeable
 /**
  * Common abstraction over an active remote-desktop connection.
  *
- * Today: VNC and RDP. Tomorrow: Spice, RustDesk, or anything else
- * that exposes the same primitives. `VncClient` and `RdpSession` live
- * in protocol-pure modules (`core/vnc`, `core/rdp`) and are wrapped by
- * thin adapters in this package — see [VncDesktopSession],
- * [RdpDesktopSession]. The interface deliberately stays at the eight
+ * Today: RDP and SPICE. `RdpSession` and `SpiceSession` live in
+ * protocol-pure modules (`core/rdp`, `core/spice`) and are wrapped by
+ * thin adapters in this package — see [RdpDesktopSession],
+ * [SpiceDesktopSession]. The interface deliberately stays at the eight
  * verbs that [DesktopViewModel] used to type-dispatch, so the
  * abstraction is invisible to drivers and only collapses real
  * juxtapositions (VISION.md "places that look unified but aren't").

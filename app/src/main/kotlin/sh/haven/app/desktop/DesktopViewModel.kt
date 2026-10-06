@@ -26,18 +26,13 @@ import sh.haven.core.data.desktop.CursorSnapshot
 import sh.haven.core.data.desktop.DesktopFrameHandle
 import sh.haven.core.data.desktop.DesktopInputHandle
 import sh.haven.core.data.desktop.DesktopStatus
-import sh.haven.core.data.preferences.AppWindowDef
-import sh.haven.core.data.preferences.AppWindowOrigin
 import sh.haven.core.data.preferences.UserPreferencesRepository
 import sh.haven.core.data.repository.ConnectionLogRepository
 import sh.haven.core.data.repository.ConnectionRepository
 import sh.haven.core.et.EtSessionManager
 import sh.haven.core.knock.KnockSequence
 import sh.haven.core.knock.PortKnocker
-import sh.haven.core.local.AppScanResult
 import sh.haven.core.local.DesktopManager
-import sh.haven.core.local.GuestAppScanner
-import sh.haven.core.local.InstalledApp
 import sh.haven.core.local.LocalSessionManager
 import sh.haven.core.local.ProotManager
 import sh.haven.core.local.proot.Distro
@@ -51,11 +46,7 @@ import sh.haven.core.ui.CursorOverlay
 import sh.haven.core.tunnel.TunnelResolver
 import sh.haven.core.tunnel.TunneledConnection
 import sh.haven.core.tunnel.TunneledSocket
-import sh.haven.core.vnc.ColorDepth
-import sh.haven.core.vnc.VncClient
-import sh.haven.core.vnc.VncConfig
 import sh.haven.feature.rdp.RdpViewModel
-import sh.haven.feature.vnc.VncViewModel
 import java.util.UUID
 import java.util.concurrent.ConcurrentLinkedQueue
 import javax.inject.Inject
@@ -82,12 +73,8 @@ class DesktopViewModel @Inject constructor(
     private val agentUiCommandBus: sh.haven.core.data.agent.AgentUiCommandBus,
     private val localSessionManager: LocalSessionManager,
     private val desktopSessionRegistry: sh.haven.core.data.desktop.DesktopSessionRegistry,
-    private val presentationManager: sh.haven.core.data.agent.AgentPresentationManager,
-    private val appWindowLauncher: AppWindowLauncher,
-    private val appWindowShortcutManager: AppWindowShortcutManager,
     private val usbDriveVmManager: sh.haven.app.usb.UsbDriveVmManager,
     private val umlRecoveryManager: sh.haven.app.usb.UmlRecoveryManager,
-    private val systemVmManager: sh.haven.core.local.SystemVmManager,
 ) : ViewModel() {
 
     // --- Distro / DE management (issue #162 Phase 3c) ---
@@ -357,49 +344,18 @@ class DesktopViewModel @Inject constructor(
      * the 3c move.
      */
     fun setupDesktop(
-        vncPassword: String,
-        de: ProotManager.DesktopEnvironment = ProotManager.DesktopEnvironment.XFCE4,
+        de: ProotManager.DesktopEnvironment,
         addons: Set<ProotManager.DesktopAddon> = emptySet(),
-        vncPort: Int? = null,
     ) {
         viewModelScope.launch {
-            // Capture the port preference BEFORE the install kicks off
-            // so the eventual startDesktop reads it on its first launch.
-            // Port 0 from the dialog (e.g. user cleared the field) means
-            // "keep auto"; we only persist non-zero overrides.
-            if (vncPort != null && vncPort in 5901..5999) {
-                desktopManager.setPortPreference(
-                    distroId = prootManager.activeDistroId,
-                    deId = de.spec.id,
-                    port = vncPort,
-                )
-            }
-            prootManager.setupDesktop(vncPassword, de)
+            // Native desktops have no VNC server; the password is unused.
+            prootManager.setupDesktop("", de)
             if (addons.isNotEmpty() &&
                 prootManager.desktopState.value is ProotManager.DesktopSetupState.Complete
             ) {
                 prootManager.installAddons(addons)
             }
         }
-    }
-
-    /**
-     * Suggested default VNC port for a fresh install on the active
-     * distro. Picks the lowest 5900+N not already pinned by another
-     * installed DE or in use by a running session. UI reads this once
-     * when the install dialog opens and stuffs it into the editable
-     * field; subsequent typed edits replace it.
-     */
-    fun suggestVncPortFor(de: ProotManager.DesktopEnvironment): Int {
-        val existing = desktopManager.getPortPreference(prootManager.activeDistroId, de.spec.id)
-        if (existing in 5901..5999) return existing
-        return desktopManager.suggestNextVncPort(prootManager.activeDistroId)
-    }
-
-    /** The stored port preference for [de], or null if auto-assign applies. */
-    fun storedVncPortFor(de: ProotManager.DesktopEnvironment): Int? {
-        val p = desktopManager.getPortPreference(prootManager.activeDistroId, de.spec.id)
-        return if (p in 5901..5999) p else null
     }
 
     fun uninstallDesktop(de: ProotManager.DesktopEnvironment) {
@@ -410,29 +366,7 @@ class DesktopViewModel @Inject constructor(
         }
     }
 
-    /** Session command for the Custom (X11) desktop (#361); blank = unset. */
-    val customDesktopCommand: StateFlow<String> = preferencesRepository.customDesktopCommand
-        .stateIn(viewModelScope, SharingStarted.Eagerly, "")
-
-    /**
-     * Persist the custom command; [thenStart] launches the Custom desktop
-     * after the write commits (sequenced here — starting from the UI right
-     * after an async save would race the launch path's preference read).
-     */
-    fun setCustomDesktopCommand(command: String, thenStart: Boolean = false) {
-        viewModelScope.launch {
-            preferencesRepository.setCustomDesktopCommand(command)
-            if (thenStart && command.isNotBlank()) {
-                startDesktop(ProotManager.DesktopEnvironment.CUSTOM_X11)
-            }
-        }
-    }
-
-    /**
-     * Start a DE and add it as a tab in the Desktop session viewer.
-     * Replaces the old _navigateToVnc → ConnectionsScreen → DesktopViewModel
-     * round-trip with a direct `addVncSession` (or `addWaylandTab`) call.
-     */
+    /** Start a native DE and add it as a Wayland tab in the Desktop session viewer. */
     fun startDesktop(de: ProotManager.DesktopEnvironment) {
         viewModelScope.launch {
             val shellCmd = preferencesRepository.waylandShellCommand.first()
@@ -443,289 +377,13 @@ class DesktopViewModel @Inject constructor(
             if (de.isNative) {
                 kotlinx.coroutines.delay(2000)
                 addWaylandTab()
-                return@launch
             }
-            val port = desktopManager.getVncPort(de) ?: 5901
-            // Wait up to 8 s for the Xvnc server to start listening,
-            // racing the poll against the DesktopManager's own error
-            // state — if the launch throws inside DesktopManager (e.g.
-            // missing compositor binary on the Arch nested-Wayland path,
-            // GlassHaven/Haven#162 bug B), the manager records ERROR +
-            // an errorMessage and we exit the wait immediately with the
-            // diagnostic instead of running out the full timeout and
-            // leaving the user staring at a spinner. See #169.
-            val outcome = withContext(Dispatchers.IO) {
-                val deadline = System.currentTimeMillis() + 8000
-                while (System.currentTimeMillis() < deadline) {
-                    val managerInstance = desktopManager.desktops.value[de]
-                    if (managerInstance?.state == DesktopManager.DesktopState.ERROR) {
-                        return@withContext DesktopStartOutcome.Error(
-                            managerInstance.errorMessage ?: "Couldn't start ${de.label}",
-                        )
-                    }
-                    try {
-                        java.net.Socket("127.0.0.1", port).close()
-                        return@withContext DesktopStartOutcome.Ready
-                    } catch (_: Exception) {
-                        kotlinx.coroutines.delay(500)
-                    }
-                }
-                DesktopStartOutcome.Timeout
-            }
-            when (outcome) {
-                is DesktopStartOutcome.Ready -> {
-                    // Confirm to the manager that the desktop is up so
-                    // the row's status dot flips from amber STARTING to
-                    // green RUNNING. The manager keeps STARTING until
-                    // we signal — see DesktopManager.markRunning.
-                    desktopManager.markRunning(de)
-                }
-                is DesktopStartOutcome.Error -> {
-                    Log.e(TAG, "startDesktop: ${LogRedact.of(de.label)} failed — ${outcome.message}")
-                    val activeDistro = prootManager.activeDistroId
-                    // Surface to the user via a toast + the Manage row's
-                    // ERROR chip (DesktopManager already holds the state).
-                    // NOT persisted to ConnectionLog: that table has a
-                    // foreign key to connection_profiles, and a desktop has
-                    // no profile row — inserting a synthetic id crashed the
-                    // app with SQLITE_CONSTRAINT_FOREIGNKEY on every failing
-                    // nested-Wayland start (Sway/Hyprland/Niri), the
-                    // regression the #169/#162-B error-surfacing introduced.
-                    _userMessages.emit("Couldn't start ${de.label} on $activeDistro: ${outcome.message}")
-                    desktopManager.stopDesktop(de)
-                    return@launch
-                }
-                is DesktopStartOutcome.Timeout -> {
-                    Log.e(TAG, "startDesktop: VNC port $port not listening after 8s")
-                    _userMessages.emit("${de.label} didn't come up within 8s")
-                    desktopManager.stopDesktop(de)
-                    return@launch
-                }
-            }
-            val pwd = prootManager.storedVncPassword
-                ?: connectionRepository.getAll()
-                    .firstOrNull { it.isVnc && it.host == "localhost" }
-                    ?.vncPassword
-            addVncSession(
-                host = "localhost",
-                port = port,
-                password = pwd,
-                username = null,
-                sshForward = false,
-                sshSessionId = null,
-                profileId = null,
-                colorDepth = "BPP_24_TRUE",
-            )
         }
     }
 
     fun stopDesktop(de: ProotManager.DesktopEnvironment) {
         viewModelScope.launch(Dispatchers.IO) {
             desktopManager.stopDesktop(de)
-        }
-    }
-
-    // --- Saved app windows (single-app cage kiosks; see AppWindowDefList) ---
-    // The user-facing half of the agent's present_app: define + launch app
-    // windows, and restart ones the agent launched. Both land in the same
-    // present_media overlay, so this mirrors McpTools.presentApp.
-
-    /** Saved app windows, most-recently-used first, for the Desktop settings list. */
-    val appWindowDefs: StateFlow<List<AppWindowDef>> =
-        preferencesRepository.appWindowDefs
-            .map { list -> list.items.sortedByDescending { it.lastUsed } }
-            .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
-
-    /** Def ids currently launching, so the row's Launch button shows a spinner
-     *  during the (~10–15s) cage-kiosk bring-up. */
-    private val _launchingIds = MutableStateFlow<Set<String>>(emptySet())
-    val launchingIds: StateFlow<Set<String>> = _launchingIds.asStateFlow()
-
-    /** Global default cage resolution/scale, applied when a def doesn't set its own. */
-    val appWindowDefaultResolution: StateFlow<String> =
-        preferencesRepository.appWindowDefaultResolution
-            .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), "auto")
-    val appWindowDefaultScale: StateFlow<Float> =
-        preferencesRepository.appWindowDefaultScale
-            .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 1f)
-
-    fun setAppWindowDefaultResolution(resolution: String) {
-        viewModelScope.launch { preferencesRepository.setAppWindowDefaultResolution(resolution) }
-    }
-
-    fun setAppWindowDefaultScale(scale: Float) {
-        viewModelScope.launch { preferencesRepository.setAppWindowDefaultScale(scale) }
-    }
-
-    /**
-     * Launch a saved app window into the present_media overlay — the same
-     * surface the agent's `present_app` uses. Delegates the cage start +
-     * present to [AppWindowLauncher] (shared with the home-screen shortcut
-     * path); this wrapper only adds the per-def launching spinner and
-     * surfaces any returned message on the screen's snackbar.
-     */
-    fun launchAppWindow(def: AppWindowDef) {
-        viewModelScope.launch(Dispatchers.IO) {
-            _launchingIds.update { it + def.id }
-            try {
-                appWindowLauncher.launch(def)?.let { _userMessages.emit(it) }
-            } finally {
-                _launchingIds.update { it - def.id }
-            }
-        }
-    }
-
-    /** Pin [def] to the home screen as a launcher icon (the app's Linux desktop icon). */
-    fun pinAppWindow(def: AppWindowDef) {
-        viewModelScope.launch(Dispatchers.IO) {
-            if (!appWindowShortcutManager.pinToHomeScreen(def)) {
-                _userMessages.emit("This launcher doesn't support home-screen shortcuts")
-            }
-        }
-    }
-
-    fun addAppWindow(
-        label: String,
-        command: String,
-        fullscreen: Boolean,
-        resolution: String?,
-        scale: Float?,
-        runAsRoot: Boolean = false,
-    ) {
-        viewModelScope.launch {
-            preferencesRepository.upsertAppWindowDef(
-                label, command, AppWindowOrigin.USER, fullscreen, resolution, scale, runAsRoot,
-            )
-        }
-    }
-
-    fun deleteAppWindow(id: String) {
-        viewModelScope.launch { preferencesRepository.deleteAppWindowDef(id) }
-    }
-
-    fun updateAppWindow(
-        id: String,
-        label: String,
-        command: String,
-        fullscreen: Boolean,
-        resolution: String?,
-        scale: Float?,
-        runAsRoot: Boolean = false,
-    ) {
-        viewModelScope.launch {
-            preferencesRepository.updateAppWindowDef(id, label, command, fullscreen, resolution, scale, runAsRoot)
-        }
-    }
-
-    // --- Installed-app launcher ("Browse installed apps", xfce4-style menu) ---
-
-    private val _installedApps = MutableStateFlow<AppScanResult?>(null)
-    /** Discovered guest GUI apps; null until [refreshInstalledApps] completes. */
-    val installedApps: StateFlow<AppScanResult?> = _installedApps.asStateFlow()
-
-    private val _scanningApps = MutableStateFlow(false)
-    val scanningApps: StateFlow<Boolean> = _scanningApps.asStateFlow()
-
-    /** Scan the active guest's `.desktop` catalog. Idempotent; safe to re-call. */
-    fun refreshInstalledApps() {
-        viewModelScope.launch(Dispatchers.IO) {
-            if (!prootManager.isRootfsInstalled) {
-                _installedApps.value = AppScanResult(emptyList(), 0, 0)
-                return@launch
-            }
-            _scanningApps.value = true
-            try {
-                _installedApps.value = GuestAppScanner(prootManager).scan()
-            } catch (e: Exception) {
-                Log.w(TAG, "installed-app scan failed", e)
-                _userMessages.emit("Couldn't scan installed apps: ${e.message}")
-                _installedApps.value = AppScanResult(emptyList(), 0, 0)
-            } finally {
-                _scanningApps.value = false
-            }
-        }
-    }
-
-    /** Launch a discovered app in a cage window, recording it as a saved def. */
-    fun launchInstalledApp(app: InstalledApp, fullscreen: Boolean) {
-        viewModelScope.launch(Dispatchers.IO) {
-            // A saved def with the same label is the CONFIGURED way to run
-            // this app — a pack (or the user) may have set the command
-            // (xcb platform), multiWindow, and placement rules there. The
-            // guest .desktop scan knows none of that (its exec is the raw
-            // desktop-file command, e.g. `qmmp-1`), so launching it
-            // generically gives a broken variant of an app the user
-            // already configured — the two "Qmmp" rows behaving
-            // differently was reported as a bug. Delegate on label match.
-            val configured = preferencesRepository.appWindowDefs.first()
-                .items.find { it.label.equals(app.name, ignoreCase = true) }
-            if (configured != null) {
-                _launchingIds.update { it + configured.id }
-                try {
-                    appWindowLauncher.launch(configured)?.let { _userMessages.emit(it) }
-                } finally {
-                    _launchingIds.update { it - configured.id }
-                }
-                return@launch
-            }
-            if (!desktopManager.isCageRuntimeReady()) {
-                _userMessages.emit("Installing the cage runtime (sway/wayvnc) — this can take a minute…")
-                if (!desktopManager.ensureCageRuntime()) {
-                    _userMessages.emit("Couldn't install the cage runtime for ${app.name}")
-                    return@launch
-                }
-            }
-            val session = desktopManager.startAppWindow(
-                app.exec, appWindowDefaultResolution.value, appWindowDefaultScale.value,
-            )
-            if (session.state == DesktopManager.DesktopState.RUNNING) {
-                presentationManager.presentAppWindow(
-                    host = "127.0.0.1",
-                    port = session.vncPort,
-                    sessionId = session.sessionId,
-                    caption = app.name,
-                    fullscreen = fullscreen,
-                    scale = appWindowDefaultScale.value,
-                    resolution = appWindowDefaultResolution.value,
-                )
-                preferencesRepository.upsertAppWindowDef(app.name, app.exec, AppWindowOrigin.USER, fullscreen)
-            } else {
-                _userMessages.emit("Couldn't launch ${app.name}: ${session.errorMessage ?: "failed to start"}")
-            }
-        }
-    }
-
-    /**
-     * Open an in-app VNC viewer for any running desktop that doesn't have
-     * one yet. A desktop started outside the UI start path — notably via
-     * the MCP `start_desktop` tool, which brings up the compositor +
-     * wayvnc but can't open a viewer — leaves the Sessions view empty.
-     * Called when the Sessions/monitor view is shown so the
-     * recently-started session actually connects. addVncSession dedupes
-     * by host:port, so this is safe to call repeatedly and won't disturb
-     * an already-open viewer. Native (labwc) desktops use the Wayland tab
-     * path instead and are skipped here.
-     */
-    fun connectRunningDesktopViewers() {
-        viewModelScope.launch {
-            val pwd = prootManager.storedVncPassword
-                ?: connectionRepository.getAll()
-                    .firstOrNull { it.isVnc && it.host == "localhost" }
-                    ?.vncPassword
-            desktopManager.desktops.value.forEach { (de, inst) ->
-                if (inst.state == DesktopManager.DesktopState.RUNNING && !de.isNative) {
-                    addVncSession(
-                        host = "localhost",
-                        port = inst.vncPort,
-                        password = pwd,
-                        username = null,
-                        sshForward = false,
-                        sshSessionId = null,
-                        profileId = null,
-                        colorDepth = "BPP_24_TRUE",
-                    )
-                }
-            }
         }
     }
 
@@ -764,10 +422,10 @@ class DesktopViewModel @Inject constructor(
     }
 
     /**
-     * Resolve [profileId] to a VNC or RDP profile and dispatch to the
+     * Resolve [profileId] to an RDP or SPICE profile and dispatch to the
      * matching `add*Session`. Used by the workspace launcher; for
      * tunneled profiles, picks the first connected SSH session for the
-     * tunnel profile and lets `addVncSession` / `addRdpSession` throw
+     * tunnel profile and lets `addRdpSession` / `addSpiceSession` throw
      * the existing "SSH session not found" error if none is up.
      */
     private fun openRemoteDesktopForProfile(profileId: String) {
@@ -778,24 +436,6 @@ class DesktopViewModel @Inject constructor(
                 return@launch
             }
             when {
-                profile.isVnc -> {
-                    val sshSessionId =
-                        if (profile.vncSshForward && profile.vncSshProfileId != null) {
-                            sshSessionManager.getSessionsForProfile(profile.vncSshProfileId!!)
-                                .firstOrNull { it.status.name == "CONNECTED" }
-                                ?.sessionId
-                        } else null
-                    addVncSession(
-                        host = profile.host,
-                        port = profile.vncPort ?: 5900,
-                        password = profile.vncPassword,
-                        username = profile.vncUsername,
-                        sshForward = profile.vncSshForward,
-                        sshSessionId = sshSessionId,
-                        profileId = profile.id,
-                        colorDepth = profile.vncColorDepth,
-                    )
-                }
                 profile.isRdp -> {
                     val sshSessionId =
                         if (profile.rdpSshForward && profile.rdpSshProfileId != null) {
@@ -834,7 +474,7 @@ class DesktopViewModel @Inject constructor(
                 }
                 else -> Log.w(
                     TAG,
-                    "OpenRemoteDesktop: ${profile.label} is ${profile.connectionType}, not VNC/RDP/SPICE",
+                    "OpenRemoteDesktop: ${profile.label} is ${profile.connectionType}, not RDP/SPICE",
                 )
             }
         }
@@ -1035,99 +675,16 @@ class DesktopViewModel @Inject constructor(
         }
     }
 
-    // --- System VM (#326) — a full QEMU x86_64 VM in the active distro,
-    // viewed over VNC on loopback. One at a time (TCG + phone RAM). The
-    // manager owns the lifecycle; this exposes its state + image store to
-    // the Manage screen and auto-opens a VNC tab once the VM is up.
-
-    val systemVmState: StateFlow<sh.haven.core.local.SystemVmManager.VmState?> get() = systemVmManager.state
-
-    private val _systemVmImages = MutableStateFlow<List<sh.haven.core.local.SystemVmManager.VmImage>>(emptyList())
-    val systemVmImages: StateFlow<List<sh.haven.core.local.SystemVmManager.VmImage>> = _systemVmImages.asStateFlow()
-
-    /** True during an import or a boot (both slow, and both hold the manager mutex). */
-    private val _systemVmBusy = MutableStateFlow(false)
-    val systemVmBusy: StateFlow<Boolean> = _systemVmBusy.asStateFlow()
-
-    /**
-     * The import dialog's whole draft — open/closed AND the three fields —
-     * lives here rather than in the composable, because a rotation recreates
-     * the activity and took the dialog with it. `remember` loses it outright,
-     * and `rememberSaveable` doesn't save it either: the composable holding it
-     * is no longer in the composition when state is saved. A ViewModel survives
-     * config changes by construction, which is the property this needs.
-     *
-     * The fields have to move together with the flag. Hoisting only the flag
-     * was verified on-device to be WORSE than not hoisting at all: the dialog
-     * came back looking intact with the arch silently reset to x86_64, which
-     * for this field means an arm64 image gets recorded as x86_64 and then
-     * never boots — the exact trap the dialog's own hint warns about. A dialog
-     * that vanishes is at least an obvious loss.
-     */
-    private val _showSystemVmImport = MutableStateFlow(false)
-    val showSystemVmImport: StateFlow<Boolean> = _showSystemVmImport.asStateFlow()
-
-    private val _systemVmImportLabel = MutableStateFlow("")
-    val systemVmImportLabel: StateFlow<String> = _systemVmImportLabel.asStateFlow()
-
-    private val _systemVmImportSource = MutableStateFlow("")
-    val systemVmImportSource: StateFlow<String> = _systemVmImportSource.asStateFlow()
-
-    private val _systemVmImportArch = MutableStateFlow(sh.haven.core.local.VmArch.X86_64)
-    val systemVmImportArch: StateFlow<sh.haven.core.local.VmArch> = _systemVmImportArch.asStateFlow()
-
     // --- Desktop-manager dialog drafts -------------------------------------
     //
-    // Same reason as the system-VM import draft below, and the same rule: flag
-    // AND fields together, never the flag alone. These screens sit in a
+    // Flag AND fields together, never the flag alone. These screens sit in a
     // HorizontalPager under a nav host that can leave the composition, so a
     // rotation takes any open dialog with it.
     //
-    // AppWindowDialog and DesktopSetupDialog are deliberately NOT here yet:
-    // their state is derived (from `initial`) or key-reset (the setup dialog's
-    // port field re-initialises when the selected DE changes), and moving that
-    // faithfully needs watching on a device rather than reasoning about it.
 
-    /**
-     * The app-window add/edit dialog's draft; null when closed. [editingId] is
-     * the AppWindowDef being edited, or null for a new one — the add/edit
-     * distinction has to travel with the draft, since it decides both the title
-     * and whether Save updates or inserts.
-     *
-     * The caller builds the draft (the resolution presets that decide
-     * [customMode] live with the UI), so this only stores and clears it.
-     */
-    data class AppWindowDraft(
-        val editingId: String? = null,
-        val label: String = "",
-        val command: String = "",
-        val fullscreen: Boolean = false,
-        val runAsRoot: Boolean = false,
-        val resToken: String? = null,
-        val customMode: Boolean = false,
-        val customRes: String = "",
-        val scale: Float? = null,
-    )
-
-    private val _appWindowDraft = MutableStateFlow<AppWindowDraft?>(null)
-    val appWindowDraft: StateFlow<AppWindowDraft?> = _appWindowDraft.asStateFlow()
-
-    fun openAppWindowDialog(draft: AppWindowDraft) { _appWindowDraft.value = draft }
-
-    fun setAppWindowDraft(draft: AppWindowDraft) { _appWindowDraft.value = draft }
-
-    fun dismissAppWindowDialog() { _appWindowDraft.value = null }
-
-    /**
-     * The desktop-setup dialog: which DE it was opened for (null = closed) plus
-     * its draft. The port seeds from the suggestion at open time, which is what
-     * the old `rememberSaveable(selectedDe, suggestedVncPort)` amounted to — the
-     * dialog is opened *for* a DE and neither key can change while it is up.
-     */
+    /** The desktop-setup dialog: which DE it was opened for (null = closed) plus its draft. */
     data class DesktopSetupDraft(
-        val password: String = "haven",
         val shellCmd: String = "/bin/sh",
-        val portText: String = "",
         val addons: Set<ProotManager.DesktopAddon> = emptySet(),
     )
 
@@ -1137,8 +694,8 @@ class DesktopViewModel @Inject constructor(
     private val _desktopSetupDraft = MutableStateFlow(DesktopSetupDraft())
     val desktopSetupDraft: StateFlow<DesktopSetupDraft> = _desktopSetupDraft.asStateFlow()
 
-    fun openDesktopSetup(de: ProotManager.DesktopEnvironment, suggestedVncPort: Int) {
-        _desktopSetupDraft.value = DesktopSetupDraft(portText = suggestedVncPort.toString())
+    fun openDesktopSetup(de: ProotManager.DesktopEnvironment) {
+        _desktopSetupDraft.value = DesktopSetupDraft()
         _setupDesktopDe.value = de
     }
 
@@ -1147,30 +704,6 @@ class DesktopViewModel @Inject constructor(
     fun dismissDesktopSetup() {
         _setupDesktopDe.value = null
         _desktopSetupDraft.value = DesktopSetupDraft()
-    }
-
-    private val _showInstalledApps = MutableStateFlow(false)
-    val showInstalledApps: StateFlow<Boolean> = _showInstalledApps.asStateFlow()
-
-    fun setShowInstalledApps(open: Boolean) { _showInstalledApps.value = open }
-
-    /** Non-null while the Custom (X11) command dialog is open; the value is "also start the desktop after saving" (#361). */
-    private val _customCmdStartAfter = MutableStateFlow<Boolean?>(null)
-    val customCmdStartAfter: StateFlow<Boolean?> = _customCmdStartAfter.asStateFlow()
-
-    private val _customCmdDraft = MutableStateFlow("")
-    val customCmdDraft: StateFlow<String> = _customCmdDraft.asStateFlow()
-
-    fun openCustomCmdDialog(initial: String, startAfterSave: Boolean) {
-        _customCmdDraft.value = initial
-        _customCmdStartAfter.value = startAfterSave
-    }
-
-    fun setCustomCmdDraft(value: String) { _customCmdDraft.value = value }
-
-    fun dismissCustomCmdDialog() {
-        _customCmdStartAfter.value = null
-        _customCmdDraft.value = ""
     }
 
     /** The bring-your-own-rootfs import dialog's draft (#284). */
@@ -1260,85 +793,6 @@ class DesktopViewModel @Inject constructor(
         _distroPendingAdd.value = null
     }
 
-    fun openSystemVmImport() { _showSystemVmImport.value = true }
-
-    fun setSystemVmImportLabel(value: String) { _systemVmImportLabel.value = value }
-
-    fun setSystemVmImportSource(value: String) { _systemVmImportSource.value = value }
-
-    fun setSystemVmImportArch(value: sh.haven.core.local.VmArch) { _systemVmImportArch.value = value }
-
-    /** Closes the dialog and clears the draft, so the next open starts clean rather than resurrecting a cancelled one. */
-    fun dismissSystemVmImport() {
-        _showSystemVmImport.value = false
-        _systemVmImportLabel.value = ""
-        _systemVmImportSource.value = ""
-        _systemVmImportArch.value = sh.haven.core.local.VmArch.X86_64
-    }
-
-    init {
-        viewModelScope.launch(Dispatchers.IO) { refreshSystemVmImages() }
-    }
-
-    private fun refreshSystemVmImages() {
-        _systemVmImages.value = runCatching { systemVmManager.listImages() }.getOrDefault(emptyList())
-    }
-
-    /**
-     * Import a bootable disk image ([source] = http(s) URL or on-device path),
-     * normalised to qcow2. [arch] is the guest CPU the image holds — recorded
-     * with it, since a qcow2 doesn't say and the boot silently hangs on the
-     * wrong target.
-     */
-    fun importSystemVmImage(label: String, source: String, arch: sh.haven.core.local.VmArch) {
-        val id = label.lowercase().replace(Regex("[^a-z0-9._-]+"), "-").trim('-')
-        if (id.isEmpty()) {
-            viewModelScope.launch { _userMessages.emit("Give the image a name (letters/digits).") }
-            return
-        }
-        viewModelScope.launch(Dispatchers.IO) {
-            _systemVmBusy.value = true
-            try {
-                systemVmManager.importImage(id, label.ifBlank { id }, source.trim(), arch = arch)
-                refreshSystemVmImages()
-                _userMessages.emit("Imported \"$label\".")
-            } catch (e: Exception) {
-                _userMessages.emit(e.message ?: "Couldn't import the image")
-            } finally {
-                _systemVmBusy.value = false
-            }
-        }
-    }
-
-    /** Boot a stored image and, once its VNC server is up, open a viewer tab on it. */
-    fun startSystemVm(imageId: String) {
-        viewModelScope.launch(Dispatchers.IO) {
-            _systemVmBusy.value = true
-            try {
-                val st = systemVmManager.startImage(imageId)
-                val port = st.vncPort
-                if (st.status == sh.haven.core.local.SystemVmManager.Status.RUNNING && port != null) {
-                    addVncSession(host = "127.0.0.1", port = port, password = null, colorDepth = "BPP_24_TRUE")
-                }
-            } catch (e: Exception) {
-                _userMessages.emit(e.message ?: "Couldn't start the VM")
-            } finally {
-                _systemVmBusy.value = false
-            }
-        }
-    }
-
-    fun stopSystemVm() {
-        viewModelScope.launch(Dispatchers.IO) { systemVmManager.stop() }
-    }
-
-    fun deleteSystemVmImage(imageId: String) {
-        viewModelScope.launch(Dispatchers.IO) {
-            systemVmManager.deleteImage(imageId)
-            refreshSystemVmImages()
-        }
-    }
-
     private val _tabs = MutableStateFlow<List<DesktopTab>>(emptyList())
     val tabs: StateFlow<List<DesktopTab>> = _tabs.asStateFlow()
 
@@ -1377,65 +831,15 @@ class DesktopViewModel @Inject constructor(
     }
 
     /**
-     * User dismissed the bandwidth-suggestion banner — clear it; the
-     * session-side bandwidthSuggestionFired flag stops it re-firing.
-     */
-    fun dismissBandwidthSuggestion(tabId: String) {
-        val tab = _tabs.value.firstOrNull { it.id == tabId } as? DesktopTab.Vnc ?: return
-        tab._bandwidthSuggestion.value = null
-    }
-
-    /**
-     * User accepted the bandwidth-suggestion banner — persist the new
-     * colour depth on the profile (if any), close the existing tab, and
-     * reconnect with the new depth.
-     */
-    fun acceptBandwidthSuggestion(tabId: String) {
-        val tab = _tabs.value.firstOrNull { it.id == tabId } as? DesktopTab.Vnc ?: return
-        val newDepth = tab._bandwidthSuggestion.value ?: return
-        val pid = tab.profileId
-        viewModelScope.launch(Dispatchers.IO) {
-            if (pid != null) {
-                connectionRepository.getById(pid)?.let { existing ->
-                    if (existing.vncColorDepth != newDepth) {
-                        connectionRepository.save(existing.copy(vncColorDepth = newDepth))
-                    }
-                }
-            }
-            // Snapshot before close, since closeTab disposes the tab.
-            val host = tab.originalHost.ifEmpty { return@launch }
-            val port = tab.originalPort
-            val username = tab.originalUsername
-            val password = tab.originalPassword
-            val sshForward = tab.sshForward
-            val sshSessionId = tab.sshSessionId
-            withContext(Dispatchers.Main) { closeTab(tabId) }
-            addVncSession(
-                host = host,
-                port = port,
-                password = password,
-                username = username,
-                sshForward = sshForward,
-                sshSessionId = sshSessionId,
-                profileId = pid,
-                colorDepth = newDepth,
-            )
-        }
-    }
-
-    /**
      * Reconnect a tab that hit "connection lost" (e.g. no server listening),
      * from the inline Retry button — so a dead desktop isn't a long-press dead
      * end (#121, KoriKraut). Profile-backed tabs re-run the full connect via the
      * AgentUiCommand bus (same path a tap uses), which re-establishes the SSH
-     * tunnel with a fresh session instead of reusing the torn-down one. Ad-hoc
-     * VNC tabs (no profile) fall back to re-dialling the saved original params,
-     * mirroring [acceptBandwidthSuggestion].
+     * tunnel with a fresh session instead of reusing the torn-down one.
      */
     fun retryTab(tabId: String) {
         val tab = _tabs.value.firstOrNull { it.id == tabId } ?: return
         val profileId = when (tab) {
-            is DesktopTab.Vnc -> tab.profileId
             is DesktopTab.Rdp -> tab.profileId
             is DesktopTab.Spice -> tab.profileId
             else -> null
@@ -1446,27 +850,6 @@ class DesktopViewModel @Inject constructor(
                 sh.haven.core.data.agent.AgentUiCommand.ConnectProfile(profileId),
             )
             return
-        }
-        // Ad-hoc VNC tab with no backing profile — re-dial the original params.
-        if (tab is DesktopTab.Vnc) {
-            val host = tab.originalHost.ifEmpty { return }
-            val port = tab.originalPort
-            val username = tab.originalUsername
-            val password = tab.originalPassword
-            val sshForward = tab.sshForward
-            val sshSessionId = tab.sshSessionId
-            val colorDepth = tab.colorDepth
-            closeTab(tabId)
-            addVncSession(
-                host = host,
-                port = port,
-                password = password,
-                username = username,
-                sshForward = sshForward,
-                sshSessionId = sshSessionId,
-                profileId = null,
-                colorDepth = colorDepth,
-            )
         }
     }
 
@@ -1487,7 +870,7 @@ class DesktopViewModel @Inject constructor(
 
     /**
      * Find an existing tab matching a connection. Matches by profileId first,
-     * then by host:port for VNC or host:port:username for RDP.
+     * then by host:port.
      * Returns the tab index, or -1 if not found.
      */
     private fun findExistingTab(
@@ -1502,7 +885,6 @@ class DesktopViewModel @Inject constructor(
         if (profileId != null) {
             val idx = tabs.indexOfFirst { tab ->
                 when (tab) {
-                    is DesktopTab.Vnc -> tab.profileId == profileId
                     is DesktopTab.Rdp -> tab.profileId == profileId
                     is DesktopTab.Spice -> tab.profileId == profileId
                     else -> false
@@ -1513,283 +895,11 @@ class DesktopViewModel @Inject constructor(
         // Match by host+port (and username for RDP)
         return tabs.indexOfFirst { tab ->
             when {
-                protocol == "VNC" && tab is DesktopTab.Vnc && tab.profileId == null ->
-                    tab.label == "$host:$port"
                 protocol == "RDP" && tab is DesktopTab.Rdp && tab.profileId == null ->
                     tab.label == "$host:$port"
                 protocol == "SPICE" && tab is DesktopTab.Spice && tab.profileId == null ->
                     tab.label == "$host:$port"
                 else -> false
-            }
-        }
-    }
-
-    // --- VNC sessions ---
-
-    fun addVncSession(
-        host: String,
-        port: Int,
-        password: String?,
-        username: String? = null,
-        sshForward: Boolean = false,
-        sshSessionId: String? = null,
-        profileId: String? = null,
-        colorDepth: String = "BPP_24_TRUE",
-    ) {
-        viewModelScope.launch(Dispatchers.IO) {
-            // Deduplicate: if a tab for the same connection exists, reuse or replace
-            val existingIdx = findExistingTab(profileId, host, port, "VNC")
-            if (existingIdx >= 0) {
-                val existing = _tabs.value[existingIdx]
-                if (existing.connected.value) {
-                    // Already connected — just switch to it
-                    pauseAllExcept(existingIdx)
-                    _activeTabIndex.value = existingIdx
-                    return@launch
-                }
-                // Disconnected/errored — close old tab before creating new one
-                closeTab(existing.id)
-            }
-
-            val label = resolveLabel(profileId) ?: "$host:$port"
-            val colorTag = resolveColorTag(profileId)
-            val tabId = UUID.randomUUID().toString()
-
-            // Per-tab live state, declared up front so the tab can be shown in
-            // a connecting state (connected=false, no frame) before the
-            // synchronous handshake runs — mirroring RDP, which previously was
-            // the only protocol to show "connecting".
-            val connected = MutableStateFlow(false)
-            val frame = MutableStateFlow<Bitmap?>(null)
-            val error = MutableStateFlow<String?>(null)
-            val cursor = MutableStateFlow<CursorOverlay?>(null)
-            val pointerPos = MutableStateFlow(0 to 0)
-            val bandwidthSuggestion = MutableStateFlow<String?>(null)
-
-            // Hoisted out of try so the catch / onError can clean it up
-            // when the dial fails (#121). tunnelLease owns the forward +
-            // dependent release + the parent-gone teardown callback.
-            var tunnelLease: SshSessionManager.TunnelLease? = null
-            var tabAdded = false
-            try {
-                val actualHost: String
-                val actualPort: Int
-                // WireGuard / Tailscale TunneledConnection — non-null when
-                // the profile has tunnelConfigId set and we're not going
-                // through SSH RemoteForward instead.
-                var tunneledConn: TunneledConnection? = null
-
-                if (sshForward && sshSessionId != null) {
-                    val sshClient = findSshClient(sshSessionId)
-                        ?: throw IllegalStateException("SSH session not found")
-                    // Forward target as seen FROM the SSH server. When the VNC
-                    // server is the jump host itself (#104: wayvnc binds
-                    // loopback only, and dialing the host's own external
-                    // address back through sshd hits ECONNREFUSED), the target
-                    // must be 127.0.0.1 — detected by the VNC host matching
-                    // the jump profile's host. Any OTHER value is a distinct
-                    // machine behind the jump host and must be honoured
-                    // verbatim; hardcoding loopback here sent every jump-host
-                    // topology to the wrong machine (#538). RDP/SPICE below
-                    // already pass the host through.
-                    val jumpHost = profileId?.let { pid ->
-                        connectionRepository.getById(pid)?.vncSshProfileId
-                            ?.let { connectionRepository.getById(it)?.host }
-                    }
-                    val target = vncForwardTarget(host, jumpHost)
-                    val lp = sshClient.setPortForwardingL("127.0.0.1", 0, target, port)
-                    actualHost = "127.0.0.1"
-                    actualPort = lp
-                    Log.d(TAG, "VNC SSH tunnel: localhost:$lp -> ${LogRedact.of(target)}:$port (via ${LogRedact.of(host)})")
-                    // Tie this tab to the SSH session: if the SSH is torn down
-                    // for any reason (Connections-list disconnect, network
-                    // death, jump cascade), the lease fires and closes the tab
-                    // instead of leaving it over a dead pipe (#121).
-                    if (profileId != null) {
-                        tunnelLease = sshSessionManager.acquireTunnelLease(
-                            sessionId = sshSessionId,
-                            dependentProfileId = profileId,
-                            localForwardPort = lp,
-                        ) { viewModelScope.launch { closeTab(tabId) } }
-                    }
-                } else {
-                    actualHost = host
-                    actualPort = port
-                    // Try the WireGuard / Tailscale path. Returns null when
-                    // the profile has no tunnelConfigId — caller falls
-                    // through to a direct kernel-socket dial in client.start.
-                    if (profileId != null) {
-                        val profile = connectionRepository.getById(profileId)
-                        if (profile != null) {
-                            tunneledConn = tunnelResolver.dial(profile, actualHost, actualPort, 30_000)
-                            if (tunneledConn != null) {
-                                Log.d(TAG, "VNC dialed via tunnel ${profile.tunnelConfigId} -> $actualHost:$actualPort")
-                            }
-                        }
-                    }
-                }
-
-                val config = VncConfig().apply {
-                    this.colorDepth = runCatching { ColorDepth.valueOf(colorDepth) }
-                        .getOrDefault(ColorDepth.BPP_24_TRUE)
-                    shared = true
-                    if (!password.isNullOrEmpty()) passwordSupplier = { password }
-                    if (!username.isNullOrEmpty()) usernameSupplier = { username }
-                    onScreenUpdate = { bitmap -> frame.value = bitmap }
-                    onCursorUpdate = { bmp, hx, hy ->
-                        cursor.value = if (bmp == null) null else CursorOverlay(bmp, hx, hy)
-                    }
-                    onBandwidthSuggestion = { suggested ->
-                        // Only surface if the global preference is on. If
-                        // the user's already dismissed the banner this
-                        // session, the StateFlow is set to null and the
-                        // session-side flag (bandwidthSuggestionFired)
-                        // prevents re-firing.
-                        viewModelScope.launch {
-                            if (preferencesRepository.bandwidthAutoSuggest.first()) {
-                                bandwidthSuggestion.value = suggested.name
-                            }
-                        }
-                    }
-                    onError = { e ->
-                        Log.e(TAG, "VNC error on tab $tabId", e)
-                        error.value = VncViewModel.describeError(e, host, port)
-                        connected.value = false
-                        desktopSessionRegistry.setStatus(profileId, DesktopStatus.ERROR)
-                        // VncClient.start() catches setup failures (e.g. the
-                        // handshake EOF when no VNC server is listening behind
-                        // the SSH forward) and routes them here instead of
-                        // throwing, so the catch block below never runs for
-                        // them — and a mid-session drop lands here too. Release
-                        // the SSH tunnel (lease) + any WG/Tailscale dependent so
-                        // nothing is left orphaned with a green dot (#121).
-                        // Idempotent, so the later disconnectTab stays safe.
-                        tunnelLease?.close()
-                        releaseSshTunnelDependent(profileId)
-                    }
-                    onRemoteClipboard = { text ->
-                        // Length only. A clipboard is where a password manager puts
-                        // the password, and this line put 50 characters of it in
-                        // logcat for anyone who reads a bug report (#518).
-                        Log.d(TAG, "VNC clipboard ($tabId): ${text.length} chars")
-                    }
-                }
-
-                val client = VncClient(config)
-
-                // Add the tab now (connected=false) so the Desktop screen
-                // shows a connecting state during the (synchronous) handshake,
-                // like RDP does via onConnected. The handshake below flips
-                // _connected in place. A connected tab keeps its lease so it's
-                // torn down with the SSH session; a failed handshake leaves the
-                // error visible (onError already released the lease, and that
-                // release removed the lease before any SSH teardown could fire
-                // its parent-gone callback, so the error tab isn't auto-closed).
-                val newTab = DesktopTab.Vnc(
-                    id = tabId,
-                    label = label,
-                    colorTag = colorTag,
-                    client = client,
-                    _connected = connected,
-                    _frame = frame,
-                    _error = error,
-                    _cursor = cursor,
-                    _pointerPos = pointerPos,
-                    _bandwidthSuggestion = bandwidthSuggestion,
-                    tunnelLease = tunnelLease,
-                    profileId = profileId,
-                    originalHost = host,
-                    originalPort = port,
-                    originalUsername = username,
-                    originalPassword = password,
-                    sshForward = sshForward,
-                    sshSessionId = sshSessionId,
-                    colorDepth = colorDepth,
-                )
-                _tabs.value = _tabs.value.toMutableList().apply { add(newTab) }
-                tabAdded = true
-                pauseAllExcept(_tabs.value.size - 1)
-                _activeTabIndex.value = _tabs.value.size - 1
-                desktopSessionRegistry.setStatus(profileId, DesktopStatus.CONNECTING)
-                // Expose the rendered frame + cursor to MCP capture_desktop_tab.
-                desktopSessionRegistry.registerFrameHandle(
-                    profileId,
-                    DesktopFrameHandle(
-                        protocol = "VNC",
-                        frame = { frame.value },
-                        cursor = { cursor.value?.let { CursorSnapshot(it.bitmap, it.hotspotX, it.hotspotY) } },
-                        pointer = { pointerPos.value },
-                    ),
-                )
-                // Expose mouse/clipboard input to the MCP remote-desktop tools.
-                desktopSessionRegistry.registerInputHandle(
-                    profileId,
-                    DesktopInputHandle(
-                        protocol = "VNC",
-                        mouseMove = { x, y -> newTab.remoteDesktop.sendMouseMove(x, y) },
-                        mouseClick = { x, y, button -> newTab.remoteDesktop.sendMouseClick(x, y, button) },
-                        mouseWheel = { deltaY -> newTab.remoteDesktop.sendMouseWheel(deltaY) },
-                        clipboard = { text -> newTab.remoteDesktop.sendClipboardText(text) },
-                    ),
-                )
-                // Let MCP disconnect_profile close this tab even when there's
-                // no tunnel lease to cascade through (direct connections, #437).
-                desktopSessionRegistry.registerCloseHandle(profileId) {
-                    viewModelScope.launch { closeTab(tabId) }
-                }
-
-                val tc = tunneledConn
-                if (tc != null) {
-                    client.start(TunneledSocket(tc, actualHost, actualPort), actualHost)
-                } else {
-                    // Knock only on the direct path. SSH-forward goes via
-                    // a localhost tunnel (handled at the SSH connect site)
-                    // and a userspace WG/Tailscale tunnel doesn't expose
-                    // raw kernel sockets for knockd to see.
-                    if (!sshForward && profileId != null) {
-                        runVncKnockIfConfigured(profileId, actualHost)
-                    }
-                    client.start(actualHost, actualPort)
-                }
-                // start() runs the handshake synchronously and swallows setup
-                // failures into onError (above), which has flagged the error +
-                // set the registry to ERROR. Only flip to connected on success.
-                if (error.value == null) {
-                    connected.value = true
-                    desktopSessionRegistry.setStatus(profileId, DesktopStatus.CONNECTED)
-                }
-            } catch (e: Exception) {
-                Log.e(TAG, "VNC connect failed", e)
-                // Connect-failure cleanup (#121): release the SSH tunnel lease
-                // (removes the forward + releases the dependent, tearing down
-                // the SSH iff it was opened solely for this tunnel) and any
-                // WG/Tailscale dependent. Idempotent / no-op if the failure
-                // happened before the lease was acquired.
-                tunnelLease?.close()
-                releaseSshTunnelDependent(profileId)
-                error.value = VncViewModel.describeError(e, host, port)
-                desktopSessionRegistry.setStatus(profileId, DesktopStatus.ERROR)
-                // If the failure happened before the tab was added (e.g. tunnel
-                // setup threw), surface an error tab so the user sees why.
-                if (!tabAdded) {
-                    val errorTab = DesktopTab.Vnc(
-                        id = tabId,
-                        label = label,
-                        colorTag = colorTag,
-                        client = VncClient(VncConfig()),
-                        _connected = connected,
-                        _frame = frame,
-                        _error = error,
-                        _cursor = cursor,
-                        _pointerPos = pointerPos,
-                        _bandwidthSuggestion = bandwidthSuggestion,
-                        profileId = profileId,
-                    )
-                    val tabs = _tabs.value.toMutableList()
-                    tabs.add(errorTab)
-                    _tabs.value = tabs
-                    _activeTabIndex.value = tabs.size - 1
-                }
             }
         }
     }
@@ -1964,7 +1074,7 @@ class DesktopViewModel @Inject constructor(
                 // and the SOCKS path runs through a userspace tunnel
                 // that knockd can't observe.
                 if (!sshForward && rdpSocksProxy == null && profileId != null) {
-                    runVncKnockIfConfigured(profileId, actualHost)
+                    runKnockIfConfigured(profileId, actualHost)
                 }
 
                 desktopSessionRegistry.setStatus(profileId, DesktopStatus.CONNECTING)
@@ -2206,7 +1316,7 @@ class DesktopViewModel @Inject constructor(
 
                 // Knock only on the direct path (SSH-forward knocked at SSH connect).
                 if (!sshForward && profileId != null) {
-                    runVncKnockIfConfigured(profileId, actualHost)
+                    runKnockIfConfigured(profileId, actualHost)
                 }
 
                 desktopSessionRegistry.setStatus(profileId, DesktopStatus.CONNECTING)
@@ -2265,7 +1375,6 @@ class DesktopViewModel @Inject constructor(
         // (cursor / virtual cursor seed) repaints immediately, without
         // waiting for the IO dispatch round-trip.
         when (val tab = activeTab.value) {
-            is DesktopTab.Vnc -> tab._pointerPos.value = x to y
             is DesktopTab.Rdp -> tab._pointerPos.value = x to y
             is DesktopTab.Spice -> tab._pointerPos.value = x to y
             else -> {}
@@ -2289,40 +1398,12 @@ class DesktopViewModel @Inject constructor(
 
     fun sendClick(x: Int, y: Int, button: Int = 1) {
         when (val tab = activeTab.value) {
-            is DesktopTab.Vnc -> tab._pointerPos.value = x to y
             is DesktopTab.Rdp -> tab._pointerPos.value = x to y
             is DesktopTab.Spice -> tab._pointerPos.value = x to y
             else -> {}
         }
         viewModelScope.launch(Dispatchers.IO) {
             activeTab.value?.remoteDesktop?.sendMouseClick(x, y, button)
-        }
-    }
-
-    fun sendVncKey(keySym: Int, pressed: Boolean) {
-        viewModelScope.launch(Dispatchers.IO) {
-            (activeTab.value as? DesktopTab.Vnc)?.client?.updateKey(keySym, pressed)
-        }
-    }
-
-    fun typeVncKey(keySym: Int) {
-        viewModelScope.launch(Dispatchers.IO) {
-            (activeTab.value as? DesktopTab.Vnc)?.client?.type(keySym)
-        }
-    }
-
-    /**
-     * Type a string sequentially via the active VNC tab. Single coroutine
-     * so key down/up events stay in source order on the wire — see
-     * [VncClient.typeText]. Also pushes the text to the remote VNC
-     * clipboard as defence-in-depth (Ctrl+V on the remote then works
-     * regardless of synth-typing fidelity).
-     */
-    fun typeVncText(text: String) {
-        viewModelScope.launch(Dispatchers.IO) {
-            val client = (activeTab.value as? DesktopTab.Vnc)?.client ?: return@launch
-            client.copyText(text)
-            client.typeText(text)
         }
     }
 
@@ -2391,10 +1472,10 @@ class DesktopViewModel @Inject constructor(
         }
     }
 
-    /** Knock against the VNC/RDP host using the profile's saved sequence,
+    /** Knock against the RDP/SPICE host using the profile's saved sequence,
      *  if any. Failures are logged but not thrown; the real socket open
      *  surfaces the actual symptom. */
-    private suspend fun runVncKnockIfConfigured(profileId: String, host: String) {
+    private suspend fun runKnockIfConfigured(profileId: String, host: String) {
         val profile = connectionRepository.getById(profileId) ?: return
         val seq = KnockSequence.parse(
             profile.portKnockSequence,
@@ -2420,20 +1501,6 @@ class DesktopViewModel @Inject constructor(
     private fun disconnectTab(tab: DesktopTab) {
         viewModelScope.launch(Dispatchers.IO) {
             when (tab) {
-                is DesktopTab.Vnc -> {
-                    tab.client.stop()
-                    // SSH side via the lease (removes the forward + releases
-                    // the dependent, tearing the SSH down if it was opened
-                    // solely for this tunnel). No-op if already closed by a
-                    // parent-gone cascade. releaseSshTunnelDependent also
-                    // covers the WG/Tailscale dependent (and is idempotent).
-                    tab.tunnelLease?.close()
-                    releaseSshTunnelDependent(tab.profileId)
-                    desktopSessionRegistry.clear(tab.profileId)
-                    desktopSessionRegistry.clearFrameHandle(tab.profileId)
-                    desktopSessionRegistry.clearInputHandle(tab.profileId)
-                    desktopSessionRegistry.clearCloseHandle(tab.profileId)
-                }
                 is DesktopTab.Rdp -> {
                     if (tab.profileId != null) {
                         val verboseLog = tab.session.drainVerboseLog()
@@ -2515,18 +1582,4 @@ class DesktopViewModel @Inject constructor(
         super.onCleared()
         _tabs.value.forEach { disconnectTab(it) }
     }
-}
-
-/**
- * The remote target for a VNC-over-SSH local forward, as dialled FROM the
- * SSH server. The configured VNC host is honoured verbatim (#538: a distinct
- * machine behind the jump host) except when it names the jump host itself —
- * then loopback, because the server there typically binds 127.0.0.1 only and
- * sshd dialling its own external address refuses (#104). Blank falls back to
- * loopback too.
- */
-internal fun vncForwardTarget(vncHost: String?, jumpHost: String?): String = when {
-    vncHost.isNullOrBlank() -> "127.0.0.1"
-    !jumpHost.isNullOrBlank() && vncHost.trim() == jumpHost.trim() -> "127.0.0.1"
-    else -> vncHost.trim()
 }

@@ -42,8 +42,8 @@ expand one for its description and arguments. The tag after each name is its
 consent level:
 
 - **asks every call** — side-effectful or sensitive; a consent sheet describing the specific action on every call (78 tools).
-- **asks once per session** — reversible actions and screen-reading; prompts the first time each session, then proceeds (61 tools).
-- **no per-call prompt** — read-only queries and tap-equivalent UI actions; still behind the endpoint being enabled and the client paired (92 tools).
+- **asks once per session** — reversible actions and screen-reading; prompts the first time each session, then proceeds (60 tools).
+- **no per-call prompt** — read-only queries and tap-equivalent UI actions; still behind the endpoint being enabled and the client paired (91 tools).
 
 ## Sections
 
@@ -54,11 +54,11 @@ consent level:
 - [**Files, media & clipboard**](#sec-files) — 23 tools
 - [**Cloud storage (rclone)**](#sec-rclone) — 15 tools
 - [**Email**](#sec-email) — 15 tools
-- [**Linux guest (proot) & desktops**](#sec-linux) — 46 tools
+- [**Linux guest (proot) & desktops**](#sec-linux) — 45 tools
 - [**Networking — tunnels & port forwarding**](#sec-networking) — 14 tools
 - [**USB & host-device brokers**](#sec-usb) — 19 tools
 - [**Security — SSH keys, host keys, TOTP & age**](#sec-security) — 17 tools
-- [**Agent ↔ you (attention & self-drive)**](#sec-agent-you) — 13 tools
+- [**Agent ↔ you (attention & self-drive)**](#sec-agent-you) — 12 tools
 - [**Agent endpoint, device & diagnostics**](#sec-agent-endpoint) — 17 tools
 
 <a id="sec-senses"></a>
@@ -213,9 +213,9 @@ Initiate a connection for a saved profile via the same code path a UI tap uses (
 <details markdown="1">
 <summary><code>create_connection</code> · asks every call</summary>
 
-Create a saved connection profile. Supports connectionType=SSH, SMB, VNC, RDP, SPICE, EMAIL, RETICULUM. SSH-family fields: username (required), password (optional, stored), keyId (optional — references list_ssh_keys), ignoreSavedKeys (force password-only auth, never offer saved keys), useMosh (turn an SSH profile into a Mosh profile), sessionManager (optional: TMUX | ZELLIJ | SCREEN | BYOBU | HERDR | PSMUX — attach through that multiplexer; omit for a plain shell), remoteCommand (run a command via an SSH exec request instead of a login shell — e.g. 'tmux new -A -s work' to attach-or-create that session before shell startup files run) + requestPty (PTY for it, default true), bindAddress (local address the outgoing SSH socket binds to, ssh -b — direct connections only). SMB: smbShare (required), username + password, smbDomain. VNC: vncUsername, vncPassword, vncPort, and vncSshForward + vncSshProfileId to tunnel VNC through a saved SSH profile. RDP: rdpUsername (required), rdpPassword, rdpDomain, rdpPort. SPICE: spicePassword (optional ticket — no username/domain), spicePort (default 5900), and spiceSshForward + spiceSshProfileId to tunnel SPICE through a saved SSH profile. EMAIL: emailProvider ("imap" default, or "proton"); username = the email address; password = the account/app-password; for IMAP set emailServer (required) + emailPort (993) + emailSmtpPort (465) + emailTls (true), plus emailSmtpServer when the SMTP host differs (e.g. smtp.gmail.com); for Proton add emailMailboxPassword if two-password mode. EMAIL host is optional (the tunnel-ingress/bastion SPA/knock guards), not the mail server. OPENAI (OpenAI-compatible endpoint, e.g. llama-server or CLIProxyAPI): host = server IP/hostname (a full http:// URL also works), port = TCP port (default 80), optional password arg = the API key (sent as a Bearer token; omit for keyless servers), openaiPathPrefix = optional path inserted before /v1 (e.g. "/api"). Connect verifies via GET /v1/models; chat via the chat screen or openai_chat. BTSERIAL (Bluetooth-serial console, #406): host = the paired device's Bluetooth MAC (from list_bluetooth_devices); no other fields. The device must already be paired in Android Settings. BLESERIAL (Bluetooth-LE-serial console — Nordic UART Service / HM-10): host = the BLE peripheral's MAC; no other fields. It needn't be paired — scan-and-pick in the editor; the GATT service/characteristics are auto-detected (NUS 6E400001…, then HM-10 FFE0/FFE1). USBSERIAL (USB-serial console, #408 — Arduino / Duet3D G-code / ESP32 / USB-TTL): host = the device's vendorId:productId hex, e.g. 1a86:7523, from list_usb_devices; usbBaudRate = baud (default 115200); usbDataBits/usbParity/usbStopBits/usbFlowControl set the rest of the line format (default 8N1, no flow control). Plug the adapter in first; connect_profile pops the Android USB-permission prompt. Chipsets: CDC-ACM, CH34x, FTDI, CP21xx, Prolific. RETICULUM: destinationHash (required, 32 hex chars) is the address; reticulumHost + reticulumPort are only how this phone reaches the mesh, defaulting to 127.0.0.1:37428 which is a Sideband or Columba shared instance on this device — any other host is a TCP gateway. reticulumNetworkName + reticulumPassphrase set IFAC on an authenticated gateway. The new profile id is returned for follow-up calls (set_profile_routing, connect_profile). For rclone / local create the profile in the UI — those need an OAuth flow the agent can't drive.
+Create a saved connection profile. Supports connectionType=SSH, SMB, RDP, SPICE, EMAIL, RETICULUM. SSH-family fields: username (required), password (optional, stored), keyId (optional — references list_ssh_keys), ignoreSavedKeys (force password-only auth, never offer saved keys), useMosh (turn an SSH profile into a Mosh profile), sessionManager (optional: TMUX | ZELLIJ | SCREEN | BYOBU | HERDR | PSMUX — attach through that multiplexer; omit for a plain shell), remoteCommand (run a command via an SSH exec request instead of a login shell — e.g. 'tmux new -A -s work' to attach-or-create that session before shell startup files run) + requestPty (PTY for it, default true), bindAddress (local address the outgoing SSH socket binds to, ssh -b — direct connections only). SMB: smbShare (required), username + password, smbDomain. RDP: rdpUsername (required), rdpPassword, rdpDomain, rdpPort. SPICE: spicePassword (optional ticket — no username/domain), spicePort (default 5900), and spiceSshForward + spiceSshProfileId to tunnel SPICE through a saved SSH profile. EMAIL: emailProvider ("imap" default, or "proton"); username = the email address; password = the account/app-password; for IMAP set emailServer (required) + emailPort (993) + emailSmtpPort (465) + emailTls (true), plus emailSmtpServer when the SMTP host differs (e.g. smtp.gmail.com); for Proton add emailMailboxPassword if two-password mode. EMAIL host is optional (the tunnel-ingress/bastion SPA/knock guards), not the mail server. OPENAI (OpenAI-compatible endpoint, e.g. llama-server or CLIProxyAPI): host = server IP/hostname (a full http:// URL also works), port = TCP port (default 80), optional password arg = the API key (sent as a Bearer token; omit for keyless servers), openaiPathPrefix = optional path inserted before /v1 (e.g. "/api"). Connect verifies via GET /v1/models; chat via the chat screen or openai_chat. BTSERIAL (Bluetooth-serial console, #406): host = the paired device's Bluetooth MAC (from list_bluetooth_devices); no other fields. The device must already be paired in Android Settings. BLESERIAL (Bluetooth-LE-serial console — Nordic UART Service / HM-10): host = the BLE peripheral's MAC; no other fields. It needn't be paired — scan-and-pick in the editor; the GATT service/characteristics are auto-detected (NUS 6E400001…, then HM-10 FFE0/FFE1). USBSERIAL (USB-serial console, #408 — Arduino / Duet3D G-code / ESP32 / USB-TTL): host = the device's vendorId:productId hex, e.g. 1a86:7523, from list_usb_devices; usbBaudRate = baud (default 115200); usbDataBits/usbParity/usbStopBits/usbFlowControl set the rest of the line format (default 8N1, no flow control). Plug the adapter in first; connect_profile pops the Android USB-permission prompt. Chipsets: CDC-ACM, CH34x, FTDI, CP21xx, Prolific. RETICULUM: destinationHash (required, 32 hex chars) is the address; reticulumHost + reticulumPort are only how this phone reaches the mesh, defaulting to 127.0.0.1:37428 which is a Sideband or Columba shared instance on this device — any other host is a TCP gateway. reticulumNetworkName + reticulumPassphrase set IFAC on an authenticated gateway. The new profile id is returned for follow-up calls (set_profile_routing, connect_profile). For rclone / local create the profile in the UI — those need an OAuth flow the agent can't drive.
 
-- `connectionType` (string, required) — SSH | SMB | VNC | RDP | SPICE | EMAIL | BTSERIAL | BLESERIAL | USBSERIAL | RETICULUM | GUEST.
+- `connectionType` (string, required) — SSH | SMB | RDP | SPICE | EMAIL | BTSERIAL | BLESERIAL | USBSERIAL | RETICULUM | GUEST.
 - `host` (string, required) — Target hostname or IP. For EMAIL this is the optional tunnel ingress/bastion (SPA/knock target), NOT the mail server — leave blank for a direct IMAP connection.
 - `label` (string, required) — User-facing label.
 - `authMethods` (string[]) — SSH only (#166): ordered multi-factor auth methods attempted in one connect, for servers requiring a chain like publickey,password. Each element is a token: "PASSWORD", "KEY" (any saved key), "KEY:<keyId>", "KEYBOARD_INTERACTIVE", or "TOTP:<id>" (auto-fill an OATH-TOTP code from list_totp_secrets, #178). Omit for the single-method default derived from keyId/password.
@@ -231,8 +231,8 @@ Create a saved connection profile. Supports connectionType=SSH, SMB, VNC, RDP, S
 - `ignoreSavedKeys` (boolean) — SSH-family only: when true, authenticate with password (and keyboard-interactive) only — saved keystore keys are never offered to the server. Lets a profile target a password-only server without the auto-key-offer suppressing the password prompt (#121). Default false.
 - `keyId` (string) — SSH only: id of a saved SSH key (from list_ssh_keys) to authenticate with. Mutually optional with password.
 - `openaiPathPrefix` (string) — OPENAI only: optional path prefix inserted before /v1 (e.g. "/api" for CLIProxyAPI).
-- `password` (string) — Password (stored). Optional for SSH if a key is used; some VNC/SMB setups allow guest.
-- `port` (integer) — TCP port. Defaults: SSH 22, SMB 445, VNC 5900, RDP 3389, SPICE 5900. Type-specific vncPort/rdpPort/spicePort override this.
+- `password` (string) — Password (stored). Optional for SSH if a key is used; some SMB setups allow guest.
+- `port` (integer) — TCP port. Defaults: SSH 22, SMB 445, RDP 3389, SPICE 5900. Type-specific rdpPort/spicePort override this.
 - `portKnockDelayMs` (integer) — Inter-knock delay in ms (default 100). Ignored when portKnockSequence is empty.
 - `portKnockSequence` (string) — Optional port-knock sequence fired before the real connect. Format: whitespace/comma-separated 'port[/proto]' tokens — e.g. '7000 8000 9000' (all TCP) or '7000/tcp 8000/udp 9000/tcp'. Empty = disabled.
 - `protocol` (string) — OPENAI only: wire protocol — OPENAI (default, OpenAI-compatible /v1/chat/completions), OLLAMA (native /api), ANTHROPIC (Messages API /v1/messages), or GEMINI (generativelanguage /v1beta/models/{model}:generateContent).
@@ -262,11 +262,6 @@ Create a saved connection profile. Supports connectionType=SSH, SMB, VNC, RDP, S
 - `usbStopBits` (string) — USBSERIAL only: stop bits 1|1.5|2 (default 1).
 - `useMosh` (boolean) — SSH only: when true, the profile uses Mosh on top of the SSH bootstrap. SSH execs `mosh-server new -s`, parses MOSH CONNECT, then the UDP transport takes over. Default false.
 - `username` (string) — Username for SSH/SMB.
-- `vncPassword` (string) — VNC password.
-- `vncPort` (integer) — VNC only: TCP port (default 5900). Overrides the generic `port`.
-- `vncSshForward` (boolean) — VNC only: tunnel the VNC connection through a saved SSH profile (set vncSshProfileId). The VNC target is reached at 127.0.0.1:<port> from the SSH server. Default false.
-- `vncSshProfileId` (string) — VNC only: id of the SSH profile (from list_connections) to tunnel through when vncSshForward is true.
-- `vncUsername` (string) — Username for VeNCrypt VNC.
 
 </details>
 
@@ -282,7 +277,7 @@ Delete a saved connection profile by id. Disconnects any live session for the pr
 <details markdown="1">
 <summary><code>disconnect_profile</code> · asks once per session</summary>
 
-Disconnect every live session for a profile across all transports (SSH, Mosh, Eternal Terminal, RDP, VNC, SMB, Reticulum, local, Bluetooth/BLE/USB serial). Use list_connections to find profileIds.
+Disconnect every live session for a profile across all transports (SSH, Mosh, Eternal Terminal, RDP, SMB, Reticulum, local, Bluetooth/BLE/USB serial). Use list_connections to find profileIds.
 
 - `profileId` (string, required) — ID of the connection profile to disconnect.
 
@@ -308,7 +303,7 @@ List Bluetooth Classic devices already paired (bonded) with the phone — { addr
 <details markdown="1">
 <summary><code>list_connections</code> · no per-call prompt</summary>
 
-List saved connection profiles (SSH, Mosh, VNC, RDP, SMB, rclone, local, Reticulum, OPENAI). Secrets like passwords and keys are redacted. SSH profiles also report `sshOptions` (the ssh_config-style lines set on the profile) and `sshEngine` — "jsch" (default) or "sshlib" (the experimental whole-connection engine, opted into with the 'HavenSshEngine sshlib' directive) — so an agent that sets the engine can confirm which one a profile is actually on.
+List saved connection profiles (SSH, Mosh, RDP, SMB, rclone, local, Reticulum, OPENAI). Secrets like passwords and keys are redacted. SSH profiles also report `sshOptions` (the ssh_config-style lines set on the profile) and `sshEngine` — "jsch" (default) or "sshlib" (the experimental whole-connection engine, opted into with the 'HavenSshEngine sshlib' directive) — so an agent that sets the engine can confirm which one a profile is actually on.
 
 </details>
 
@@ -327,7 +322,7 @@ Run one command on a saved SSH connection over an exec channel (no terminal sess
 <details markdown="1">
 <summary><code>update_connection</code> · asks every call</summary>
 
-Edit fields on an existing connection profile (load → change → save). Pass profileId (required) plus only the fields you want to change — anything omitted is left as-is. Common SSH-family fields: label, host, port, username, password (stored, mapped to the profile's transport), keyId, ignoreSavedKeys (force password-only auth), useMosh, forwardAgent, remoteCommand (SSH exec instead of a login shell; empty string clears) + requestPty, bindAddress (ssh -b; direct connections only, empty string clears). Desktop tunnels: vncSshForward + vncSshProfileId, rdpSshForward + rdpSshProfileId, spiceSshForward + spiceSshProfileId, smbSshForward + smbSshProfileId. USB/IP auto-forward: usbForwardVidPid (export a phone-attached USB device to this host on every connect). Passwords are stored encrypted and never echoed back. OPENAI: password maps to the API key (empty string clears). For routing/proxy use set_profile_routing; for port-knock/SPA use set_port_knock/set_spa. Returns the updated profile (secrets redacted).
+Edit fields on an existing connection profile (load → change → save). Pass profileId (required) plus only the fields you want to change — anything omitted is left as-is. Common SSH-family fields: label, host, port, username, password (stored, mapped to the profile's transport), keyId, ignoreSavedKeys (force password-only auth), useMosh, forwardAgent, remoteCommand (SSH exec instead of a login shell; empty string clears) + requestPty, bindAddress (ssh -b; direct connections only, empty string clears). Desktop tunnels: rdpSshForward + rdpSshProfileId, spiceSshForward + spiceSshProfileId, smbSshForward + smbSshProfileId. USB/IP auto-forward: usbForwardVidPid (export a phone-attached USB device to this host on every connect). Passwords are stored encrypted and never echoed back. OPENAI: password maps to the API key (empty string clears). For routing/proxy use set_profile_routing; for port-knock/SPA use set_port_knock/set_spa. Returns the updated profile (secrets redacted).
 
 - `profileId` (string, required) — Profile id from list_connections.
 - `bindAddress` (string) — SSH only (#636): local address the outgoing SSH socket binds to (ssh -b). Direct connections only — refused on profiles with a proxy or jump host. Empty string clears.
@@ -339,7 +334,7 @@ Edit fields on an existing connection profile (load → change → save). Pass p
 - `label` (string) — New user-facing label.
 - `moshServerCommand` (string) — Mosh only: override the command Haven runs over SSH to start mosh-server (default 'mosh-server new -s -c 256 …'). It must print a 'MOSH CONNECT <port> <key>' line, which Haven parses to find the session — so a wrapper can point Haven at a different port (e.g. scripts/mosh-fault-rig.py bootstrap, which puts a fault-injecting relay in front). Empty string restores the default.
 - `openaiPathPrefix` (string) — OPENAI only: path prefix inserted before /v1 (e.g. "/api"). Empty string clears.
-- `password` (string) — New password (stored encrypted). Mapped to the profile's transport (SSH/VNC/RDP/SMB). Pass an empty string to clear it.
+- `password` (string) — New password (stored encrypted). Mapped to the profile's transport (SSH/RDP/SMB). Pass an empty string to clear it.
 - `port` (integer) — New TCP port.
 - `protocol` (string) — OPENAI only: wire protocol — OPENAI (default), OLLAMA, ANTHROPIC, or GEMINI. Empty string clears (back to OPENAI).
 - `rdpSshForward` (boolean) — RDP only: tunnel through a saved SSH profile (set rdpSshProfileId).
@@ -354,8 +349,6 @@ Edit fields on an existing connection profile (load → change → save). Pass p
 - `usbForwardVidPid` (string) — SSH only: VID:PID of a phone-attached USB device (e.g. '1050:0406' — see list_usb_devices) to auto-export over USB/IP whenever this profile connects. Haven opens the device, starts the usbip server on loopback, adds the remote forward, and runs `usbip attach` on the host, re-attaching after a tunnel drop. Empty string clears (no auto-forward).
 - `useMosh` (boolean) — SSH only: use Mosh on top of the SSH bootstrap.
 - `username` (string) — New username (SSH/SMB).
-- `vncSshForward` (boolean) — VNC only: tunnel through a saved SSH profile (set vncSshProfileId).
-- `vncSshProfileId` (string) — VNC only: SSH profile id to tunnel through. Empty string clears.
 
 </details>
 
@@ -1245,7 +1238,7 @@ Send a plain-text email from a connected EMAIL profile. Pass profileId (from lis
 
 <a id="sec-linux"></a>
 
-## Linux guest (proot) & desktops (46)
+## Linux guest (proot) & desktops (45)
 
 The on-device Linux distros, their desktop environments and windows, guest services, the audio bridge, and guest-file access.
 
@@ -1379,7 +1372,7 @@ Single rich read of the proot subsystem: active distro id, every Distro (id, lab
 <details markdown="1">
 <summary><code>install_app_pack</code> · asks once per session</summary>
 
-Install a curated guest-app pack (from list_app_packs) into the ACTIVE distro: package install via the distro's package manager, idempotent config drops, optional pinned-asset downloads, then — app-side — a verify-binary check, app-window def registration (so the app appears in Installed Apps / present_app-launchable), and audio-bridge start if the pack needs it. Long-running (a package install): returns { jobId, status: "running" } immediately; poll by calling again with that jobId — the response carries accumulated output and, once finished, the exitCode (0 = installed AND registered; non-zero = a phase failed, see output tail). Requires an installed active distro whose family the pack supports.
+Install a curated guest-app pack (from list_app_packs) into the ACTIVE distro: package install via the distro's package manager, idempotent config drops, optional pinned-asset downloads, then — app-side — a verify-binary check, app-window def registration, and audio-bridge start if the pack needs it. Long-running (a package install): returns { jobId, status: "running" } immediately; poll by calling again with that jobId — the response carries accumulated output and, once finished, the exitCode (0 = installed AND registered; non-zero = a phase failed, see output tail). Requires an installed active distro whose family the pack supports.
 
 - `id` (string) — Pack id from list_app_packs (e.g. "qmmp"). Required unless polling via jobId.
 - `includeAssets` (boolean) — Also fetch the pack's optional pinned assets (skins, sample content). Default true.
@@ -1458,7 +1451,7 @@ Slim distro-only read of inspect_proot. Returns each Distro with installed/activ
 <details markdown="1">
 <summary><code>list_guest_apps</code> · no per-call prompt</summary>
 
-List the GUI applications installed in the active proot guest, discovered from its `.desktop` files (the same source an xfce4 application menu reads). Use this to find an app to launch with `present_app` without knowing its exact command. Returns { count, iconsResolved, apps:[{ name, exec, hasIcon, categories }] } sorted by name; `exec` is the runnable guest command (field codes stripped) you pass straight to present_app's `command`. `hasIcon` indicates whether a decodable icon was resolved (icons themselves stay on-device for the launcher UI). Skips NoDisplay/Terminal/non-application entries.
+List the GUI applications installed in the active proot guest, discovered from its `.desktop` files (the same source an xfce4 application menu reads). Use this to find an app to launch with `launch_app_in_desktop` without knowing its exact command. Returns { count, iconsResolved, apps:[{ name, exec, hasIcon, categories }] } sorted by name; `exec` is the runnable guest command (field codes stripped) you pass straight to launch_app_in_desktop's `command`. `hasIcon` indicates whether a decodable icon was resolved (icons themselves stay on-device for the launcher UI). Skips NoDisplay/Terminal/non-application entries.
 
 </details>
 
@@ -1483,16 +1476,6 @@ Open an interactive local PRoot shell whose environment JOINS a RUNNING desktop 
 
 - `deId` (string, required) — Desktop environment id of a RUNNING desktop (e.g. "openbox", "xfce4", "sway").
 - `plain` (boolean) — Skip the user's sessionManager preference and exec a bare login shell. Default false.
-
-</details>
-
-<details markdown="1">
-<summary><code>read_app_window_log</code> · no per-call prompt</summary>
-
-Read the captured output log of a present_app cage window. The cage redirects BOTH the sway compositor AND the GUI app it runs (stdout+stderr merged) into one log, so this is how the agent SEES a present_app app's own output — startup errors, GL/Mesa diagnostics, a crash trace — without wrapping the command in a logging script. Pass the sessionId returned by present_app for a live window; OMIT it to read the most-recent app-window log, which still works after the app crashed or exited (the session is gone but the log survives on disk). Returns { sessionId?, display, bytes, truncated, log }. For a GUI app that came up then died (a grey/blank or vanished window), this is the first thing to read.
-
-- `maxBytes` (integer) — Return at most the last N bytes of the log. Default 16384, clamped 256..262144.
-- `sessionId` (string) — present_app sessionId for a live window. Omit to read the newest app-window log (survives a crashed/exited app).
 
 </details>
 
@@ -2209,7 +2192,7 @@ Set per-key options on a saved SSH key (the toggles on the Keys screen). `keyId`
 
 <a id="sec-agent-you"></a>
 
-## Agent ↔ you (attention & self-drive) (13)
+## Agent ↔ you (attention & self-drive) (12)
 
 How an agent reaches your attention (present_*, notifications, the agent-to-agent turn tools) and drives Haven's own UI.
 
@@ -2254,22 +2237,6 @@ Read recent Android notifications — the phone's inbound attention: app, title,
 </details>
 
 <details markdown="1">
-<summary><code>present_app</code> · asks once per session</summary>
-
-Show the user a LIVE, interactive single application window inline in Haven. Launches `command` as a Wayland app under a `cage` kiosk inside the active proot guest, exposes it over VNC, and embeds the live view in a bottom sheet over whatever screen the user is on (pinch-zoom, pan, drag and fullscreen all work; the user can interact). Use this to collaborate in a real GUI app — an image viewer, a media/audio player, a PDF/whiteboard tool — rather than pushing a static image with present_media. `command` is the guest shell command cage runs (e.g. 'imv /root/board.png', 'mpv /root/clip.mp4'); the app and any Wayland deps must already be installed in the guest. Returns { presented, sessionId, vncPort, state } once the window is up. Multiple app windows can run at once: each call launches another cage; the newest is shown full-overlay and any previous one is backgrounded to a draggable edge icon (tap to bring it back). The user backgrounds a window by tapping outside it (keeps it running) and tears it down with the Dismiss button or the edge-icon close. If the window comes up grey/blank or vanishes, read the app's own stdout/stderr with read_app_window_log (works even after it crashed) instead of wrapping the command in a logging script.
-
-- `command` (string, required) — Guest shell command for the GUI app cage runs, e.g. 'imv /root/x.png'.
-- `caption` (string) — Optional one-line caption shown above the window.
-- `fullscreen` (boolean) — Open the window filling the whole screen (immersive) instead of the bottom sheet. Default false.
-- `multiWindow` (boolean) — Float the app's windows instead of force-fullscreening them. Required for apps that open several toplevels (qmmp's skinned main/EQ/playlist deck) — under the default kiosk rule they stack and only the last-raised window is visible. Default false.
-- `resolution` (string) — Cage display resolution: 'auto' (portrait, fills the screen — default) or a 'WxH' token like '1280x720'. Lower resolution = bigger fonts.
-- `runAsRoot` (boolean) — Run the app as root via fakeroot-tcp (the cage compositor itself runs non-root, so system tools like package managers go read-only otherwise). Installs fakeroot if missing. APT distros only today. Default false.
-- `scale` (number) — Output scale factor (wlroots HiDPI; foot/GTK honour it). 1.0 default; 1.5/2 enlarge fonts + UI.
-- `swayRules` (string[]) — Extra sway config lines appended to the kiosk config — per-title placement for multiWindow apps (sway centers every floating window, stacking a deck), e.g. 'for_window [title="^Playlist$"] move position 20 136'.
-
-</details>
-
-<details markdown="1">
 <summary><code>present_media</code> · no per-call prompt</summary>
 
 Show the user an image — or play a short sound — inline in Haven. A bottom sheet floats over whatever screen the user is on, rendering the image (or an audio card with a play button) plus an optional caption. The "here, look at / listen to this" channel: use it when you have something visual or audible you want the user to perceive directly. Reference the media by a file Haven can reach — `profileId` ("local" for the device / proot-guest cache, or an SSH/SMB/rclone profile id) + `path` — or by a ready `url` (e.g. a serve_file loopback URL). Haven streams the file into a local handle; the bytes never pass through the agent context. `mimeType` is inferred from the file (extension, else content sniff) when omitted; set it for audio. Only image/* and audio/* are supported. Returns immediately ({ presented }) as soon as the request is accepted — Haven fetches/stages the file and shows the sheet in the background, so a slow transfer can't turn a delivered image into a timeout; a staging failure is logged (not returned). The user dismisses the sheet at their leisure.
@@ -2286,7 +2253,7 @@ Show the user an image — or play a short sound — inline in Haven. A bottom s
 <details markdown="1">
 <summary><code>present_web</code> · no per-call prompt</summary>
 
-Show the user HTML, an SVG, or a PDF inline in an in-app WebView — the interactive rung between present_media (a static image) and present_app (a full live VNC app). Pass a `url` (e.g. a serve_file loopback URL or any web page), or reference a file with `profileId` ("local" for the device / proot-guest cache, or an SSH/SMB/rclone profile id) + `path`, which Haven serves over a loopback URL. A PDF is paged; HTML/SVG render live (pinch-zoom + pan). Floats in a bottom sheet over whatever screen the user is on; bytes never pass through the agent context. Returns immediately: a `url` acks with { presented, id, url }; a file reference acks with { presented } and is staged/shown in the background (a staging failure is logged, not returned). The user dismisses it at their leisure.
+Show the user HTML, an SVG, or a PDF inline in an in-app WebView — the interactive rung above present_media (a static image). Pass a `url` (e.g. a serve_file loopback URL or any web page), or reference a file with `profileId` ("local" for the device / proot-guest cache, or an SSH/SMB/rclone profile id) + `path`, which Haven serves over a loopback URL. A PDF is paged; HTML/SVG render live (pinch-zoom + pan). Floats in a bottom sheet over whatever screen the user is on; bytes never pass through the agent context. Returns immediately: a `url` acks with { presented, id, url }; a file reference acks with { presented } and is staged/shown in the background (a staging failure is logged, not returned). The user dismisses it at their leisure.
 
 - `caption` (string) — Optional one-line caption shown above the view.
 - `path` (string) — Absolute path of the .html/.svg/.pdf file on that backend.

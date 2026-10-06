@@ -278,29 +278,15 @@ fun HavenNavHost(
         }
     }
 
-    // Desktop (VNC/RDP) navigation is collected HERE, at the always-composed
+    // Desktop (RDP/SPICE) navigation is collected HERE, at the always-composed
     // nav-host level, rather than inside ConnectionsScreen — so a desktop tab is
     // created the instant the connect emits, no matter which screen is on-screen.
     // This is what makes the lost-connection Retry button and the MCP
     // connect_profile tool reliably open the desktop even when the Connections
     // screen isn't composed (it isn't, from the Desktop tab). (#121)
     val connectionsViewModel: ConnectionsViewModel = hiltViewModel()
-    val navigateToVncEvent by connectionsViewModel.navigateToVnc.collectAsState()
     val navigateToRdpEvent by connectionsViewModel.navigateToRdp.collectAsState()
     val navigateToSpiceEvent by connectionsViewModel.navigateToSpice.collectAsState()
-    LaunchedEffect(navigateToVncEvent) {
-        navigateToVncEvent?.let { nav ->
-            desktopViewModel.addVncSession(
-                nav.host, nav.port, nav.password, nav.username,
-                sshForward = nav.sshForward,
-                sshSessionId = nav.sshSessionId,
-                profileId = nav.profileId,
-                colorDepth = nav.colorDepth,
-            )
-            connectionsViewModel.onDesktopNavigated()
-            requestScreen(Screen.Desktop)
-        }
-    }
     LaunchedEffect(navigateToRdpEvent) {
         navigateToRdpEvent?.let { nav ->
             desktopViewModel.addRdpSession(
@@ -631,7 +617,7 @@ fun HavenNavHost(
                     },
                     // VNC/RDP navigation is handled by the always-composed
                     // collector above (HavenNavHost), not via these callbacks —
-                    // see the navigateToVnc/navigateToRdp LaunchedEffects (#121).
+                    // see the navigateToRdp/navigateToSpice LaunchedEffects (#121).
                     onNavigateToSmb = { profileId ->
                         pendingSmbProfileId = profileId
                         coroutineScope.launch {
@@ -716,17 +702,6 @@ fun HavenNavHost(
                         onNavigateToConnections = {
                             coroutineScope.launch {
                                 requestScreen(Screen.Connections)
-                            }
-                        },
-                        onNavigateToVnc = { host, port, username, password, sshForward, sshSessionId, colorDepth ->
-                            desktopViewModel.addVncSession(
-                                host, port, password, username,
-                                sshForward = sshForward,
-                                sshSessionId = sshSessionId,
-                                colorDepth = colorDepth,
-                            )
-                            coroutineScope.launch {
-                                requestScreen(Screen.Desktop)
                             }
                         },
                         onSelectionActiveChanged = { terminalSelectionActive = it },

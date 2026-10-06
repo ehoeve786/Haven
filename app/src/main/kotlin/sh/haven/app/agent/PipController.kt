@@ -12,12 +12,11 @@ import javax.inject.Singleton
  * PiP lifecycle) and the Compose tree.
  *
  * - [activePipMedia] is the one presented item currently eligible for PiP — set
- *   by `PresentationHost` when an APP_WINDOW, IMAGE or WEB overlay is shown,
- *   cleared on dismiss (AUDIO has no visual surface, so it is never set).
- *   MainActivity uses it to keep `PictureInPictureParams` current (aspect ratio,
- *   plus auto-enter for APP_WINDOW only) and to render the full-bleed PiP view —
- *   the live VNC frame for an app window, or the decoded image / PDF page / live
- *   WebView for image and web (#225).
+ *   by `PresentationHost` when an IMAGE or WEB overlay is shown, cleared on
+ *   dismiss (AUDIO has no visual surface, so it is never set). MainActivity
+ *   uses it to keep `PictureInPictureParams` current (aspect ratio) and to
+ *   render the full-bleed PiP view — the decoded image / PDF page / live
+ *   WebView (#225).
  * - [isInPip] is pushed from `Activity.onPictureInPictureModeChanged` so the
  *   composition can swap to the minimal PiP UI (and so the biometric re-lock is
  *   suppressed while floating).

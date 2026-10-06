@@ -68,13 +68,11 @@ fun LinuxVmSetupDialog(
     vmStatus: LocalVmStatus,
     onConnectSsh: (port: Int) -> Unit,
     onConnectSshDirect: (ip: String, port: Int) -> Unit,
-    onConnectVnc: (port: Int) -> Unit,
-    onConnectVncDirect: (ip: String, port: Int) -> Unit,
     onDismiss: () -> Unit,
 ) {
     val context = LocalContext.current
-    val hasLocalServices = vmStatus.sshPort != null || vmStatus.vncPort != null
-    val hasDirectServices = vmStatus.directSshPort != null || vmStatus.directVncPort != null
+    val hasLocalServices = vmStatus.sshPort != null
+    val hasDirectServices = vmStatus.directIp != null && vmStatus.directSshPort != null
     val hasAnyServices = hasLocalServices || hasDirectServices
 
     AlertDialog(
@@ -95,25 +93,11 @@ fun LinuxVmSetupDialog(
                             onClick = { onConnectSsh(vmStatus.sshPort) },
                         )
                     }
-                    if (vmStatus.vncPort != null) {
-                        StatusRow(
-                            label = "VNC on localhost:${vmStatus.vncPort}",
-                            actionLabel = connectLabel,
-                            onClick = { onConnectVnc(vmStatus.vncPort) },
-                        )
-                    }
                     if (vmStatus.directIp != null && vmStatus.directSshPort != null) {
                         StatusRow(
                             label = "SSH on ${vmStatus.directIp}:${vmStatus.directSshPort}",
                             actionLabel = connectLabel,
                             onClick = { onConnectSshDirect(vmStatus.directIp, vmStatus.directSshPort) },
-                        )
-                    }
-                    if (vmStatus.directIp != null && vmStatus.directVncPort != null) {
-                        StatusRow(
-                            label = "VNC on ${vmStatus.directIp}:${vmStatus.directVncPort}",
-                            actionLabel = connectLabel,
-                            onClick = { onConnectVncDirect(vmStatus.directIp, vmStatus.directVncPort) },
                         )
                     }
                     Spacer(Modifier.height(16.dp))

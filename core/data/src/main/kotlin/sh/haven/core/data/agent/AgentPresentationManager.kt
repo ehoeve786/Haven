@@ -12,19 +12,12 @@ import javax.inject.Singleton
 enum class PresentedMediaKind {
     IMAGE,
     AUDIO,
-    /**
-     * A live, interactive single-app window: a GUI app running under a cage
-     * kiosk in the guest, reached over VNC at [PresentedMedia.host]:[port].
-     * The overlay embeds the VNC viewer rather than decoding a file.
-     */
-    APP_WINDOW,
 
     /**
      * HTML / SVG / PDF shown inline. HTML and SVG load from a loopback-served
      * URL ([PresentedMedia.url]) in an in-app WebView; a PDF is downloaded to
      * a cache file ([PresentedMedia.filePath]) and paged via PdfRenderer
-     * (which needs a local fd). The rung between a static image ([IMAGE]) and
-     * a live app ([APP_WINDOW]).
+     * (which needs a local fd).
      */
     WEB,
 }
@@ -33,8 +26,7 @@ enum class PresentedMediaKind {
  * One thing an agent has pushed for the user to look at / listen to /
  * interact with. For IMAGE/AUDIO the bytes live in a cache file
  * ([filePath]) — cheap to keep in the StateFlow and what the image decoder
- * / audio player want. For APP_WINDOW there is no file: it carries the VNC
- * [host]/[port]/[sessionId] of a live cage-kiosk session instead.
+ * / audio player want.
  */
 data class PresentedMedia(
     val id: Long,
@@ -48,16 +40,6 @@ data class PresentedMedia(
     val caption: String? = null,
     /** Audio only: start playback as soon as the sheet appears. */
     val autoPlay: Boolean = false,
-    /** APP_WINDOW: VNC endpoint + the DesktopManager session to stop on dismiss. */
-    val host: String? = null,
-    val port: Int? = null,
-    val sessionId: String? = null,
-    /** APP_WINDOW: open filling the whole screen (escaping the sheet) instead of the 420dp box. */
-    val fullscreen: Boolean = false,
-    /** APP_WINDOW: the cage output scale this window launched at (seeds the 3-finger scale gesture). */
-    val scale: Float = 1f,
-    /** APP_WINDOW: the resolution token ("auto" | "WxH"); "auto" lets fullscreen refit the cage to the screen. */
-    val resolution: String = "auto",
     val presentedAt: Long = System.currentTimeMillis(),
 )
 
@@ -94,15 +76,23 @@ class AgentPresentationManager @Inject constructor() {
 
     private val _minimizedIds = MutableStateFlow<Set<Long>>(emptySet())
     /**
-     * Ids of [PresentedMediaKind.APP_WINDOW] entries the user has backgrounded
-     * to an edge icon. They stay in [pending] (the cage + VNC keep running) but
-     * the host skips rendering them; the edge dock renders an icon per id.
-     * Only ever holds app-window ids — image/audio are never minimized.
-     *
-     * Invariant: at most one app window is *non*-minimized at a time (the one
-     * shown full-overlay). [presentAppWindow] and [restore] enforce it.
+     * Ids of entries the user has backgrounded to an edge icon. They stay in
+     * [pending] but the host skips rendering them; the edge dock renders an
+     * icon per id.
      */
     val minimizedIds: StateFlow<Set<Long>> = _minimizedIds.asStateFlow()
+
+    /** Background an entry to an edge icon. */
+    fun minimize(id: Long) {
+        _minimizedIds.value = _minimizedIds.value + id
+    }
+
+    /** Restore a backgrounded entry, moving it to the front of [pending]. */
+    fun restore(id: Long) {
+        _minimizedIds.value = _minimizedIds.value - id
+        val item = _pending.value.firstOrNull { it.id == id } ?: return
+        _pending.value = listOf(item) + _pending.value.filterNot { it.id == id }
+    }
 
     /**
      * Enqueue [filePath] for the user to see/hear. Non-blocking; returns
@@ -151,68 +141,11 @@ class AgentPresentationManager @Inject constructor() {
         ),
     )
 
-    /**
-     * Enqueue a live [PresentedMediaKind.APP_WINDOW] backed by a cage-kiosk
-     * VNC session at [host]:[port]. [sessionId] is the DesktopManager session
-     * the UI stops when the window is dismissed. No cache file is involved.
-     */
-    fun presentAppWindow(
-        host: String,
-        port: Int,
-        sessionId: String,
-        caption: String?,
-        fullscreen: Boolean = false,
-        scale: Float = 1f,
-        resolution: String = "auto",
-    ): Long {
-        // Auto-background the currently-focused app window so the new one takes
-        // the single full-overlay slot; the previous one becomes an edge icon.
-        currentFocusedAppWindowId()?.let { _minimizedIds.value = _minimizedIds.value + it }
-        return enqueue(
-            PresentedMedia(
-                id = nextId.getAndIncrement(),
-                kind = PresentedMediaKind.APP_WINDOW,
-                caption = caption,
-                host = host,
-                port = port,
-                sessionId = sessionId,
-                fullscreen = fullscreen,
-                scale = scale,
-                resolution = resolution,
-            ),
-        )
-    }
-
-    /** The id of the app window currently shown full-overlay, or null. */
-    private fun currentFocusedAppWindowId(): Long? =
-        _pending.value.firstOrNull {
-            it.kind == PresentedMediaKind.APP_WINDOW && it.id !in _minimizedIds.value
-        }?.id
-
-    /** Background an app window to an edge icon (keeps the cage + VNC alive). */
-    fun minimize(id: Long) {
-        _minimizedIds.value = _minimizedIds.value + id
-    }
-
-    /**
-     * Restore a backgrounded app window to the full overlay. Backgrounds the
-     * current focused window first (single-focus invariant), then un-minimizes
-     * [id] and moves it to the front of [pending] so the host renders it.
-     */
-    fun restore(id: Long) {
-        currentFocusedAppWindowId()?.let { focused ->
-            if (focused != id) _minimizedIds.value = _minimizedIds.value + focused
-        }
-        _minimizedIds.value = _minimizedIds.value - id
-        val item = _pending.value.firstOrNull { it.id == id } ?: return
-        _pending.value = listOf(item) + _pending.value.filterNot { it.id == id }
-    }
-
     private fun enqueue(item: PresentedMedia): Long {
         val next = _pending.value + item
         if (next.size > MAX_QUEUE) {
             // Evict and delete the backing file of the oldest entries so a
-            // misbehaving agent can't fill the cache. (APP_WINDOW has no file.)
+            // misbehaving agent can't fill the cache.
             val evicted = next.subList(0, next.size - MAX_QUEUE)
             evicted.forEach { it.filePath?.let { p -> runCatching { File(p).delete() } } }
             _pending.value = next.subList(next.size - MAX_QUEUE, next.size).toList()
@@ -225,9 +158,7 @@ class AgentPresentationManager @Inject constructor() {
     /**
      * Called by the UI when the user dismisses an item (taps Dismiss or
      * swipes the sheet away). Removes it from the queue and deletes its
-     * backing cache file (IMAGE/AUDIO only). For APP_WINDOW the UI layer is
-     * responsible for stopping the DesktopManager session — this manager
-     * (core:data) doesn't depend on core:local.
+     * backing cache file, if any.
      */
     fun dismiss(id: Long) {
         val current = _pending.value
