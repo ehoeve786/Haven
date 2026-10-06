@@ -735,7 +735,9 @@ internal class McpTools(
         "read_clipboard" to ToolHandler(
             description = "Return the system clipboard's primary plain-text content. Returns { text } where text is null when the clipboard is empty or non-text (image, intent, etc.). On Android 10+ the system enforces foreground/IME restrictions on clipboard reads; this call may return null even when the clipboard has content if Haven isn't currently focused.",
             inputSchema = emptyObjectSchema(),
-            consentLevel = ConsentLevel.NEVER,
+            // Clipboards routinely hold copied passwords and OTPs.
+            consentLevel = ConsentLevel.ONCE_PER_SESSION,
+            summarise = { _ -> "Let the agent read your clipboard?" },
         ) { _ -> readClipboard() },
 
         "get_preference" to ToolHandler(

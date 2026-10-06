@@ -42,8 +42,8 @@ expand one for its description and arguments. The tag after each name is its
 consent level:
 
 - **asks every call** — side-effectful or sensitive; a consent sheet describing the specific action on every call (78 tools).
-- **asks once per session** — reversible actions and screen-reading; prompts the first time each session, then proceeds (61 tools).
-- **no per-call prompt** — read-only queries and tap-equivalent UI actions; still behind the endpoint being enabled and the client paired (92 tools).
+- **asks once per session** — reversible actions and screen-reading; prompts the first time each session, then proceeds (62 tools).
+- **no per-call prompt** — read-only queries and tap-equivalent UI actions; still behind the endpoint being enabled and the client paired (91 tools).
 
 ## Sections
 
@@ -800,7 +800,7 @@ Open a media URL in the system player (VLC, MX Player, Chrome, etc.) via Android
 </details>
 
 <details markdown="1">
-<summary><code>read_clipboard</code> · no per-call prompt</summary>
+<summary><code>read_clipboard</code> · asks once per session</summary>
 
 Return the system clipboard's primary plain-text content. Returns { text } where text is null when the clipboard is empty or non-text (image, intent, etc.). On Android 10+ the system enforces foreground/IME restrictions on clipboard reads; this call may return null even when the clipboard has content if Haven isn't currently focused.
 
