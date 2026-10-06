@@ -44,7 +44,7 @@ class TaskerFireReceiver : BroadcastReceiver() {
 
     override fun onReceive(context: Context, intent: Intent) {
         if (intent.action != TaskerPlugin.ACTION_FIRE_SETTING) return
-        val bundle = TaskerPlugin.configFrom(intent)
+        val bundle = TaskerPlugin.configFrom(context, intent)
         if (bundle == null) {
             Log.w(TAG, "ignoring fire with invalid/foreign config")
             return
@@ -160,6 +160,7 @@ class TaskerFireReceiver : BroadcastReceiver() {
             addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_SINGLE_TOP)
             putExtra(EXTRA_RUN_PROFILE_ID, profileId)
             putExtra(EXTRA_RUN_COMMAND, command)
+            putExtra(TaskerPlugin.BUNDLE_SECRET, TaskerPlugin.secret(context))
         }
         val pi = PendingIntent.getActivity(
             context,

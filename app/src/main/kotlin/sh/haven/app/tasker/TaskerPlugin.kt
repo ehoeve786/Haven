@@ -1,5 +1,6 @@
 package sh.haven.app.tasker
 
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 
@@ -66,6 +67,30 @@ object TaskerPlugin {
     const val BUNDLE_COMMAND = "sh.haven.tasker.COMMAND"
     const val BUNDLE_OVERLAY = "sh.haven.tasker.OVERLAY"
     const val BUNDLE_BLOCK = "sh.haven.tasker.BLOCK"
+    /**
+     * Per-install secret. The fire receiver and MainActivity are exported, so
+     * without it any app that learned a profile id (document ids from
+     * HavenDocumentsProvider carry one) could run commands on that server.
+     * The edit activity embeds it in each saved action; only the host app
+     * stores that Bundle.
+     */
+    const val BUNDLE_SECRET = "sh.haven.tasker.SECRET"
+
+    @Volatile private var cachedSecret: String? = null
+
+    /** This install's secret, minted on first use and kept in app-private prefs. */
+    fun secret(context: Context): String = cachedSecret ?: synchronized(this) {
+        val prefs = context.getSharedPreferences("tasker_plugin", Context.MODE_PRIVATE)
+        prefs.getString("secret", null) ?: java.util.Base64.getUrlEncoder().withoutPadding()
+            .encodeToString(ByteArray(32).also { java.security.SecureRandom().nextBytes(it) })
+            .also { prefs.edit().putString("secret", it).commit() }
+    }.also { cachedSecret = it }
+
+    /** Constant-time check that [presented] is this install's secret. */
+    fun hasSecret(context: Context, presented: String?): Boolean =
+        presented != null && java.security.MessageDigest.isEqual(
+            presented.toByteArray(), secret(context).toByteArray(),
+        )
 
     /** Build the config Bundle the edit activity hands back to the host. */
     fun buildBundle(
@@ -74,12 +99,14 @@ object TaskerPlugin {
         command: String,
         overlay: Boolean,
         block: Boolean,
+        secret: String,
     ): Bundle = Bundle().apply {
         putString(BUNDLE_PROFILE_ID, profileId)
         putString(BUNDLE_PROFILE_LABEL, profileLabel)
         putString(BUNDLE_COMMAND, command)
         putBoolean(BUNDLE_OVERLAY, overlay)
         putBoolean(BUNDLE_BLOCK, block)
+        putString(BUNDLE_SECRET, secret)
         // Let the host substitute its own variables into the command at fire
         // time (Tasker %vars / MacroDroid magic text). Harmless if the host
         // ignores it; the receiver just sees the already-substituted command.
@@ -103,8 +130,9 @@ object TaskerPlugin {
      * command — guards against a host replaying a Bundle from an older/other
      * plugin version (the contract's "reject unknown Bundle" rule).
      */
-    fun isValid(bundle: Bundle?): Boolean =
+    fun isValid(context: Context, bundle: Bundle?): Boolean =
         bundle != null &&
+            hasSecret(context, bundle.getString(BUNDLE_SECRET)) &&
             !bundle.getString(BUNDLE_PROFILE_ID).isNullOrBlank() &&
             !bundle.getString(BUNDLE_COMMAND).isNullOrBlank()
 
@@ -113,18 +141,20 @@ object TaskerPlugin {
      * [EXTRA_BUNDLE] (how Tasker/MacroDroid's plugin flow passes it); falls
      * back to the same keys as **flat** intent extras, so the action also
      * works from a generic "Send Intent" step (and is reachable via `adb
-     * shell am broadcast`, which can't build a nested Bundle). Returns null
-     * if neither form carries a valid profile id + command.
+     * shell am broadcast`, which can't build a nested Bundle). Either form
+     * must carry [BUNDLE_SECRET]. Returns null if neither form carries the
+     * secret plus a valid profile id + command.
      */
-    fun configFrom(intent: Intent): Bundle? {
-        intent.getBundleExtra(EXTRA_BUNDLE)?.let { if (isValid(it)) return it }
+    fun configFrom(context: Context, intent: Intent): Bundle? {
+        intent.getBundleExtra(EXTRA_BUNDLE)?.let { if (isValid(context, it)) return it }
         val flat = Bundle().apply {
             putString(BUNDLE_PROFILE_ID, intent.getStringExtra(BUNDLE_PROFILE_ID))
             putString(BUNDLE_PROFILE_LABEL, intent.getStringExtra(BUNDLE_PROFILE_LABEL))
             putString(BUNDLE_COMMAND, intent.getStringExtra(BUNDLE_COMMAND))
             putBoolean(BUNDLE_OVERLAY, intent.getBooleanExtra(BUNDLE_OVERLAY, false))
             putBoolean(BUNDLE_BLOCK, intent.getBooleanExtra(BUNDLE_BLOCK, false))
+            putString(BUNDLE_SECRET, intent.getStringExtra(BUNDLE_SECRET))
         }
-        return if (isValid(flat)) flat else null
+        return if (isValid(context, flat)) flat else null
     }
 }

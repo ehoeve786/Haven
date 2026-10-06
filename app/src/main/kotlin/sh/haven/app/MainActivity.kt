@@ -208,6 +208,12 @@ class MainActivity : AppCompatActivity() {
         val command = intent.getStringExtra(
             sh.haven.app.tasker.TaskerFireReceiver.EXTRA_RUN_COMMAND,
         ) ?: return
+        // MainActivity is exported: only our own tap-to-watch PendingIntent
+        // carries the install secret, so a forged launch can't run a command.
+        if (!sh.haven.app.tasker.TaskerPlugin.hasSecret(
+                this, intent.getStringExtra(sh.haven.app.tasker.TaskerPlugin.BUNDLE_SECRET),
+            )
+        ) return
         intent.removeExtra(sh.haven.app.tasker.TaskerFireReceiver.EXTRA_RUN_PROFILE_ID)
         intent.removeExtra(sh.haven.app.tasker.TaskerFireReceiver.EXTRA_RUN_COMMAND)
         pendingTaskerRun.value = profileId to command

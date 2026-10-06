@@ -89,6 +89,7 @@ class TaskerEditActivity : ComponentActivity() {
                             command = command,
                             overlay = overlay,
                             block = block,
+                            secret = TaskerPlugin.secret(this),
                         )
                         val blurb = getString(R.string.tasker_blurb, profile.label, command).take(60)
                         setResult(
