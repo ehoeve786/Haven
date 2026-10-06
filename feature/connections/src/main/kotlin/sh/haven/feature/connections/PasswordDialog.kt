@@ -135,17 +135,6 @@ fun PasswordDialog(
                     }
                 }
                 when {
-                    profile.isRdp -> {
-                        Text("${profile.rdpUsername ?: profile.username}@${profile.host}:${profile.rdpPort}")
-                        val domain = profile.rdpDomain
-                        if (!domain.isNullOrBlank()) {
-                            Text(
-                                stringResource(R.string.connections_password_domain, domain),
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            )
-                        }
-                    }
                     needsUsername -> Text("${profile.host}:${profile.port}")
                     else -> Text("${profile.username}@${profile.host}:${profile.port}")
                 }

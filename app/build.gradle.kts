@@ -192,7 +192,6 @@ androidComponents {
     onVariants(selector().withFlavor("features" to "terminal")) { variant ->
         variant.packaging.jniLibs.excludes.addAll(
             // Remote desktop transports
-            "**/librdp_transport.so",
             "**/libspice_transport.so",
             // Native Wayland compositor + GPU renderer
             "**/liblabwc_android.so",
@@ -256,7 +255,6 @@ dependencies {
     implementation(project(":core:btserial"))
     implementation(project(":core:bleserial"))
     implementation(project(":core:usbserial"))
-    implementation(project(":core:rdp"))
     implementation(project(":core:prns"))
     implementation(project(":core:spice"))
     implementation(project(":core:smb"))

@@ -35,8 +35,6 @@ class NativeFeatures(private val context: Context) {
         return libs.all { File(dir, it).canExecute() }
     }
 
-    /** RDP client — `librdp_transport.so`. */
-    val rdp: Boolean get() = has("librdp_transport.so")
 
     /** SPICE client — `libspice_transport.so`. */
     val spice: Boolean get() = has("libspice_transport.so")
@@ -60,7 +58,7 @@ class NativeFeatures(private val context: Context) {
     val wayland: Boolean get() = has("liblabwc_android.so")
 
     /** True when this build ships any remote-desktop or compositor payload. */
-    val anyDesktop: Boolean get() = rdp || spice
+    val anyDesktop: Boolean get() = spice
 
     /**
      * The UML guest transport. All four pieces are required: the kernel and

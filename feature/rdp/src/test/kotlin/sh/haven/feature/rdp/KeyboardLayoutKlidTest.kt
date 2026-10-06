@@ -1,4 +1,4 @@
-package sh.haven.core.rdp
+package sh.haven.feature.rdp
 
 import java.util.Locale
 import org.junit.Assert.assertEquals

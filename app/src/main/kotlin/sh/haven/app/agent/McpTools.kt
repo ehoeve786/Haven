@@ -441,7 +441,7 @@ internal class McpTools(
         ) { args -> unpairMcpClient(args) },
 
         "list_connections" to ToolHandler(
-            description = "List saved connection profiles (SSH, Mosh, RDP, SMB, rclone, local, Reticulum, OPENAI). Secrets like passwords and keys are redacted. SSH profiles also report `sshOptions` (the ssh_config-style lines set on the profile) and `sshEngine` — \"jsch\" (default) or \"sshlib\" (the experimental whole-connection engine, opted into with the 'HavenSshEngine sshlib' directive) — so an agent that sets the engine can confirm which one a profile is actually on.",
+            description = "List saved connection profiles (SSH, Mosh, SMB, rclone, local, Reticulum, OPENAI). Secrets like passwords and keys are redacted. SSH profiles also report `sshOptions` (the ssh_config-style lines set on the profile) and `sshEngine` — \"jsch\" (default) or \"sshlib\" (the experimental whole-connection engine, opted into with the 'HavenSshEngine sshlib' directive) — so an agent that sets the engine can confirm which one a profile is actually on.",
             inputSchema = emptyObjectSchema(),
         ) { _ -> listConnections() },
 
@@ -453,7 +453,7 @@ internal class McpTools(
         ) { args -> readExitedSession(args) },
 
         "list_sessions" to ToolHandler(
-            description = "List currently registered sessions across all transports (ssh, mosh, et, reticulum, rdp, smb, local, mail, openai, and Bluetooth/BLE/USB serial) with sessionId, profileId, label, status (connecting, connected, reconnecting, disconnected, error), transport, and isAgentRepl — a screen heuristic (Claude Code TUI chrome in the bottom lines) marking which terminal session is an agent REPL, so a conversation peer can be picked without guessing; null when the session has no attached terminal tab. SSH sessions additionally include sessionManager, chosenSessionName (the stable tmux/zellij identity that survives reconnects), channel state, jump-session linkage, and active port forwards.",
+            description = "List currently registered sessions across all transports (ssh, mosh, et, reticulum, smb, local, mail, openai, and Bluetooth/BLE/USB serial) with sessionId, profileId, label, status (connecting, connected, reconnecting, disconnected, error), transport, and isAgentRepl — a screen heuristic (Claude Code TUI chrome in the bottom lines) marking which terminal session is an agent REPL, so a conversation peer can be picked without guessing; null when the session has no attached terminal tab. SSH sessions additionally include sessionManager, chosenSessionName (the stable tmux/zellij identity that survives reconnects), channel state, jump-session linkage, and active port forwards.",
             inputSchema = emptyObjectSchema(),
         ) { _ -> listSessions() },
 
@@ -732,7 +732,7 @@ internal class McpTools(
         // --- Write tools (require consent) ------------------------------
 
         "disconnect_profile" to ToolHandler(
-            description = "Disconnect every live session for a profile across all transports (SSH, Mosh, Eternal Terminal, RDP, SMB, Reticulum, local, Bluetooth/BLE/USB serial). Use list_connections to find profileIds.",
+            description = "Disconnect every live session for a profile across all transports (SSH, Mosh, Eternal Terminal, SMB, Reticulum, local, Bluetooth/BLE/USB serial). Use list_connections to find profileIds.",
             inputSchema = objectSchema {
                 string("profileId", "ID of the connection profile to disconnect.", required = true)
             },
@@ -1603,20 +1603,16 @@ internal class McpTools(
         ) { args -> setProfileRouting(args) },
 
         "create_connection" to ToolHandler(
-            description = "Create a saved connection profile. Supports connectionType=SSH, SMB, RDP, SPICE, EMAIL, RETICULUM. SSH-family fields: username (required), password (optional, stored), keyId (optional — references list_ssh_keys), ignoreSavedKeys (force password-only auth, never offer saved keys), useMosh (turn an SSH profile into a Mosh profile), sessionManager (optional: TMUX | ZELLIJ | SCREEN | BYOBU | HERDR | PSMUX — attach through that multiplexer; omit for a plain shell), remoteCommand (run a command via an SSH exec request instead of a login shell — e.g. 'tmux new -A -s work' to attach-or-create that session before shell startup files run) + requestPty (PTY for it, default true), bindAddress (local address the outgoing SSH socket binds to, ssh -b — direct connections only). SMB: smbShare (required), username + password, smbDomain. RDP: rdpUsername (required), rdpPassword, rdpDomain, rdpPort. SPICE: spicePassword (optional ticket — no username/domain), spicePort (default 5900), and spiceSshForward + spiceSshProfileId to tunnel SPICE through a saved SSH profile. EMAIL: emailProvider (\"imap\" default, or \"proton\"); username = the email address; password = the account/app-password; for IMAP set emailServer (required) + emailPort (993) + emailSmtpPort (465) + emailTls (true), plus emailSmtpServer when the SMTP host differs (e.g. smtp.gmail.com); for Proton add emailMailboxPassword if two-password mode. EMAIL host is optional (the tunnel-ingress/bastion SPA/knock guards), not the mail server. OPENAI (OpenAI-compatible endpoint, e.g. llama-server or CLIProxyAPI): host = server IP/hostname (a full http:// URL also works), port = TCP port (default 80), optional password arg = the API key (sent as a Bearer token; omit for keyless servers), openaiPathPrefix = optional path inserted before /v1 (e.g. \"/api\"). Connect verifies via GET /v1/models; chat via the chat screen or openai_chat. BTSERIAL (Bluetooth-serial console, #406): host = the paired device's Bluetooth MAC (from list_bluetooth_devices); no other fields. The device must already be paired in Android Settings. BLESERIAL (Bluetooth-LE-serial console — Nordic UART Service / HM-10): host = the BLE peripheral's MAC; no other fields. It needn't be paired — scan-and-pick in the editor; the GATT service/characteristics are auto-detected (NUS 6E400001…, then HM-10 FFE0/FFE1). USBSERIAL (USB-serial console, #408 — Arduino / Duet3D G-code / ESP32 / USB-TTL): host = the device's vendorId:productId hex, e.g. 1a86:7523, from list_usb_devices; usbBaudRate = baud (default 115200); usbDataBits/usbParity/usbStopBits/usbFlowControl set the rest of the line format (default 8N1, no flow control). Plug the adapter in first; connect_profile pops the Android USB-permission prompt. Chipsets: CDC-ACM, CH34x, FTDI, CP21xx, Prolific. RETICULUM: destinationHash (required, 32 hex chars) is the address; reticulumHost + reticulumPort are only how this phone reaches the mesh, defaulting to 127.0.0.1:37428 which is a Sideband or Columba shared instance on this device — any other host is a TCP gateway. reticulumNetworkName + reticulumPassphrase set IFAC on an authenticated gateway. The new profile id is returned for follow-up calls (set_profile_routing, connect_profile). For rclone / local create the profile in the UI — those need an OAuth flow the agent can't drive.",
+            description = "Create a saved connection profile. Supports connectionType=SSH, SMB, SPICE, EMAIL, RETICULUM. SSH-family fields: username (required), password (optional, stored), keyId (optional — references list_ssh_keys), ignoreSavedKeys (force password-only auth, never offer saved keys), useMosh (turn an SSH profile into a Mosh profile), sessionManager (optional: TMUX | ZELLIJ | SCREEN | BYOBU | HERDR | PSMUX — attach through that multiplexer; omit for a plain shell), remoteCommand (run a command via an SSH exec request instead of a login shell — e.g. 'tmux new -A -s work' to attach-or-create that session before shell startup files run) + requestPty (PTY for it, default true), bindAddress (local address the outgoing SSH socket binds to, ssh -b — direct connections only). SMB: smbShare (required), username + password, smbDomain. SPICE: spicePassword (optional ticket — no username/domain), spicePort (default 5900), and spiceSshForward + spiceSshProfileId to tunnel SPICE through a saved SSH profile. EMAIL: emailProvider (\"imap\" default, or \"proton\"); username = the email address; password = the account/app-password; for IMAP set emailServer (required) + emailPort (993) + emailSmtpPort (465) + emailTls (true), plus emailSmtpServer when the SMTP host differs (e.g. smtp.gmail.com); for Proton add emailMailboxPassword if two-password mode. EMAIL host is optional (the tunnel-ingress/bastion SPA/knock guards), not the mail server. OPENAI (OpenAI-compatible endpoint, e.g. llama-server or CLIProxyAPI): host = server IP/hostname (a full http:// URL also works), port = TCP port (default 80), optional password arg = the API key (sent as a Bearer token; omit for keyless servers), openaiPathPrefix = optional path inserted before /v1 (e.g. \"/api\"). Connect verifies via GET /v1/models; chat via the chat screen or openai_chat. BTSERIAL (Bluetooth-serial console, #406): host = the paired device's Bluetooth MAC (from list_bluetooth_devices); no other fields. The device must already be paired in Android Settings. BLESERIAL (Bluetooth-LE-serial console — Nordic UART Service / HM-10): host = the BLE peripheral's MAC; no other fields. It needn't be paired — scan-and-pick in the editor; the GATT service/characteristics are auto-detected (NUS 6E400001…, then HM-10 FFE0/FFE1). USBSERIAL (USB-serial console, #408 — Arduino / Duet3D G-code / ESP32 / USB-TTL): host = the device's vendorId:productId hex, e.g. 1a86:7523, from list_usb_devices; usbBaudRate = baud (default 115200); usbDataBits/usbParity/usbStopBits/usbFlowControl set the rest of the line format (default 8N1, no flow control). Plug the adapter in first; connect_profile pops the Android USB-permission prompt. Chipsets: CDC-ACM, CH34x, FTDI, CP21xx, Prolific. RETICULUM: destinationHash (required, 32 hex chars) is the address; reticulumHost + reticulumPort are only how this phone reaches the mesh, defaulting to 127.0.0.1:37428 which is a Sideband or Columba shared instance on this device — any other host is a TCP gateway. reticulumNetworkName + reticulumPassphrase set IFAC on an authenticated gateway. The new profile id is returned for follow-up calls (set_profile_routing, connect_profile). For rclone / local create the profile in the UI — those need an OAuth flow the agent can't drive.",
             inputSchema = objectSchema {
                 string("label", "User-facing label.", required = true)
-                string("connectionType", "SSH | SMB | RDP | SPICE | EMAIL | BTSERIAL | BLESERIAL | USBSERIAL | RETICULUM | GUEST.", required = true)
+                string("connectionType", "SSH | SMB | SPICE | EMAIL | BTSERIAL | BLESERIAL | USBSERIAL | RETICULUM | GUEST.", required = true)
                 string("host", "Target hostname or IP. For EMAIL this is the optional tunnel ingress/bastion (SPA/knock target), NOT the mail server — leave blank for a direct IMAP connection.", required = true)
-                integer("port", "TCP port. Defaults: SSH 22, SMB 445, RDP 3389, SPICE 5900. Type-specific rdpPort/spicePort override this.")
+                integer("port", "TCP port. Defaults: SSH 22, SMB 445, SPICE 5900. Type-specific spicePort overrides this.")
                 string("username", "Username for SSH/SMB.")
                 string("password", "Password (stored). Optional for SSH if a key is used; some SMB setups allow guest.")
                 string("smbShare", "Share name (SMB). Required when connectionType=SMB.")
                 string("smbDomain", "AD/workgroup domain (SMB). Optional.")
-                string("rdpUsername", "Windows username (RDP). Required when connectionType=RDP.")
-                string("rdpPassword", "Windows password (RDP).")
-                string("rdpDomain", "AD domain (RDP). Optional.")
-                integer("rdpPort", "RDP only: TCP port (default 3389). Overrides the generic `port`.")
                 string("spicePassword", "SPICE only: ticket/password (stored). Optional — omit for an unticketed server.")
                 integer("spicePort", "SPICE only: TCP port (default 5900). Overrides the generic `port`.")
                 boolean("spiceSshForward", "SPICE only: tunnel through a saved SSH profile (set spiceSshProfileId). The SPICE target is reached at 127.0.0.1:<port> from the SSH server. Default false.")
@@ -1671,14 +1667,14 @@ internal class McpTools(
         ) { args -> createConnection(args) },
 
         "update_connection" to ToolHandler(
-            description = "Edit fields on an existing connection profile (load → change → save). Pass profileId (required) plus only the fields you want to change — anything omitted is left as-is. Common SSH-family fields: label, host, port, username, password (stored, mapped to the profile's transport), keyId, ignoreSavedKeys (force password-only auth), useMosh, forwardAgent, remoteCommand (SSH exec instead of a login shell; empty string clears) + requestPty, bindAddress (ssh -b; direct connections only, empty string clears). Desktop tunnels: rdpSshForward + rdpSshProfileId, spiceSshForward + spiceSshProfileId, smbSshForward + smbSshProfileId. USB/IP auto-forward: usbForwardVidPid (export a phone-attached USB device to this host on every connect). Passwords are stored encrypted and never echoed back. OPENAI: password maps to the API key (empty string clears). For routing/proxy use set_profile_routing; for port-knock/SPA use set_port_knock/set_spa. Returns the updated profile (secrets redacted).",
+            description = "Edit fields on an existing connection profile (load → change → save). Pass profileId (required) plus only the fields you want to change — anything omitted is left as-is. Common SSH-family fields: label, host, port, username, password (stored, mapped to the profile's transport), keyId, ignoreSavedKeys (force password-only auth), useMosh, forwardAgent, remoteCommand (SSH exec instead of a login shell; empty string clears) + requestPty, bindAddress (ssh -b; direct connections only, empty string clears). Desktop tunnels: spiceSshForward + spiceSshProfileId, smbSshForward + smbSshProfileId. USB/IP auto-forward: usbForwardVidPid (export a phone-attached USB device to this host on every connect). Passwords are stored encrypted and never echoed back. OPENAI: password maps to the API key (empty string clears). For routing/proxy use set_profile_routing; for port-knock/SPA use set_port_knock/set_spa. Returns the updated profile (secrets redacted).",
             inputSchema = objectSchema {
                 string("profileId", "Profile id from list_connections.", required = true)
                 string("label", "New user-facing label.")
                 string("host", "New hostname or IP.")
                 integer("port", "New TCP port.")
                 string("username", "New username (SSH/SMB).")
-                string("password", "New password (stored encrypted). Mapped to the profile's transport (SSH/RDP/SMB). Pass an empty string to clear it.")
+                string("password", "New password (stored encrypted). Mapped to the profile's transport (SSH/SMB/SPICE). Pass an empty string to clear it.")
                 string("keyId", "SSH only: id of a saved key (list_ssh_keys). Empty string clears.")
                 string("sshOptions", "SSH only: replace the profile's ssh_config-style option lines (e.g. 'HavenSshEngine sshlib' opts this profile into the EXPERIMENTAL sshlib engine for the whole connection — terminal, exec, SFTP and tunnels; it refuses jump/proxy, FIDO2, OpenSSH certs and MFA chains). Empty string clears. Ignored on non-SSH profiles (USB-serial packs its line format here).")
                 string("remoteCommand", "SSH only (#436): run this command via an SSH exec request instead of a login shell (e.g. 'tmux new -A -s work'). Empty string clears (back to the normal shell).")
@@ -1690,8 +1686,6 @@ internal class McpTools(
                 boolean("forwardAgent", "SSH only: enable SSH agent forwarding. Keys with a stored passphrase (or none) are exposed to the remote's ssh-agent socket (#377).")
                 string("openaiPathPrefix", "OPENAI only: path prefix inserted before /v1 (e.g. \"/api\"). Empty string clears.")
                 string("protocol", "OPENAI only: wire protocol — OPENAI (default), OLLAMA, ANTHROPIC, or GEMINI. Empty string clears (back to OPENAI).")
-                boolean("rdpSshForward", "RDP only: tunnel through a saved SSH profile (set rdpSshProfileId).")
-                string("rdpSshProfileId", "RDP only: SSH profile id to tunnel through. Empty string clears.")
                 boolean("smbSshForward", "SMB only: tunnel through a saved SSH profile (set smbSshProfileId).")
                 string("smbSshProfileId", "SMB only: SSH profile id to tunnel through. Empty string clears.")
                 boolean("spiceSshForward", "SPICE only: tunnel through a saved SSH profile (set spiceSshProfileId).")
@@ -2170,7 +2164,6 @@ internal class McpTools(
             // every build, but the terminal flavour's is built without the
             // rclone package (#510), so its presence proves nothing.
             if (sh.haven.rclone.bridge.RcloneBridge.available) put("rclone")
-            if (native.rdp) put("rdp")
             if (native.spice) put("spice")
             if (sh.haven.core.wayland.WaylandBridge.available) put("wayland")
             if (native.ffmpeg) put("ffmpeg")
@@ -2289,9 +2282,6 @@ internal class McpTools(
             put("sshEngine", sh.haven.core.ssh.sshEngineFromOptionsText(p.sshOptions).name.lowercase())
             if (!p.bindAddress.isNullOrBlank()) put("bindAddress", p.bindAddress)
         }
-        // RDP
-        if (!p.rdpUsername.isNullOrEmpty()) put("rdpUsername", p.rdpUsername)
-        if (!p.rdpDomain.isNullOrEmpty()) put("rdpDomain", p.rdpDomain)
         // SMB
         if (!p.smbShare.isNullOrEmpty()) put("smbShare", p.smbShare)
         // OPENAI — baseUrl is the dial target (host[+port] + prefix); the key
@@ -6227,7 +6217,7 @@ internal class McpTools(
         if (args.has("keyId") && !newKeyId.isNullOrBlank() && sshKeyRepository.getById(newKeyId) == null) {
             throw IllegalArgumentException("key $newKeyId not found")
         }
-        for (refKey in listOf("rdpSshProfileId", "smbSshProfileId", "spiceSshProfileId")) {
+        for (refKey in listOf("smbSshProfileId", "spiceSshProfileId")) {
             if (args.has(refKey)) {
                 val ref = args.optString(refKey).ifBlank { null }
                 if (ref != null && connectionRepository.getById(ref) == null) {
@@ -6253,7 +6243,7 @@ internal class McpTools(
         }
 
         // `port` maps to the base port AND the transport-specific port column —
-        // RDP/SMB/SPICE dial rdpPort/smbPort/spicePort, not the base port (mirrors
+        // SMB/SPICE dial smbPort/spicePort, not the base port (mirrors
         // create_connection, which sets both).
         val portChanged = args.has("port")
         val newPort = if (portChanged) args.optInt("port", existing.port) else existing.port
@@ -6262,12 +6252,10 @@ internal class McpTools(
             label = if (args.has("label")) args.optString("label").ifBlank { existing.label } else existing.label,
             host = if (args.has("host")) args.optString("host").ifBlank { existing.host } else existing.host,
             port = newPort,
-            rdpPort = if (portChanged && existing.connectionType == "RDP") newPort else existing.rdpPort,
             smbPort = if (portChanged && existing.connectionType == "SMB") newPort else existing.smbPort,
             spicePort = if (portChanged && existing.connectionType == "SPICE") newPort else existing.spicePort,
             username = if (args.has("username")) args.optString("username") else existing.username,
             sshPassword = if (existing.connectionType == "SSH") newPassword(existing.sshPassword) else existing.sshPassword,
-            rdpPassword = if (existing.connectionType == "RDP") newPassword(existing.rdpPassword) else existing.rdpPassword,
             smbPassword = if (existing.connectionType == "SMB") newPassword(existing.smbPassword) else existing.smbPassword,
             spicePassword = if (existing.connectionType == "SPICE") newPassword(existing.spicePassword) else existing.spicePassword,
             openaiApiKey = if (existing.connectionType == "OPENAI") newPassword(existing.openaiApiKey) else existing.openaiApiKey,
@@ -6291,8 +6279,6 @@ internal class McpTools(
             ignoreSavedKeys = bool("ignoreSavedKeys", existing.ignoreSavedKeys),
             useMosh = bool("useMosh", existing.useMosh),
             forwardAgent = bool("forwardAgent", existing.forwardAgent),
-            rdpSshForward = bool("rdpSshForward", existing.rdpSshForward),
-            rdpSshProfileId = str("rdpSshProfileId", existing.rdpSshProfileId),
             smbSshForward = bool("smbSshForward", existing.smbSshForward),
             smbSshProfileId = str("smbSshProfileId", existing.smbSshProfileId),
             spiceSshForward = bool("spiceSshForward", existing.spiceSshForward),
@@ -6313,8 +6299,8 @@ internal class McpTools(
         val type = args.optString("connectionType").uppercase().ifBlank {
             throw IllegalArgumentException("connectionType required")
         }
-        if (type !in setOf("SSH", "SMB", "RDP", "SPICE", "EMAIL", "OPENAI", "BTSERIAL", "BLESERIAL", "USBSERIAL", "RETICULUM", "GUEST")) {
-            throw IllegalArgumentException("connectionType must be SSH, SMB, RDP, SPICE, EMAIL, OPENAI, BTSERIAL, BLESERIAL, USBSERIAL, or RETICULUM (use the UI for LOCAL / RCLONE / GUEST)")
+        if (type !in setOf("SSH", "SMB", "SPICE", "EMAIL", "OPENAI", "BTSERIAL", "BLESERIAL", "USBSERIAL", "RETICULUM", "GUEST")) {
+            throw IllegalArgumentException("connectionType must be SSH, SMB, SPICE, EMAIL, OPENAI, BTSERIAL, BLESERIAL, USBSERIAL, or RETICULUM (use the UI for LOCAL / RCLONE / GUEST)")
         }
         // EMAIL's host is the optional tunnel-ingress/bastion (SPA/knock target),
         // not the mail server — so it may be blank; every other type requires it.
@@ -6338,7 +6324,6 @@ internal class McpTools(
         val defaultPort = when (type) {
             "SSH" -> 22
             "SMB" -> 445
-            "RDP" -> 3389
             "SPICE" -> 5900
             "OPENAI" -> 0
             "EMAIL" -> 0
@@ -6348,12 +6333,11 @@ internal class McpTools(
             "RETICULUM" -> 0 // the mesh port lives in reticulumPort
             else -> 22
         }
-        // Honor the type-specific port field (rdpPort/spicePort) the
+        // Honor the type-specific port field (spicePort) the
         // description advertises, preferring it over the generic `port`, then
         // the per-type default. Previously only `port` was read, so a caller
         // following the docs and passing spicePort silently got 5900 (#353).
         val typePortArg = when (type) {
-            "RDP" -> "rdpPort"
             "SPICE" -> "spicePort"
             "USBSERIAL" -> "usbBaudRate" // baud lives in `port` (#408)
             else -> null
@@ -6500,26 +6484,6 @@ internal class McpTools(
                     smbShare = share,
                     smbDomain = args.optString("smbDomain").ifBlank { null },
                     smbPassword = password.ifBlank { null },
-                    tunnelConfigId = tunnelConfigId,
-                    portKnockSequence = knockSequence,
-                    portKnockDelayMs = knockDelay,
-                )
-            }
-            "RDP" -> {
-                val rdpUser = args.optString("rdpUsername").ifBlank {
-                    throw IllegalArgumentException("rdpUsername required for RDP")
-                }
-                ConnectionProfile(
-                    label = label,
-                    host = host,
-                    port = port,
-                    username = rdpUser,
-                    connectionType = "RDP",
-                    rdpPort = port,
-                    rdpUsername = rdpUser,
-                    rdpPassword = args.optString("rdpPassword").ifBlank { null },
-                    rdpDomain = args.optString("rdpDomain").ifBlank { null },
-                    rdpSshForward = false,
                     tunnelConfigId = tunnelConfigId,
                     portKnockSequence = knockSequence,
                     portKnockDelayMs = knockDelay,

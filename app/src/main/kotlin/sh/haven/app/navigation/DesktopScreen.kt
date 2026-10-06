@@ -207,44 +207,6 @@ fun DesktopScreen(
             if (tab != null) {
                 Box(modifier = Modifier.weight(1f).fillMaxWidth()) {
                     when (tab) {
-                        is DesktopTab.Rdp -> RdpSessionContent(
-                            connected = tab.connected,
-                            frame = tab.frame,
-                            frameSeq = tab.frameSeq,
-                            error = tab.error,
-                            toolbarLayout = toolbarLayout,
-                            chipAnchor = rdpChipAnchor,
-                            onChipAnchorChange = onRdpChipAnchorChange,
-                            onTap = { x, y -> desktopViewModel.sendClick(x, y) },
-                            onMiddleClick = { x, y -> desktopViewModel.sendClick(x, y, button = 2) },
-                            onDragStart = { x, y ->
-                                desktopViewModel.sendPointer(x, y)
-                                desktopViewModel.pressButton(1)
-                            },
-                            onDrag = { x, y -> desktopViewModel.sendPointer(x, y) },
-                            onDragEnd = { desktopViewModel.releaseButton(1) },
-                            onScrollUp = { desktopViewModel.scrollUp() },
-                            onScrollDown = { desktopViewModel.scrollDown() },
-                            onTypeChar = { ch ->
-                                sh.haven.feature.rdp.typeRdpChar(
-                                    ch = ch,
-                                    sendKey = { sc, pressed -> desktopViewModel.sendRdpKey(sc, pressed) },
-                                    sendUnicode = { codepoint -> desktopViewModel.typeRdpUnicode(codepoint) },
-                                )
-                            },
-                            onKeyDown = { scancode -> desktopViewModel.sendRdpKey(scancode, true) },
-                            onKeyUp = { scancode -> desktopViewModel.sendRdpKey(scancode, false) },
-                            onDisconnect = { desktopViewModel.closeTab(tab.id) },
-                            onFullscreenChanged = onFullscreenChanged,
-                            cursor = tab.cursor,
-                            pointerPos = tab.pointerPos,
-                            inputMode = inputMode,
-                            onSetInputMode = onSetInputMode,
-                            currentOrientation = desktopOrientation,
-                            onCycleOrientation = { desktopViewModel.cycleDesktopOrientation() },
-                            onRetry = { desktopViewModel.retryTab(tab.id) },
-                        )
-
                         // SPICE reuses the RDP content renderer: a bitmap canvas
                         // + PC set-1 scancode keyboard, which SPICE also uses.
                         is DesktopTab.Spice -> RdpSessionContent(
@@ -282,8 +244,7 @@ fun DesktopScreen(
                             onCycleOrientation = { desktopViewModel.cycleDesktopOrientation() },
                             onRetry = { desktopViewModel.retryTab(tab.id) },
                             // 2-finger pinch = viewport zoom, drag = pan/scroll
-                            // (toolbar toggle), tap = middle click (uniform with
-                            // RDP/VNC, #286).
+                            // (toolbar toggle), tap = middle click (#286).
                             onMiddleClick = { x, y -> desktopViewModel.sendClick(x, y, button = 2) },
                         )
 

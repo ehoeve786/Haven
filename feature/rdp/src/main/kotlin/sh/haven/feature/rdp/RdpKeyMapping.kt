@@ -24,7 +24,7 @@ fun typeRdpChar(
     ch: Char,
     sendKey: (Int, Boolean) -> Unit,
     sendUnicode: (Int) -> Unit,
-    layoutKlid: UInt = sh.haven.core.rdp.keyboardLayoutKlid(),
+    layoutKlid: UInt = keyboardLayoutKlid(),
 ) {
     // #504 follow-up: base-remapped layouts (QWERTZ, AZERTY, UK). The KLID we
     // announce makes the server interpret scancodes through THAT layout, so
