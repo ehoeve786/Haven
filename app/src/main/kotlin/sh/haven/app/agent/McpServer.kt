@@ -276,9 +276,15 @@ class McpServer @Inject constructor(
      * minted by an authenticated `initialize` in this process. Set from the
      * bearer/session resolution on every authenticated request, so grant
      * keys are backed by a real credential.
+     *
+     * Per-thread, reset per request: each connection runs on its own worker,
+     * and a shared field let one client's request be evaluated under another
+     * client's name (and its grants) when the two raced.
      */
-    @Volatile
-    private var lastClientHint: String? = null
+    private val clientHintTL = ThreadLocal<String?>()
+    private var lastClientHint: String?
+        get() = clientHintTL.get()
+        set(v) = clientHintTL.set(v)
 
     /**
      * In-memory mirror of [UserPreferencesRepository.mcpClientTokenHashes]
@@ -1230,6 +1236,7 @@ class McpServer @Inject constructor(
         // pairing prompt/audit, never authentication (#mcp-backbone Stage 3).
         val authClient: String? = bearerToken?.let { resolveBearer(it) }
         val sessionClient: String? = requestSessionId?.let { sessions[it]?.clientName }
+        lastClientHint = null
         when {
             authClient != null -> lastClientHint = authClient
             sessionClient != null -> lastClientHint = sessionClient
