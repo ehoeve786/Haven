@@ -93,5 +93,7 @@ class HttpFramingTest {
         assertFalse(isLoopbackOrigin("https://evil.example"))
         assertFalse(isLoopbackOrigin("http://192.168.1.5:8730"))
         assertFalse(isLoopbackOrigin("null"))
+        assertFalse(isLoopbackOrigin("http://127.evil.example"))
+        assertFalse(isLoopbackOrigin("http://127.0.0.1.nip.io:8730"))
     }
 }

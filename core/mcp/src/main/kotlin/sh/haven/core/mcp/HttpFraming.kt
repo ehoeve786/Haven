@@ -130,5 +130,6 @@ fun isLoopbackOrigin(origin: String): Boolean {
     } else {
         afterScheme.substringBefore(':')
     }
-    return host == "localhost" || host == "::1" || host.startsWith("127.")
+    // Exact 127.x.y.z match: a prefix check let `http://127.evil.example` through.
+    return host == "localhost" || host == "::1" || Regex("""127(\.\d{1,3}){3}""").matches(host)
 }
