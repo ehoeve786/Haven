@@ -210,9 +210,6 @@ fun ConnectionEditDialog(
         seed?.isBtSerial == true -> "BTSERIAL"
         seed?.isBleSerial == true -> "BLESERIAL"
         seed?.isUsbSerial == true -> "USBSERIAL"
-        seed?.isVnc == true -> "VNC"
-        seed?.isRdp == true -> "RDP"
-        seed?.isSpice == true -> "SPICE"
         seed?.isSmb == true -> "SMB"
         seed?.isRclone == true -> "RCLONE"
         seed?.isEmail == true -> "EMAIL"
@@ -231,9 +228,6 @@ fun ConnectionEditDialog(
         "BLESERIAL" -> "BLESERIAL"
         "USBSERIAL" -> "USBSERIAL"
         "RETICULUM" -> "RETICULUM"
-        "VNC" -> "VNC"
-        "RDP" -> "RDP"
-        "SPICE" -> "SPICE"
         "SMB" -> "SMB"
         "RCLONE" -> "RCLONE"
         "EMAIL" -> "EMAIL"
@@ -264,52 +258,17 @@ fun ConnectionEditDialog(
     var port by rememberSaveable {
         mutableStateOf(
             when {
-                seed?.isVnc == true -> (seed.vncPort ?: 5900).toString()
-                seed?.isRdp == true -> seed.rdpPort.toString()
-                seed?.isSpice == true -> (seed.spicePort ?: 5900).toString()
                 seed?.isSmb == true -> seed.smbPort.toString()
                 else -> seed?.port?.toString() ?: "22"
             }
         )
     }
     var username by rememberSaveable { mutableStateOf(seed?.username ?: "") }
-    var rdpUsername by rememberSaveable { mutableStateOf(existing?.rdpUsername ?: "") }
-    var rdpPassword by rememberSaveable { mutableStateOf(existing?.rdpPassword ?: "") }
-    var rdpDomain by rememberSaveable { mutableStateOf(existing?.rdpDomain ?: "") }
-    var rdpSshForward by rememberSaveable { mutableStateOf(existing?.rdpSshForward ?: false) }
-    var rdpSshProfileId by rememberSaveable { mutableStateOf(existing?.rdpSshProfileId) }
-    var rdpUseNla by rememberSaveable { mutableStateOf(existing?.rdpUseNla ?: true) }
-    var rdpColorDepth by rememberSaveable { mutableStateOf(existing?.rdpColorDepth ?: 32) }
-    var spicePassword by rememberSaveable { mutableStateOf(existing?.spicePassword ?: "") }
-    var spiceSshForward by rememberSaveable {
-        mutableStateOf(existing?.let { strictTunnelInitialEnabled(it.connectionType, "SPICE", it.spiceSshForward, it.spiceSshProfileId) } ?: false)
-    }
-    var spiceSshProfileId by rememberSaveable { mutableStateOf(existing?.spiceSshProfileId) }
     var smbShare by rememberSaveable { mutableStateOf(existing?.smbShare ?: "") }
     var smbPassword by rememberSaveable { mutableStateOf(existing?.smbPassword ?: "") }
     var smbDomain by rememberSaveable { mutableStateOf(existing?.smbDomain ?: "") }
     var smbSshForward by rememberSaveable { mutableStateOf(existing?.smbSshForward ?: false) }
     var smbSshProfileId by rememberSaveable { mutableStateOf(existing?.smbSshProfileId) }
-    var vncUsername by rememberSaveable { mutableStateOf(existing?.vncUsername ?: "") }
-    var vncPassword by rememberSaveable { mutableStateOf(existing?.vncPassword ?: "") }
-    var vncSshForward by rememberSaveable {
-        mutableStateOf(existing?.let { strictTunnelInitialEnabled(it.connectionType, "VNC", it.vncSshForward, it.vncSshProfileId) } ?: false)
-    }
-    var vncSshProfileId by rememberSaveable { mutableStateOf(existing?.vncSshProfileId) }
-    var vncColorDepth by rememberSaveable { mutableStateOf(existing?.vncColorDepth ?: "BPP_24_TRUE") }
-    // Saved VNC settings on an SSH profile — editable via the SSH section when
-    // the user has ticked "Save for this connection" in the terminal's VNC
-    // quick-dialog. `null` means no VNC settings are stored on this profile,
-    // so the section stays hidden (#104).
-    var vncSavedPort by rememberSaveable {
-        mutableStateOf(existing?.vncPort?.toString() ?: "")
-    }
-    var vncSavedSshForward by rememberSaveable {
-        mutableStateOf(existing?.vncSshForward ?: true)
-    }
-    var vncSettingsStored by rememberSaveable {
-        mutableStateOf(existing?.connectionType == "SSH" && existing?.vncPort != null)
-    }
     var destinationHash by rememberSaveable { mutableStateOf(existing?.destinationHash ?: "") }
     var jumpProfileId by rememberSaveable { mutableStateOf(existing?.jumpProfileId) }
     var proxyType by rememberSaveable { mutableStateOf(existing?.proxyType) }
@@ -506,7 +465,6 @@ fun ConnectionEditDialog(
     var secTerminalExpanded by rememberSaveable { mutableStateOf(false) }
     var secAuthExpanded by rememberSaveable { mutableStateOf(false) }
     var secReliabilityExpanded by rememberSaveable { mutableStateOf(false) }
-    var secEmbeddedVncExpanded by rememberSaveable { mutableStateOf(false) }
     var portKnockDelayMs by rememberSaveable {
         mutableStateOf((existing?.portKnockDelayMs ?: 100).toString())
     }
@@ -1103,16 +1061,13 @@ fun ConnectionEditDialog(
                     "BTSERIAL" to "Bluetooth Serial",
                     "BLESERIAL" to "Bluetooth LE Serial",
                     "USBSERIAL" to "USB Serial",
-                    "VNC" to "VNC (Desktop)",
-                    "RDP" to "RDP (Desktop)",
-                    "SPICE" to "SPICE (Desktop)",
                     "SMB" to "SMB (File Share)",
                     "RCLONE" to "Cloud Storage (rclone)",
                     "EMAIL" to "Email (IMAP / Proton)",
                     "OPENAI" to "AI Endpoint (OpenAI-compatible)",
                     "RETICULUM" to "Reticulum",
                 )
-                // #510: the terminal build ships no RDP or SPICE client, so
+                // #510: the terminal build ships no rclone or UML guest, so
                 // offering them here would only produce a profile that fails
                 // at connect with "native library failed to load".
                 //
@@ -1120,20 +1075,17 @@ fun ConnectionEditDialog(
                 // missing type still opens and still shows its own transport,
                 // because the label lookup below reads the unfiltered list —
                 // filtering that too would throw NoSuchElementException on a
-                // profile the user already has. VNC stays: its client is
-                // Kotlin and ships in every build.
+                // profile the user already has.
                 val dialogContext = LocalContext.current
                 val transportOptions = remember(dialogContext) {
                     val native = NativeFeatures(dialogContext)
                     TransportAvailability.offered(
                         allTransportOptions,
-                        rdp = native.rdp,
-                        spice = native.spice,
                         // Probed, not looked for: libgojni.so is present in
                         // every build, but the terminal flavour's copy is
                         // built without rclone.
                         rclone = sh.haven.rclone.bridge.RcloneBridge.available,
-                        // Same missing-file gate as rdp/spice: the terminal
+                        // Missing-file gate: the terminal
                         // flavour drops the UML libraries, F-Droid skips the
                         // fetch.
                         uml = native.uml,
@@ -1170,15 +1122,12 @@ fun ConnectionEditDialog(
                                     transportExpanded = false
                                     // Update port to transport default when switching
                                     val defaultPort = when (value) {
-                                        "VNC" -> "5900"
-                                        "RDP" -> "3389"
-                                        "SPICE" -> "5900"
                                         "SMB" -> "445"
                                         "OPENAI" -> "80"
                                         "ET" -> "22"
                                         else -> "22"
                                     }
-                                    if (port == "22" || port == "5900" || port == "3389" || port == "445" || port == "2022") {
+                                    if (port == "22" || port == "5900" || port == "445" || port == "2022") {
                                         port = defaultPort
                                     }
                                 },
@@ -1197,9 +1146,6 @@ fun ConnectionEditDialog(
                             when (connectionType) {
                                 "LOCAL" -> "Local Shell"
                                 "GUEST" -> "Linux Guest"
-                                "VNC" -> "My VNC Desktop"
-                                "RDP" -> "My RDP Desktop"
-                                "SPICE" -> "My SPICE Desktop"
                                 "SMB" -> "My File Share"
                                 "RCLONE" -> "My Google Drive"
                                 "EMAIL" -> "My Mail"
@@ -1888,287 +1834,6 @@ fun ConnectionEditDialog(
                             }
                         },
                         onCarrierChange = { aiRouteCarrierId = it },
-                    )
-                } else if (connectionType == "VNC") {
-                    ConnectionSection(stringResource(R.string.connections_section_vnc))
-                    // VNC: tunnel toggle first (it changes what Host means),
-                    // then connection fields.
-                    SshTunnelBlock(
-                        enabled = vncSshForward,
-                        carrierId = vncSshProfileId,
-                        sshProfiles = sshProfiles,
-                        onEnabledChange = { newValue ->
-                            vncSshForward = newValue
-                            if (!newValue) vncSshProfileId = null
-                            host = tunnelHostOnToggle(newValue, host)
-                        },
-                        onCarrierChange = { vncSshProfileId = it },
-                    )
-                    Spacer(Modifier.height(4.dp))
-                    OutlinedTextField(
-                        value = host,
-                        onValueChange = { host = it },
-                        label = { Text(stringResource(if (vncSshForward) R.string.connections_field_vnc_host_via_ssh else R.string.common_host)) },
-                        placeholder = { Text(if (vncSshForward) "127.0.0.1" else "192.168.1.100") },
-                        supportingText = if (vncSshForward) {
-                            {
-                                Text(
-                                    stringResource(R.string.connections_helper_vnc_host_via_ssh),
-                                    style = MaterialTheme.typography.bodySmall,
-                                )
-                            }
-                        } else null,
-                        singleLine = true,
-                        modifier = Modifier.fillMaxWidth(),
-                    )
-                    Spacer(Modifier.height(4.dp))
-                    OutlinedTextField(
-                        value = port,
-                        onValueChange = { port = it.filter { c -> c.isDigit() } },
-                        label = { Text(stringResource(R.string.connections_field_port)) },
-                        placeholder = { Text("5900") },
-                        singleLine = true,
-                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                        modifier = Modifier.width(120.dp),
-                    )
-                    Spacer(Modifier.height(4.dp))
-                    OutlinedTextField(
-                        value = vncUsername,
-                        onValueChange = { vncUsername = it },
-                        label = { Text(stringResource(R.string.connections_field_username_vnc)) },
-                        singleLine = true,
-                        modifier = Modifier.fillMaxWidth(),
-                    )
-                    Spacer(Modifier.height(4.dp))
-                    OutlinedTextField(
-                        value = vncPassword,
-                        onValueChange = { vncPassword = it },
-                        label = { Text(stringResource(R.string.connections_field_password_optional)) },
-                        singleLine = true,
-                        modifier = Modifier.fillMaxWidth(),
-                    )
-                    Spacer(Modifier.height(4.dp))
-                    Text(
-                        stringResource(R.string.connections_helper_vnc_auth),
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
-                    Spacer(Modifier.height(8.dp))
-                    val depthOptions = listOf(
-                        "BPP_24_TRUE" to stringResource(R.string.connections_vnc_depth_24),
-                        "BPP_16_TRUE" to stringResource(R.string.connections_vnc_depth_16),
-                        "BPP_8_INDEXED" to stringResource(R.string.connections_vnc_depth_8),
-                    )
-                    var depthExpanded by remember { mutableStateOf(false) }
-                    val selectedDepth = depthOptions.firstOrNull { it.first == vncColorDepth } ?: depthOptions.first()
-                    ExposedDropdownMenuBox(
-                        expanded = depthExpanded,
-                        onExpandedChange = { depthExpanded = it },
-                    ) {
-                        OutlinedTextField(
-                            value = selectedDepth.second,
-                            onValueChange = {},
-                            readOnly = true,
-                            label = { Text(stringResource(R.string.connections_field_colour_depth)) },
-                            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(depthExpanded) },
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .menuAnchor(MenuAnchorType.PrimaryNotEditable),
-                        )
-                        ExposedDropdownMenu(
-                            expanded = depthExpanded,
-                            onDismissRequest = { depthExpanded = false },
-                        ) {
-                            depthOptions.forEach { (value, label) ->
-                                DropdownMenuItem(
-                                    text = { Text(label) },
-                                    onClick = {
-                                        vncColorDepth = value
-                                        depthExpanded = false
-                                    },
-                                )
-                            }
-                        }
-                    }
-                } else if (connectionType == "RDP") {
-                    ConnectionSection(stringResource(R.string.connections_section_rdp))
-                    // RDP: SSH tunnel toggle first (it changes what Host means),
-                    // then host, port, username, domain.
-                    SshTunnelBlock(
-                        enabled = rdpSshForward,
-                        carrierId = rdpSshProfileId,
-                        sshProfiles = sshProfiles,
-                        onEnabledChange = { newValue ->
-                            rdpSshForward = newValue
-                            if (!newValue) rdpSshProfileId = null
-                            host = tunnelHostOnToggle(newValue, host)
-                        },
-                        onCarrierChange = { rdpSshProfileId = it },
-                    )
-                    Spacer(Modifier.height(4.dp))
-                    OutlinedTextField(
-                        value = host,
-                        onValueChange = { host = it },
-                        label = { Text(stringResource(if (rdpSshForward) R.string.connections_field_rdp_host_via_ssh else R.string.common_host)) },
-                        placeholder = { Text(if (rdpSshForward) "127.0.0.1" else "192.168.1.100") },
-                        supportingText = if (rdpSshForward) {
-                            {
-                                Text(
-                                    stringResource(R.string.connections_helper_rdp_host_via_ssh),
-                                    style = MaterialTheme.typography.bodySmall,
-                                )
-                            }
-                        } else null,
-                        singleLine = true,
-                        modifier = Modifier.fillMaxWidth(),
-                    )
-                    Spacer(Modifier.height(4.dp))
-                    Row(
-                        horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    ) {
-                        OutlinedTextField(
-                            value = rdpUsername,
-                            onValueChange = { rdpUsername = it },
-                            label = { Text(stringResource(R.string.connections_field_username)) },
-                            placeholder = { Text("user") },
-                            singleLine = true,
-                            modifier = Modifier.weight(1f),
-                        )
-                        OutlinedTextField(
-                            value = port,
-                            onValueChange = { port = it.filter { c -> c.isDigit() } },
-                            label = { Text(stringResource(R.string.connections_field_port)) },
-                            singleLine = true,
-                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                            modifier = Modifier.width(80.dp),
-                        )
-                    }
-                    Spacer(Modifier.height(4.dp))
-                    sh.haven.core.ui.PasswordField(
-                        value = rdpPassword,
-                        onValueChange = { rdpPassword = it },
-                        label = stringResource(R.string.connections_field_password_optional),
-                        modifier = Modifier.fillMaxWidth(),
-                        onRevealRequest = onRevealSavedSecret,
-                    )
-                    Spacer(Modifier.height(4.dp))
-                    OutlinedTextField(
-                        value = rdpDomain,
-                        onValueChange = { rdpDomain = it },
-                        label = { Text(stringResource(R.string.connections_field_domain_optional)) },
-                        placeholder = { Text("WORKGROUP") },
-                        singleLine = true,
-                        modifier = Modifier.fillMaxWidth(),
-                    )
-                    Spacer(Modifier.height(4.dp))
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        androidx.compose.material3.Checkbox(
-                            checked = rdpUseNla,
-                            onCheckedChange = { rdpUseNla = it },
-                        )
-                        Text(
-                            stringResource(R.string.connections_toggle_rdp_nla),
-                            style = MaterialTheme.typography.bodyMedium,
-                        )
-                    }
-                    Text(
-                        stringResource(R.string.connections_helper_rdp_nla),
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
-                    Spacer(Modifier.height(8.dp))
-                    // Colour-depth picker. Empirical matrix from #109:
-                    //   16-bit: works on everything (slow on Windows)
-                    //   24-bit: works on xrdp, Windows resets connection
-                    //   32-bit: works on Windows, xrdp blank screen
-                    // No single value works smooth everywhere; default
-                    // is the safe-everywhere 16-bit and users pick
-                    // 24/32 if they know their server type.
-                    val rdpDepthOptions = listOf(
-                        16 to stringResource(R.string.connections_rdp_depth_16),
-                        24 to stringResource(R.string.connections_rdp_depth_24),
-                        32 to stringResource(R.string.connections_rdp_depth_32),
-                    )
-                    var rdpDepthExpanded by remember { mutableStateOf(false) }
-                    val selectedRdpDepth = rdpDepthOptions.firstOrNull { it.first == rdpColorDepth }
-                        ?: rdpDepthOptions.first()
-                    ExposedDropdownMenuBox(
-                        expanded = rdpDepthExpanded,
-                        onExpandedChange = { rdpDepthExpanded = it },
-                    ) {
-                        OutlinedTextField(
-                            value = selectedRdpDepth.second,
-                            onValueChange = {},
-                            readOnly = true,
-                            label = { Text(stringResource(R.string.connections_field_colour_depth)) },
-                            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(rdpDepthExpanded) },
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .menuAnchor(MenuAnchorType.PrimaryNotEditable),
-                        )
-                        ExposedDropdownMenu(
-                            expanded = rdpDepthExpanded,
-                            onDismissRequest = { rdpDepthExpanded = false },
-                        ) {
-                            rdpDepthOptions.forEach { (value, label) ->
-                                DropdownMenuItem(
-                                    text = { Text(label) },
-                                    onClick = {
-                                        rdpColorDepth = value
-                                        rdpDepthExpanded = false
-                                    },
-                                )
-                            }
-                        }
-                    }
-                } else if (connectionType == "SPICE") {
-                    ConnectionSection(stringResource(R.string.connections_section_spice))
-                    // SPICE: tunnel toggle first (changes what Host means), then
-                    // host/port/password. Auth is a single optional ticket — no
-                    // username/domain/colour-depth (the framebuffer is 32bpp).
-                    SshTunnelBlock(
-                        enabled = spiceSshForward,
-                        carrierId = spiceSshProfileId,
-                        sshProfiles = sshProfiles,
-                        onEnabledChange = { newValue ->
-                            spiceSshForward = newValue
-                            if (!newValue) spiceSshProfileId = null
-                            host = tunnelHostOnToggle(newValue, host)
-                        },
-                        onCarrierChange = { spiceSshProfileId = it },
-                    )
-                    Spacer(Modifier.height(4.dp))
-                    OutlinedTextField(
-                        value = host,
-                        onValueChange = { host = it },
-                        label = { Text(stringResource(R.string.common_host)) },
-                        placeholder = { Text(if (spiceSshForward) "127.0.0.1" else "192.168.1.100") },
-                        singleLine = true,
-                        modifier = Modifier.fillMaxWidth(),
-                    )
-                    Spacer(Modifier.height(4.dp))
-                    OutlinedTextField(
-                        value = port,
-                        onValueChange = { port = it.filter { c -> c.isDigit() } },
-                        label = { Text(stringResource(R.string.connections_field_port)) },
-                        placeholder = { Text("5900") },
-                        singleLine = true,
-                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                        modifier = Modifier.width(120.dp),
-                    )
-                    Spacer(Modifier.height(4.dp))
-                    OutlinedTextField(
-                        value = spicePassword,
-                        onValueChange = { spicePassword = it },
-                        label = { Text(stringResource(R.string.connections_field_password_optional)) },
-                        singleLine = true,
-                        modifier = Modifier.fillMaxWidth(),
-                    )
-                    Spacer(Modifier.height(4.dp))
-                    Text(
-                        stringResource(R.string.connections_helper_spice_auth),
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                 } else if (connectionType == "SMB") {
                     ConnectionSection(stringResource(R.string.connections_section_smb))
@@ -3196,11 +2861,6 @@ fun ConnectionEditDialog(
                         description = stringResource(R.string.connections_helper_password_only),
                     )
 
-                    // Saved VNC settings (shown when the SSH profile has had
-                    // VNC configured via the terminal's VNC quick-dialog with
-                    // "Save for this connection" ticked). Without this block
-                    // the only way to edit was to delete and recreate the
-                    // profile — #104.
                     ConnectionSection(stringResource(R.string.connections_section_port_knock))
                     portKnockBody()
                     ConnectionSection(stringResource(R.string.connections_section_spa))
@@ -3278,91 +2938,6 @@ fun ConnectionEditDialog(
                             checked = reconnectOnNetworkChange,
                             onCheckedChange = { reconnectOnNetworkChange = it },
                         )
-                    }
-
-                    if (vncSettingsStored) {
-                        CollapsibleSection(stringResource(R.string.connections_section_embedded_vnc), secEmbeddedVncExpanded, { secEmbeddedVncExpanded = !secEmbeddedVncExpanded }) {
-                        OutlinedTextField(
-                            value = vncSavedPort,
-                            onValueChange = { vncSavedPort = it.filter { c -> c.isDigit() } },
-                            label = { Text(stringResource(R.string.connections_field_vnc_port)) },
-                            placeholder = { Text("5900") },
-                            singleLine = true,
-                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                            modifier = Modifier.width(120.dp),
-                        )
-                        Spacer(Modifier.height(4.dp))
-                        OutlinedTextField(
-                            value = vncUsername,
-                            onValueChange = { vncUsername = it },
-                            label = { Text(stringResource(R.string.connections_field_username_vnc)) },
-                            singleLine = true,
-                            modifier = Modifier.fillMaxWidth(),
-                        )
-                        Spacer(Modifier.height(4.dp))
-                        OutlinedTextField(
-                            value = vncPassword,
-                            onValueChange = { vncPassword = it },
-                            label = { Text(stringResource(R.string.connections_field_vnc_password)) },
-                            singleLine = true,
-                            modifier = Modifier.fillMaxWidth(),
-                        )
-                        Spacer(Modifier.height(4.dp))
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            androidx.compose.material3.Checkbox(
-                                checked = vncSavedSshForward,
-                                onCheckedChange = { vncSavedSshForward = it },
-                            )
-                            Text(stringResource(R.string.connections_field_tunnel_through_ssh))
-                        }
-                        Spacer(Modifier.height(8.dp))
-                        // Colour-depth picker — same shape as the dedicated
-                        // VNC-profile path. Was missing here, so users with
-                        // an SSH profile that stored VNC settings via the
-                        // terminal's quick dialog had no way to switch to
-                        // 256-colour mode (#107 follow-up from Nesos-ita).
-                        val savedDepthOptions = listOf(
-                            "BPP_24_TRUE" to stringResource(R.string.connections_vnc_depth_24),
-                            "BPP_16_TRUE" to stringResource(R.string.connections_vnc_depth_16),
-                            "BPP_8_INDEXED" to stringResource(R.string.connections_vnc_depth_8),
-                        )
-                        var savedDepthExpanded by remember { mutableStateOf(false) }
-                        val selectedSavedDepth = savedDepthOptions.firstOrNull { it.first == vncColorDepth }
-                            ?: savedDepthOptions.first()
-                        ExposedDropdownMenuBox(
-                            expanded = savedDepthExpanded,
-                            onExpandedChange = { savedDepthExpanded = it },
-                        ) {
-                            OutlinedTextField(
-                                value = selectedSavedDepth.second,
-                                onValueChange = {},
-                                readOnly = true,
-                                label = { Text(stringResource(R.string.connections_field_vnc_color_depth)) },
-                                trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(savedDepthExpanded) },
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .menuAnchor(MenuAnchorType.PrimaryNotEditable),
-                            )
-                            ExposedDropdownMenu(
-                                expanded = savedDepthExpanded,
-                                onDismissRequest = { savedDepthExpanded = false },
-                            ) {
-                                savedDepthOptions.forEach { (value, label) ->
-                                    DropdownMenuItem(
-                                        text = { Text(label) },
-                                        onClick = {
-                                            vncColorDepth = value
-                                            savedDepthExpanded = false
-                                        },
-                                    )
-                                }
-                            }
-                        }
-                        Spacer(Modifier.height(4.dp))
-                        TextButton(onClick = { vncSettingsStored = false }) {
-                            Text(stringResource(R.string.connections_action_clear_vnc))
-                        }
-                        }
                     }
 
                 } else {
@@ -3552,11 +3127,11 @@ fun ConnectionEditDialog(
                 // Port knocking. Visible for any profile with a remote
                 // TCP host — skipped for LOCAL (no host), RCLONE (its own
                 // protocol), and RETICULUM (mesh, not TCP).
-                if (connectionType in setOf("VNC", "RDP", "SPICE", "SMB", "EMAIL", "OPENAI")) {
+                if (connectionType in setOf("SMB", "EMAIL", "OPENAI")) {
                     ConnectionSection(stringResource(R.string.connections_section_routing))
                     routingBody()
                 }
-                if (connectionType in setOf("VNC", "RDP", "SPICE", "SMB", "EMAIL", "OPENAI")) {
+                if (connectionType in setOf("SMB", "EMAIL", "OPENAI")) {
                     ConnectionSection(stringResource(R.string.connections_section_port_knock))
                     portKnockBody()
                     ConnectionSection(stringResource(R.string.connections_section_spa))
@@ -3565,7 +3140,7 @@ fun ConnectionEditDialog(
 
                 // Route through — shared picker for SOCKS / HTTP proxy and
                 // WireGuard / Tailscale tunnel. Was SSH-only until #149;
-                // VNC, RDP, and SMB now also honour profile.tunnelConfigId
+                // SMB now also honours profile.tunnelConfigId
                 // so the picker has to surface for them too. LOCAL has no
                 // network; RCLONE and Reticulum manage their own transport.
                 // Mutually exclusive at the UI layer: picking any tunnel
@@ -3587,9 +3162,6 @@ fun ConnectionEditDialog(
                 "BLESERIAL" -> bleDevice.isNotBlank() // a scanned device must be picked
                 "USBSERIAL" -> usbDevice.isNotBlank() && (usbBaud.toIntOrNull() ?: 0) > 0
                 "SSH" -> host.isNotBlank()
-                "VNC" -> host.isNotBlank() && tunnelComplete(vncSshForward, vncSshProfileId)
-                "RDP" -> host.isNotBlank() && rdpUsername.isNotBlank() && tunnelComplete(rdpSshForward, rdpSshProfileId)
-                "SPICE" -> host.isNotBlank() && tunnelComplete(spiceSshForward, spiceSshProfileId)
                 "SMB" -> host.isNotBlank() && smbShare.isNotBlank() && tunnelComplete(smbSshForward, smbSshProfileId)
                 // OAuth providers authenticate on connect (no Configure step); every
                 // other provider must have its remote written via Configure first (#295).
@@ -3692,114 +3264,6 @@ fun ConnectionEditDialog(
                             colorTag = colorTag,
                             groupId = groupId,
                             identityId = identityId,
-                        )
-                    } else if (connectionType == "VNC") {
-                        val vncPortInt = port.toIntOrNull() ?: 5900
-                        (existing ?: ConnectionProfile(
-                            label = label,
-                            host = host,
-                            username = "",
-                        )).copy(
-                            label = label.ifBlank { "VNC: $host" },
-                            host = host,
-                            port = vncPortInt,
-                            username = "",
-                            connectionType = "VNC",
-                            vncPort = vncPortInt,
-                            vncUsername = vncUsername.ifBlank { null },
-                            vncPassword = vncPassword.ifBlank { null },
-                            vncSshForward = vncSshForward,
-                            vncSshProfileId = tunnelCarrierForSave(vncSshForward, vncSshProfileId),
-                            vncColorDepth = vncColorDepth,
-                            colorTag = colorTag,
-                            groupId = groupId,
-                            identityId = identityId,
-                            portKnockSequence = portKnockSequence.ifBlank { null },
-                            portKnockDelayMs = portKnockDelayMs.toIntOrNull()
-                                ?.coerceAtLeast(0) ?: KnockSequence.DEFAULT_DELAY_MS,
-                            spaKey = spaKey.ifBlank { null },
-                            spaKeyBase64 = spaKeyBase64,
-                            spaHmacKey = spaHmacKey.ifBlank { null },
-                            spaHmacKeyBase64 = spaHmacKeyBase64,
-                            spaAccessSpec = spaAccessSpec.ifBlank { null },
-                            spaAllowMode = spaAllowMode,
-                            spaExplicitIp = spaExplicitIp.ifBlank { null },
-                            spaPort = spaPort.toIntOrNull()?.takeIf { it in 1..65535 }
-                                ?: SpaConfig.DEFAULT_SPA_PORT,
-                        ).withRoutingSelection(
-                            proxyType, proxyHost, proxyPort, proxyUser, proxyPassword, tunnelConfigId,
-                        )
-                    } else if (connectionType == "RDP") {
-                        val rdpPortInt = port.toIntOrNull() ?: 3389
-                        (existing ?: ConnectionProfile(
-                            label = label,
-                            host = host,
-                            username = rdpUsername,
-                        )).copy(
-                            label = label.ifBlank { "RDP: $rdpUsername@$host" },
-                            host = host,
-                            port = rdpPortInt,
-                            username = rdpUsername,
-                            connectionType = "RDP",
-                            rdpPort = rdpPortInt,
-                            rdpUsername = rdpUsername.ifBlank { null },
-                            rdpPassword = rdpPassword.ifBlank { null },
-                            rdpDomain = rdpDomain.ifBlank { null },
-                            rdpSshForward = rdpSshForward,
-                            rdpSshProfileId = tunnelCarrierForSave(rdpSshForward, rdpSshProfileId),
-                            rdpUseNla = rdpUseNla,
-                            rdpColorDepth = rdpColorDepth,
-                            colorTag = colorTag,
-                            groupId = groupId,
-                            identityId = identityId,
-                            portKnockSequence = portKnockSequence.ifBlank { null },
-                            portKnockDelayMs = portKnockDelayMs.toIntOrNull()
-                                ?.coerceAtLeast(0) ?: KnockSequence.DEFAULT_DELAY_MS,
-                            spaKey = spaKey.ifBlank { null },
-                            spaKeyBase64 = spaKeyBase64,
-                            spaHmacKey = spaHmacKey.ifBlank { null },
-                            spaHmacKeyBase64 = spaHmacKeyBase64,
-                            spaAccessSpec = spaAccessSpec.ifBlank { null },
-                            spaAllowMode = spaAllowMode,
-                            spaExplicitIp = spaExplicitIp.ifBlank { null },
-                            spaPort = spaPort.toIntOrNull()?.takeIf { it in 1..65535 }
-                                ?: SpaConfig.DEFAULT_SPA_PORT,
-                        ).withRoutingSelection(
-                            proxyType, proxyHost, proxyPort, proxyUser, proxyPassword, tunnelConfigId,
-                        )
-                    } else if (connectionType == "SPICE") {
-                        val spicePortInt = port.toIntOrNull() ?: 5900
-                        (existing ?: ConnectionProfile(
-                            label = label,
-                            host = host,
-                            username = "",
-                        )).copy(
-                            label = label.ifBlank { "SPICE: $host" },
-                            host = host,
-                            port = spicePortInt,
-                            username = "",
-                            connectionType = "SPICE",
-                            spicePort = spicePortInt,
-                            spicePassword = spicePassword.ifBlank { null },
-                            spiceSshForward = spiceSshForward,
-                            spiceSshProfileId = tunnelCarrierForSave(spiceSshForward, spiceSshProfileId),
-                            colorTag = colorTag,
-                            groupId = groupId,
-                            identityId = identityId,
-                            portKnockSequence = portKnockSequence.ifBlank { null },
-                            portKnockDelayMs = portKnockDelayMs.toIntOrNull()
-                                ?.coerceAtLeast(0) ?: KnockSequence.DEFAULT_DELAY_MS,
-                            spaKey = spaKey.ifBlank { null },
-                            spaKeyBase64 = spaKeyBase64,
-                            spaHmacKey = spaHmacKey.ifBlank { null },
-                            spaHmacKeyBase64 = spaHmacKeyBase64,
-                            spaAccessSpec = spaAccessSpec.ifBlank { null },
-                            spaAllowMode = spaAllowMode,
-                            spaExplicitIp = spaExplicitIp.ifBlank { null },
-                            spaPort = spaPort.toIntOrNull()?.takeIf { it in 1..65535 }
-                                ?: SpaConfig.DEFAULT_SPA_PORT,
-                        ).withRoutingSelection(
-                            proxyType, proxyHost, proxyPort, proxyUser, proxyPassword, tunnelConfigId,
                         )
                     } else if (connectionType == "RCLONE") {
                         (existing ?: ConnectionProfile(
@@ -3960,11 +3424,6 @@ fun ConnectionEditDialog(
                         // dial ignores port; this keeps downstream consumers
                         // that read `profile.port` sensible).
                         val portInt = if (useCloudflareTunnel) 22 else (port.toIntOrNull() ?: 22)
-                        // Saved VNC settings round-trip: if the section was
-                        // visible and the user didn't hit "Clear", persist the
-                        // edited values; if they cleared it, null everything
-                        // out so the quick-dialog reprompts next time.
-                        val vncPortInt = if (vncSettingsStored) vncSavedPort.toIntOrNull() else null
                         (existing ?: ConnectionProfile(
                             label = label,
                             host = host,
@@ -4035,11 +3494,6 @@ fun ConnectionEditDialog(
                             useEternalTerminal = selectedTransport == "ET",
                             etPort = etPortInt,
                             fileTransport = fileTransport,
-                            vncPort = vncPortInt,
-                            vncUsername = if (vncSettingsStored) vncUsername.ifBlank { null } else null,
-                            vncPassword = if (vncSettingsStored) vncPassword.ifBlank { null } else null,
-                            vncSshForward = if (vncSettingsStored) vncSavedSshForward else true,
-                            vncColorDepth = if (vncSettingsStored) vncColorDepth else "BPP_24_TRUE",
                             colorTag = colorTag,
                             groupId = groupId,
                             identityId = identityId,

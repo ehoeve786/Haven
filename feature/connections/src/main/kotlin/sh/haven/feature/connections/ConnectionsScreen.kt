@@ -156,9 +156,6 @@ private val PROFILE_COLORS = listOf(
 fun ConnectionsScreen(
     onNavigateToTerminal: (profileId: String) -> Unit = {},
     onNavigateToNewSession: (profileId: String) -> Unit = {},
-    // VNC/RDP desktop navigation is collected at the nav-host level
-    // (HavenNavHost), not here — so a tab opens regardless of which screen is
-    // composed (fixes Retry / connect_profile reliability, #121).
     onNavigateToSmb: (profileId: String) -> Unit = {},
     onNavigateToRclone: (profileId: String) -> Unit = {},
     onNavigateToEmail: (profileId: String) -> Unit = {},
@@ -252,7 +249,6 @@ fun ConnectionsScreen(
     val showMoshClientMissing by viewModel.showMoshClientMissing.collectAsState()
     val desktopSetupState by viewModel.desktopSetupState.collectAsState()
     val desktopStates by viewModel.desktopStates.collectAsState()
-    val desktopVncPasswordPrompt by viewModel.desktopVncPasswordPrompt.collectAsState()
     val groupLaunchState by viewModel.groupLaunchState.collectAsState()
     val certRenewing by viewModel.certRenewing.collectAsState()
 
@@ -636,42 +632,6 @@ fun ConnectionsScreen(
                 if (existing == null) viewModel.saveConnection(profile)
                 connectingProfile = profile
             },
-            onConnectVnc = { port ->
-                showVmSetup = false
-                val sshPort = localVmStatus.sshPort ?: 8022
-                val existing = connections.find {
-                    it.host in listOf("localhost", "127.0.0.1") && it.port == sshPort && it.username == "droid"
-                }
-                val profile = (existing?.copy(vncPort = port, vncSshForward = false))
-                    ?: ConnectionProfile(
-                        label = linuxVmLabel,
-                        host = "localhost",
-                        port = sshPort,
-                        username = "droid",
-                        vncPort = port,
-                        vncSshForward = false,
-                    )
-                viewModel.saveConnection(profile)
-                connectingProfile = profile
-            },
-            onConnectVncDirect = { ip, port ->
-                showVmSetup = false
-                val existing = connections.find {
-                    it.host == ip && it.username == "droid"
-                }
-                val sshPort = localVmStatus.directSshPort ?: 22
-                val profile = (existing?.copy(vncPort = port, vncSshForward = false))
-                    ?: ConnectionProfile(
-                        label = linuxVmLabel,
-                        host = ip,
-                        port = sshPort,
-                        username = "droid",
-                        vncPort = port,
-                        vncSshForward = false,
-                    )
-                viewModel.saveConnection(profile)
-                connectingProfile = profile
-            },
             onDismiss = { showVmSetup = false },
         )
     }
@@ -979,35 +939,6 @@ fun ConnectionsScreen(
     }
 
     // (DesktopSetupDialog rendering removed in 3c — moved to DesktopManagerScreen.kt.)
-
-    // Desktop VNC password prompt — shown when starting a desktop that requires auth
-    // but no stored password is available
-    desktopVncPasswordPrompt?.let { prompt ->
-        var vncPwd by remember { mutableStateOf("") }
-        AlertDialog(
-            onDismissRequest = { viewModel.dismissDesktopVncPasswordPrompt() },
-            title = { Text(stringResource(R.string.connections_vnc_password_title)) },
-            text = {
-                sh.haven.core.ui.PasswordField(
-                    value = vncPwd,
-                    onValueChange = { vncPwd = it },
-                    label = stringResource(R.string.common_password),
-                    modifier = Modifier.fillMaxWidth(),
-                )
-            },
-            confirmButton = {
-                TextButton(
-                    onClick = { viewModel.onDesktopVncPasswordEntered(vncPwd) },
-                    enabled = vncPwd.isNotBlank(),
-                ) { Text(stringResource(R.string.common_connect)) }
-            },
-            dismissButton = {
-                TextButton(onClick = { viewModel.dismissDesktopVncPasswordPrompt() }) {
-                    Text(stringResource(R.string.common_cancel))
-                }
-            },
-        )
-    }
 
     var showNewGroupDialog by rememberSaveable { mutableStateOf(false) }
 
@@ -1621,6 +1552,8 @@ private fun onTapProfile(
 ) {
     if (profile.isLocal) {
         viewModel.connect(profile, "")
+    } else if (profile.isDesktop) {
+        // VNC/RDP/SPICE were removed; a leftover desktop profile has nothing to open.
     } else if (profileStatus == ProfileStatus.CONNECTED && profile.isEmail) {
         onNavigateToEmail(profile.id)
     } else if (profileStatus == ProfileStatus.CONNECTED && profile.isOpenai) {
@@ -1629,28 +1562,8 @@ private fun onTapProfile(
         onNavigateToRclone(profile.id)
     } else if (profileStatus == ProfileStatus.CONNECTED && profile.isSmb) {
         onNavigateToSmb(profile.id)
-    } else if (profileStatus == ProfileStatus.CONNECTED && (profile.isVnc || profile.isRdp || profile.isSpice)) {
-        // Desktop already open — re-issuing connect navigates to the Desktop
-        // screen and the dedup in addVncSession/addRdpSession switches to the
-        // existing tab instead of reconnecting. (A VNC/RDP-over-SSH profile
-        // now reports CONNECTED via its tunnel dependent, so without this it
-        // would fall into the generic branch below and open a shell instead.)
-        viewModel.connect(profile, if (profile.isRdp) profile.rdpPassword.orEmpty() else "")
     } else if (profileStatus == ProfileStatus.CONNECTED) {
         viewModel.ensureShellForProfile(profile.id)
-    } else if (profile.isVnc) {
-        viewModel.connect(profile, "")
-    } else if (profile.isRdp) {
-        val savedPassword = profile.rdpPassword
-        if (savedPassword != null) {
-            viewModel.connect(profile, savedPassword)
-        } else {
-            showPasswordDialog()
-        }
-    } else if (profile.isSpice) {
-        // SPICE auth is an optional ticket — connect directly (connectSpice
-        // reads the saved ticket; no prompt needed if the server is unticketed).
-        viewModel.connect(profile, "")
     } else if (profile.isSmb) {
         val savedPassword = profile.smbPassword
         if (savedPassword != null) {

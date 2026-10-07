@@ -12,8 +12,7 @@ import sh.haven.core.ssh.TransportSessionManager
  * Before #510, `SessionManagerRegistry` named all twelve managers in its
  * constructor, so forgetting one was a compile error — that is what stopped
  * the disconnect and terminal-input paths silently skipping a transport
- * (#363, #366). Contributing them via `@IntoSet` buys the ability to drop RDP
- * from a build variant, but gives that guarantee up: a missing binding is a
+ * (#363, #366). Contributing them via `@IntoSet` gives that guarantee up: a missing binding is a
  * transport that quietly stops appearing in session lists, keeping the
  * foreground service alive, and accepting input.
  *
@@ -44,24 +43,16 @@ class TransportBindingsTest {
         )
     }
 
-    /**
-     * Bound separately so a terminal-only variant can leave the file out. When
-     * that variant exists this list moves to a flavour source set — the
-     * assertion below then reads "every transport this build ships".
-     */
-    private val desktop: List<TransportSessionManager> =
-        listOf(DesktopTransportModule.rdpTransport(manager()))
-
     @Test
     fun `every transport has a registry binding`() {
-        val bound = (nonDesktop + desktop).map { it.transport }.toSet()
+        val bound = nonDesktop.map { it.transport }.toSet()
 
         assertEquals(Transport.entries.toSet(), bound)
     }
 
     @Test
     fun `no transport is bound twice`() {
-        val all = (nonDesktop + desktop).map { it.transport }
+        val all = nonDesktop.map { it.transport }
 
         assertEquals(
             "a transport bound twice would disconnect and list its sessions twice",
@@ -72,13 +63,13 @@ class TransportBindingsTest {
 
     /**
      * The transports that carry a PTY are the ones terminal input is offered
-     * to. RDP and SMB have no terminal, and rclone is a storage handle — if
+     * to. SMB has no terminal, and rclone is a storage handle — if
      * one of them grew an `inputName` it would start appearing in the
      * "no transport owned this session" error the user reads.
      */
     @Test
     fun `only PTY-like transports accept terminal input`() {
-        val writable = (nonDesktop + desktop).filter { it.inputName != null }.map { it.transport }.toSet()
+        val writable = nonDesktop.filter { it.inputName != null }.map { it.transport }.toSet()
 
         assertEquals(
             setOf(

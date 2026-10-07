@@ -42,11 +42,8 @@ class NativeFeaturesTest {
     fun `an empty native dir reports no desktop or media features`() {
         val f = features()
 
-        assertFalse("rdp", f.rdp)
-        assertFalse("spice", f.spice)
         assertFalse("ffmpeg", f.ffmpeg)
         assertFalse("wayland", f.wayland)
-        assertFalse("anyDesktop", f.anyDesktop)
     }
 
     /**
@@ -66,16 +63,10 @@ class NativeFeaturesTest {
 
     @Test
     fun `shipping the libraries reports them`() {
-        ship(
-            "librdp_transport.so", "libspice_transport.so",
-            "libffmpeg.so", "libffprobe.so", "libavcodec.so",
-        )
+        ship("libffmpeg.so", "libffprobe.so", "libavcodec.so")
         val f = features()
 
-        assertTrue("rdp", f.rdp)
-        assertTrue("spice", f.spice)
         assertTrue("ffmpeg", f.ffmpeg)
-        assertTrue("anyDesktop", f.anyDesktop)
     }
 
     /**
@@ -93,10 +84,10 @@ class NativeFeaturesTest {
     /** A file that is present but not executable is not a usable library. */
     @Test
     fun `a non-executable library does not count`() {
-        ship("librdp_transport.so")
-        File(libDir.root, "librdp_transport.so").setExecutable(false)
+        ship("liblabwc_android.so")
+        File(libDir.root, "liblabwc_android.so").setExecutable(false)
 
-        assertFalse(features().rdp)
+        assertFalse(features().wayland)
     }
 
     /**
@@ -112,19 +103,6 @@ class NativeFeaturesTest {
         every { context.applicationInfo } returns ApplicationInfo()
         val f = NativeFeatures(context)
 
-        assertFalse("rdp", f.rdp)
-        assertFalse("spice", f.spice)
         assertFalse("ffmpeg", f.ffmpeg)
-        assertFalse("anyDesktop", f.anyDesktop)
-    }
-
-    /** One desktop transport is enough for the desktop UI to be worth showing. */
-    @Test
-    fun `anyDesktop is true with only one transport present`() {
-        ship("librdp_transport.so")
-        val f = features()
-
-        assertTrue(f.anyDesktop)
-        assertFalse(f.spice)
     }
 }

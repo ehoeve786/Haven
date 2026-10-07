@@ -37,8 +37,6 @@ import androidx.compose.ui.viewinterop.AndroidView
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import sh.haven.core.data.agent.PresentedMediaKind
-import sh.haven.app.agent.AppWindowConnectionStore
-import sh.haven.app.agent.AppWindowVncController
 import sh.haven.app.agent.PipController
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
@@ -104,14 +102,9 @@ class MainActivity : AppCompatActivity() {
     // long-press shortcut routes the workspace id through onCreate /
     // onNewIntent.
     @Inject lateinit var workspaceLauncher: sh.haven.app.workspace.WorkspaceLauncher
-    // App-window launcher (singleton) — invoked when a home-screen pinned
-    // shortcut routes an app-window def id through onCreate / onNewIntent.
-    @Inject lateinit var appWindowLauncher: sh.haven.app.desktop.AppWindowLauncher
-    // Picture-in-Picture for app windows: PipController bridges PiP state to
-    // the composition; the store owns the live VNC connection so it survives
-    // the overlay→PiP→overlay round-trip.
+    // Picture-in-Picture for presented images / web: PipController bridges
+    // PiP state to the composition.
     @Inject lateinit var pipController: PipController
-    @Inject lateinit var appWindowConnectionStore: AppWindowConnectionStore
     // Lets the MCP agent endpoint capture and drive Haven's own UI
     // (self-hosting loop, §1a). Holds a weak ref to the foreground
     // activity; attach/detach mirror fidoAuthenticator's lifecycle.
@@ -184,7 +177,6 @@ class MainActivity : AppCompatActivity() {
         setIntent(intent)
         exitIfDisconnected()
         handleWorkspaceShortcut(intent)
-        handleAppWindowShortcut(intent)
         handleRenewCertDeepLink(intent)
         handleConnectDeepLink(intent)
         handleOpenUsbDriveIntent(intent)
@@ -227,25 +219,6 @@ class MainActivity : AppCompatActivity() {
     }
 
     /**
-     * If [intent] carries an app-window launch action (home-screen pinned
-     * shortcut tap), start the cage and present it. Cold-start safe — the
-     * launcher queues straight onto the retained presentation queue, so a
-     * tap that cold-starts Haven still opens the app. The extra is cleared
-     * once consumed so a configuration change doesn't relaunch.
-     */
-    private fun handleAppWindowShortcut(intent: Intent?) {
-        if (intent?.action != sh.haven.app.desktop.AppWindowShortcutManager.ACTION_LAUNCH_APP_WINDOW) return
-        val defId = intent.getStringExtra(
-            sh.haven.app.desktop.AppWindowShortcutManager.EXTRA_APP_WINDOW_ID,
-        ) ?: return
-        intent.removeExtra(sh.haven.app.desktop.AppWindowShortcutManager.EXTRA_APP_WINDOW_ID)
-        Log.d("MainActivity", "launching app window $defId from shortcut")
-        MainScope().launch {
-            appWindowLauncher.launchById(defId)?.let { userMessageBus.error(it) }
-        }
-    }
-
-    /**
      * Handle the "USB drive detected" notification tap (#287): [HavenApp]'s
      * mass-storage attach receiver posts a notification whose content intent
      * carries [HavenApp.ACTION_OPEN_USB_DRIVE]. Re-publish onto the UI command
@@ -274,7 +247,7 @@ class MainActivity : AppCompatActivity() {
         agentUiCommandBus.emit(sh.haven.core.data.agent.AgentUiCommand.OpenMailRules)
     }
 
-    // --- Picture-in-Picture (app windows) ---
+    // --- Picture-in-Picture (presented images / web) ---
 
     override fun onPictureInPictureModeChanged(
         isInPictureInPictureMode: Boolean,
@@ -284,23 +257,7 @@ class MainActivity : AppCompatActivity() {
         pipController.setInPip(isInPictureInPictureMode)
     }
 
-    /**
-     * API 26–30 auto-enter fallback: those releases lack
-     * `setAutoEnterEnabled`, so enter PiP explicitly when the user leaves
-     * while an app window is open. On API 31+ the armed params auto-enter.
-     * Only an APP_WINDOW auto-enters — an image/web sheet floats only via the
-     * explicit PiP button (auto-PiP'ing a static image on Home is surprising).
-     */
-    override fun onUserLeaveHint() {
-        super.onUserLeaveHint()
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S &&
-            pipController.activePipMedia.value?.kind == PresentedMediaKind.APP_WINDOW
-        ) {
-            runCatching { enterPictureInPictureMode(buildPipParams()) }
-        }
-    }
-
-    /** Explicit PiP from a present_media / present_web / app-window overlay button. */
+    /** Explicit PiP from a present_media / present_web overlay button. */
     fun enterPipForMedia() {
         if (pipController.activePipMedia.value == null) return
         runCatching { enterPictureInPictureMode(buildPipParams()) }
@@ -310,30 +267,18 @@ class MainActivity : AppCompatActivity() {
         val builder = PictureInPictureParams.Builder()
             .setAspectRatio(currentPipAspect())
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            // Only a live app window auto-enters PiP on Home; image/web are
-            // explicit-tap only.
-            builder.setAutoEnterEnabled(
-                pipController.activePipMedia.value?.kind == PresentedMediaKind.APP_WINDOW,
-            )
+            // Image/web are explicit-tap only — never auto-enter on Home.
+            builder.setAutoEnterEnabled(false)
         }
         return builder.build()
     }
 
-    /** Aspect ratio for the current PiP item — VNC frame for an app window,
-     *  intrinsic size for an image / PDF, 16:9 for a WebView — clamped to
+    /** Aspect ratio for the current PiP item — intrinsic size for an image /
+     *  PDF, 16:9 for a WebView — clamped to
      *  Android's allowed PiP range, with a 16:9 fallback. (#225) */
     private fun currentPipAspect(): Rational {
         val media = pipController.activePipMedia.value ?: return Rational(16, 9)
         val dims: Pair<Int, Int>? = when (media.kind) {
-            PresentedMediaKind.APP_WINDOW -> {
-                val sid = media.sessionId
-                val h = media.host
-                val p = media.port
-                if (sid != null && h != null && p != null) {
-                    appWindowConnectionStore.controllerFor(sid, h, p).frame.value
-                        ?.let { it.width to it.height }
-                } else null
-            }
             PresentedMediaKind.IMAGE -> media.filePath?.let { imageDims(it) }
             PresentedMediaKind.WEB ->
                 if (media.mimeType == "application/pdf") media.filePath?.let { pdfFirstPageDims(it) }
@@ -473,7 +418,6 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         handleWorkspaceShortcut(intent)
-        handleAppWindowShortcut(intent)
         handleRenewCertDeepLink(intent)
         handleConnectDeepLink(intent)
         handleOpenUsbDriveIntent(intent)
@@ -561,8 +505,7 @@ class MainActivity : AppCompatActivity() {
 
                 val inPip by pipController.isInPip.collectAsState()
                 val activePipMedia by pipController.activePipMedia.collectAsState()
-                // Keep PiP params current so API 31+ auto-enters PiP when an
-                // app window is open, and disarms when it closes.
+                // Keep PiP params (aspect ratio) current for the shown item.
                 LaunchedEffect(activePipMedia?.id) {
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
                         runCatching { setPictureInPictureParams(buildPipParams()) }
@@ -574,15 +517,6 @@ class MainActivity : AppCompatActivity() {
                     // In PiP: render just the item, full-bleed on black. PiP is
                     // view-only on Android — interaction resumes on expand. (#225)
                     when (pipWin.kind) {
-                        PresentedMediaKind.APP_WINDOW -> {
-                            if (pipWin.sessionId != null && pipWin.host != null && pipWin.port != null) {
-                                PipAppWindow(
-                                    appWindowConnectionStore.controllerFor(
-                                        pipWin.sessionId!!, pipWin.host!!, pipWin.port!!,
-                                    ),
-                                )
-                            }
-                        }
                         PresentedMediaKind.IMAGE -> pipWin.filePath?.let { PipImage(it) }
                         PresentedMediaKind.WEB ->
                             if (pipWin.mimeType == "application/pdf") {
@@ -660,17 +594,6 @@ class MainActivity : AppCompatActivity() {
 
         fun getActiveInstance(): MainActivity? = activeInstanceRef?.get()
     }
-}
-
-/**
- * The minimal Picture-in-Picture view: the app window's live frame,
- * full-bleed on black. PiP content is view-only on Android (taps expand the
- * window), so no input wiring — interaction resumes in the expanded overlay.
- */
-@Composable
-private fun PipAppWindow(controller: AppWindowVncController) {
-    val frame by controller.frame.collectAsState()
-    PipBitmap(frame?.asImageBitmap())
 }
 
 /** Full-bleed bitmap on black — the shared body for the image and PDF PiP views. */

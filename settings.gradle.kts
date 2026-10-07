@@ -57,20 +57,6 @@ includeBuild("mosh-kotlin") {
     }
 }
 
-// IronRDP + UniFFI Kotlin bindings (submodule).
-includeBuild("rdp-kotlin") {
-    dependencySubstitution {
-        substitute(module("sh.haven:rdp-transport")).using(project(":"))
-    }
-}
-
-// Pure-Rust SPICE client + UniFFI Kotlin bindings (#286, submodule GlassOnTin/spice-kotlin).
-includeBuild("spice-kotlin") {
-    dependencySubstitution {
-        substitute(module("sh.haven:spice-transport")).using(project(":"))
-    }
-}
-
 // Prns (Personal Reticulum, Rust engine) JVM SDK — upstream's own Gradle
 // project inside the submodule, consumed unmodified so the submodule tracks
 // pure upstream trunk (Prns#94: app-supplied Pipe transports). The native
@@ -143,10 +129,7 @@ include(":core:et")
 include(":core:btserial")
 include(":core:usbserial")
 include(":core:bleserial")
-include(":core:vnc")
-include(":core:rdp")
 include(":core:prns")
-include(":core:spice")
 include(":core:smb")
 include(":core:rclone")
 include(":core:mail")
@@ -161,7 +144,5 @@ include(":core:scan")
 include(":feature:settings")
 include(":feature:editor")
 include(":feature:imagetools")
-include(":feature:vnc")
-include(":feature:rdp")
 
 include(":integration-tests")

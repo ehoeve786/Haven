@@ -1075,45 +1075,10 @@ class ConnectionsViewModel @Inject constructor(
     private val _navigateToConnections = MutableStateFlow(false)
     val navigateToConnections: StateFlow<Boolean> = _navigateToConnections.asStateFlow()
 
-    /** Emitted to navigate to VNC screen with connection params. */
-    data class VncNavigation(
-        val host: String,
-        val port: Int,
-        val password: String?,
-        val username: String? = null,
-        val sshForward: Boolean = false,
-        val sshSessionId: String? = null,
-        val profileId: String? = null,
-        val colorDepth: String = "BPP_24_TRUE",
-        /** Optional knock sequence; honoured only on the direct path
-         *  (sshForward=false) since SSH-tunneled connects can't reach
-         *  the remote firewall from this device. */
-        val portKnockSequence: String? = null,
-        val portKnockDelayMs: Int = 100,
-    )
-    private val _navigateToVnc = MutableStateFlow<VncNavigation?>(null)
-    val navigateToVnc: StateFlow<VncNavigation?> = _navigateToVnc.asStateFlow()
-
     /** Emitted to navigate to the native Wayland desktop view. */
     private val _navigateToWayland = MutableStateFlow(false)
     val navigateToWayland: StateFlow<Boolean> = _navigateToWayland.asStateFlow()
 
-    /** Emitted to navigate to RDP screen with connection params. */
-    data class RdpNavigation(val host: String, val port: Int, val username: String, val password: String, val domain: String, val sshForward: Boolean = false, val sshSessionId: String? = null, val profileId: String? = null, val useNla: Boolean = true, val colorDepth: Int = 32, val portKnockSequence: String? = null, val portKnockDelayMs: Int = 100)
-    private val _navigateToRdp = MutableStateFlow<RdpNavigation?>(null)
-    val navigateToRdp: StateFlow<RdpNavigation?> = _navigateToRdp.asStateFlow()
-
-    /** Emitted to navigate to the SPICE desktop with connection params (#286). */
-    data class SpiceNavigation(
-        val host: String,
-        val port: Int,
-        val password: String?,
-        val sshForward: Boolean = false,
-        val sshSessionId: String? = null,
-        val profileId: String? = null,
-    )
-    private val _navigateToSpice = MutableStateFlow<SpiceNavigation?>(null)
-    val navigateToSpice: StateFlow<SpiceNavigation?> = _navigateToSpice.asStateFlow()
 
     /** Emitted to navigate to Files tab for an SMB connection. */
     private val _navigateToSmb = MutableStateFlow<String?>(null)
@@ -1334,29 +1299,12 @@ class ConnectionsViewModel @Inject constructor(
 
     fun onNavigated() {
         _navigateToTerminal.value = null
-        _navigateToVnc.value = null
-        _navigateToRdp.value = null
-        _navigateToSpice.value = null
         _navigateToSmb.value = null
         _navigateToRclone.value = null
         _navigateToEmail.value = null
         _navigateToChat.value = null
         _navigateToConnections.value = false
         _newSessionProfileId.value = null
-    }
-
-    /**
-     * Consume just the desktop (VNC/RDP) navigation events. Collected at the
-     * always-composed nav-host level so a desktop tab is created the instant the
-     * connect emits, independent of which screen is on-screen — fixes Retry /
-     * MCP connect_profile failing to open a tab when the Connections screen
-     * isn't composed (#121). Separate from [onNavigated] so it doesn't clobber a
-     * concurrent terminal/SMB navigation owned by the Connections screen.
-     */
-    fun onDesktopNavigated() {
-        _navigateToVnc.value = null
-        _navigateToRdp.value = null
-        _navigateToSpice.value = null
     }
 
     /** Open a new terminal session on an already-connected profile. */
@@ -2026,9 +1974,8 @@ class ConnectionsViewModel @Inject constructor(
         // Connect only on explicit tap: the device must be plugged in and the
         // USB permission prompt answered (#408).
         profile.isUsbSerial -> false
-        profile.isVnc -> false
-        profile.isRdp -> false
-        profile.isSpice -> false
+        // Remote-desktop profiles (VNC/RDP/SPICE) were removed; never auto-connect them.
+        profile.isDesktop -> false
         profile.isSmb -> false
         profile.isSaf -> false
         else -> !profile.sshPassword.isNullOrBlank() || keys.isNotEmpty()
@@ -2416,18 +2363,9 @@ class ConnectionsViewModel @Inject constructor(
             connectUsbSerial(profile)
             return
         }
-        if (profile.isVnc) {
-            connectVnc(profile)
-            return
-        }
-        if (profile.isRdp) {
-            connectRdp(profile, password)
-            return
-        }
-        if (profile.isSpice) {
-            connectSpice(profile)
-            return
-        }
+        // Remote-desktop profiles (VNC/RDP/SPICE) can no longer be opened; don't
+        // let them fall through to the SSH path.
+        if (profile.isDesktop) return
         if (profile.isSmb) {
             connectSmb(profile, password)
             return
@@ -2474,149 +2412,6 @@ class ConnectionsViewModel @Inject constructor(
             return
         }
         connectSsh(profile, password, keyOnly, rememberPassword, usernameOverride = runtimeUsername, preselectedSessionName = sessionName)
-    }
-
-    private fun connectVnc(profile: ConnectionProfile) {
-        val host = profile.host
-        val port = profile.vncPort ?: profile.port
-        val password = profile.vncPassword
-        val username = profile.vncUsername
-        viewModelScope.launch {
-            repository.markConnected(profile.id)
-            val sshProfileId = profile.vncSshProfileId
-            if (profile.vncSshForward && sshProfileId != null) {
-                // If the jump host has no saved credential and no key
-                // JSch could try, prompt for a password up front instead
-                // of silently failing the auto-connect (#121a).
-                val needsPrompt = jumpHostNeedsPasswordPrompt(sshProfileId)
-                if (needsPrompt != null) {
-                    _pendingTunnelDependent.value = profile
-                    _passwordFallback.value = needsPrompt
-                    return@launch
-                }
-                // Auto-connect SSH tunnel host (reuses existing session if
-                // available), mirroring the RDP path. The VNC screen itself
-                // uses this sshSessionId to open the local forward.
-                try {
-                    _connectingProfileId.value = profile.id
-                    val (sshSessionId, _) = connectJumpHost(
-                        sshProfileId, "", tunnelOwnerProfileId = profile.id,
-                    )
-                    _navigateToVnc.value = VncNavigation(
-                        host, port, password, username,
-                        sshForward = true,
-                        sshSessionId = sshSessionId,
-                        profileId = profile.id,
-                        colorDepth = profile.vncColorDepth,
-                        // Knock not honoured on the SSH-forward path, but
-                        // pass it through so the field stays a single
-                        // source of truth at the call site.
-                        portKnockSequence = profile.portKnockSequence,
-                        portKnockDelayMs = profile.portKnockDelayMs,
-                    )
-                } catch (e: Exception) {
-                    Log.e(TAG, "Failed to connect SSH tunnel host for VNC", e)
-                    handleTunnelJumpFailure(e, profile, sshProfileId)
-                } finally {
-                    _connectingProfileId.value = null
-                }
-            } else {
-                _navigateToVnc.value = VncNavigation(
-                    host, port, password, username,
-                    sshForward = profile.vncSshForward,
-                    profileId = profile.id,
-                    colorDepth = profile.vncColorDepth,
-                    portKnockSequence = profile.portKnockSequence,
-                    portKnockDelayMs = profile.portKnockDelayMs,
-                )
-            }
-        }
-    }
-
-    private fun connectRdp(profile: ConnectionProfile, password: String) {
-        val host = profile.host
-        val port = profile.rdpPort
-        val username = profile.rdpUsername ?: profile.username
-        val rdpPassword = password.ifBlank { profile.rdpPassword ?: "" }
-        val domain = profile.rdpDomain ?: ""
-        viewModelScope.launch {
-            repository.markConnected(profile.id)
-            val sshProfileId = profile.rdpSshProfileId
-            if (profile.rdpSshForward && sshProfileId != null) {
-                val needsPrompt = jumpHostNeedsPasswordPrompt(sshProfileId)
-                if (needsPrompt != null) {
-                    _pendingTunnelDependent.value = profile
-                    _passwordFallback.value = needsPrompt
-                    return@launch
-                }
-                // Auto-connect SSH tunnel host (reuses existing session if available)
-                try {
-                    _connectingProfileId.value = profile.id
-                    // Pass empty password — SSH profile uses its own auth (key or password)
-                    val (sshSessionId, _) = connectJumpHost(
-                        sshProfileId, "", tunnelOwnerProfileId = profile.id,
-                    )
-                    _navigateToRdp.value = RdpNavigation(
-                        host, port, username, rdpPassword, domain,
-                        sshForward = true,
-                        sshSessionId = sshSessionId,
-                        profileId = profile.id,
-                        useNla = profile.rdpUseNla,
-                        colorDepth = profile.rdpColorDepth,
-                        portKnockSequence = profile.portKnockSequence,
-                        portKnockDelayMs = profile.portKnockDelayMs,
-                    )
-                } catch (e: Exception) {
-                    Log.e(TAG, "Failed to connect SSH tunnel host for RDP", e)
-                    handleTunnelJumpFailure(e, profile, sshProfileId)
-                } finally {
-                    _connectingProfileId.value = null
-                }
-            } else {
-                _navigateToRdp.value = RdpNavigation(host, port, username, rdpPassword, domain, profile.rdpSshForward, profileId = profile.id, useNla = profile.rdpUseNla, colorDepth = profile.rdpColorDepth, portKnockSequence = profile.portKnockSequence, portKnockDelayMs = profile.portKnockDelayMs)
-            }
-        }
-    }
-
-    private fun connectSpice(profile: ConnectionProfile) {
-        val host = profile.host
-        val port = profile.spicePort ?: profile.port
-        val password = profile.spicePassword
-        viewModelScope.launch {
-            repository.markConnected(profile.id)
-            val sshProfileId = profile.spiceSshProfileId
-            if (profile.spiceSshForward && sshProfileId != null) {
-                val needsPrompt = jumpHostNeedsPasswordPrompt(sshProfileId)
-                if (needsPrompt != null) {
-                    _pendingTunnelDependent.value = profile
-                    _passwordFallback.value = needsPrompt
-                    return@launch
-                }
-                try {
-                    _connectingProfileId.value = profile.id
-                    val (sshSessionId, _) = connectJumpHost(
-                        sshProfileId, "", tunnelOwnerProfileId = profile.id,
-                    )
-                    _navigateToSpice.value = SpiceNavigation(
-                        host, port, password,
-                        sshForward = true,
-                        sshSessionId = sshSessionId,
-                        profileId = profile.id,
-                    )
-                } catch (e: Exception) {
-                    Log.e(TAG, "Failed to connect SSH tunnel host for SPICE", e)
-                    handleTunnelJumpFailure(e, profile, sshProfileId)
-                } finally {
-                    _connectingProfileId.value = null
-                }
-            } else {
-                _navigateToSpice.value = SpiceNavigation(
-                    host, port, password,
-                    sshForward = profile.spiceSshForward,
-                    profileId = profile.id,
-                )
-            }
-        }
     }
 
     private fun connectSmb(profile: ConnectionProfile, password: String) {
@@ -3342,26 +3137,6 @@ class ConnectionsViewModel @Inject constructor(
         }
     }
 
-    /** Prompt for desktop VNC password when no stored password is available. */
-    data class DesktopVncPasswordPrompt(
-        val de: sh.haven.core.local.ProotManager.DesktopEnvironment,
-        val port: Int,
-    )
-    private val _desktopVncPasswordPrompt = MutableStateFlow<DesktopVncPasswordPrompt?>(null)
-    val desktopVncPasswordPrompt: StateFlow<DesktopVncPasswordPrompt?> = _desktopVncPasswordPrompt.asStateFlow()
-
-    fun onDesktopVncPasswordEntered(password: String) {
-        val prompt = _desktopVncPasswordPrompt.value ?: return
-        _desktopVncPasswordPrompt.value = null
-        // Save for next time
-        localSessionManager.prootManager.storedVncPassword = password
-        _navigateToVnc.value = VncNavigation("localhost", prompt.port, password)
-    }
-
-    fun dismissDesktopVncPasswordPrompt() {
-        _desktopVncPasswordPrompt.value = null
-    }
-
     /** Start a desktop environment and navigate to viewer. */
     fun startDesktop(de: sh.haven.core.local.ProotManager.DesktopEnvironment) {
         viewModelScope.launch {
@@ -3376,42 +3151,6 @@ class ConnectionsViewModel @Inject constructor(
             if (de.isNative) {
                 delay(2000)
                 _navigateToWayland.value = true
-            } else {
-                val port = desktopManager.getVncPort(de) ?: 5901
-                Log.d(TAG, "startDesktop: VNC port=$port")
-                // Look up VNC password: stored from setup, then saved profiles
-                val pwd = localSessionManager.prootManager.storedVncPassword
-                    ?: connections.value
-                        .find { it.isVnc && it.host == "localhost" }
-                        ?.vncPassword
-                Log.d(TAG, "startDesktop: waiting for VNC server on port $port...")
-                // Wait up to 8s for VNC port to become available
-                val ready = withContext(Dispatchers.IO) {
-                    repeat(16) {
-                        try {
-                            java.net.Socket("127.0.0.1", port).close()
-                            return@withContext true
-                        } catch (_: Exception) {
-                            delay(500)
-                        }
-                    }
-                    false
-                }
-                if (ready) {
-                    if (pwd == null) {
-                        // No stored password — prompt the user (VNC may or may not need auth,
-                        // but it's better to ask than to fail silently)
-                        Log.d(TAG, "startDesktop: VNC needs auth but no password stored, prompting")
-                        _desktopVncPasswordPrompt.value = DesktopVncPasswordPrompt(de, port)
-                    } else {
-                        Log.d(TAG, "startDesktop: VNC server ready, navigating to localhost:$port")
-                        _navigateToVnc.value = VncNavigation("localhost", port, pwd)
-                    }
-                } else {
-                    Log.e(TAG, "startDesktop: VNC server not listening on port $port after 8s")
-                    _error.value = "Desktop failed to start — VNC server not responding"
-                    desktopManager.stopDesktop(de)
-                }
             }
         }
     }

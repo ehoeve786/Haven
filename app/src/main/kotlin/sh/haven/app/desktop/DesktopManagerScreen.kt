@@ -80,7 +80,6 @@ import kotlinx.coroutines.launch
 import sh.haven.core.local.DesktopManager
 import sh.haven.core.local.ProotDnsMode
 import sh.haven.core.local.ProotManager
-import sh.haven.core.local.SystemVmManager
 import sh.haven.core.local.VmArch
 import sh.haven.core.local.proot.Compatibility
 import sh.haven.core.local.proot.Distro
@@ -88,7 +87,6 @@ import sh.haven.core.local.proot.DistroCatalog
 import sh.haven.core.local.proot.MirrorCatalog
 import sh.haven.core.local.proot.MirrorRegion
 import sh.haven.core.local.proot.PackageFamily
-import sh.haven.core.data.preferences.AppWindowDef
 import sh.haven.feature.connections.R
 import sh.haven.app.R as AppR
 
@@ -129,32 +127,8 @@ fun DesktopManagerScreen(viewModel: DesktopViewModel = hiltViewModel()) {
     val usbDriveSessions by viewModel.usbDriveSessions.collectAsState()
     val usbLiveSessions by viewModel.usbLiveSessions.collectAsState()
     val applianceProvisioned by viewModel.applianceProvisioned.collectAsState()
-    val customDesktopCommand by viewModel.customDesktopCommand.collectAsState()
 
-    // Both of these are ViewModel-held for the rotation reason above: the
-    // app-window draft is 8 fields deep, and the setup dialog carries a
-    // password/port the user has already typed.
     val setupDesktopDe by viewModel.setupDesktopDe.collectAsState()
-    val appWindowDraft by viewModel.appWindowDraft.collectAsState()
-    val showInstalledApps by viewModel.showInstalledApps.collectAsState()
-    val appWindowDefs by viewModel.appWindowDefs.collectAsState()
-    val launchingIds by viewModel.launchingIds.collectAsState()
-    val installedApps by viewModel.installedApps.collectAsState()
-    val scanningApps by viewModel.scanningApps.collectAsState()
-    val defaultResolution by viewModel.appWindowDefaultResolution.collectAsState()
-    val defaultScale by viewModel.appWindowDefaultScale.collectAsState()
-    val systemVmState by viewModel.systemVmState.collectAsState()
-    val systemVmImages by viewModel.systemVmImages.collectAsState()
-    val systemVmBusy by viewModel.systemVmBusy.collectAsState()
-    // The import draft is held by the ViewModel, not this composable: a rotation
-    // recreates the activity, and neither `remember` nor `rememberSaveable`
-    // survives it here (the composable isn't in the composition when state is
-    // saved). Flag AND fields together — see the ViewModel for why hoisting
-    // only the flag was measurably worse than hoisting nothing.
-    val showImportVmDialog by viewModel.showSystemVmImport.collectAsState()
-    val importVmLabel by viewModel.systemVmImportLabel.collectAsState()
-    val importVmSource by viewModel.systemVmImportSource.collectAsState()
-    val importVmArch by viewModel.systemVmImportArch.collectAsState()
 
     Column(
         modifier = Modifier
@@ -199,61 +173,17 @@ fun DesktopManagerScreen(viewModel: DesktopViewModel = hiltViewModel()) {
             onUnlockUsbDrivePartition = { busid, devicePath, passphrase -> viewModel.unlockUsbDrivePartition(busid, devicePath, passphrase) },
             applianceProvisioned = applianceProvisioned,
             onDeleteUsbAppliance = { viewModel.deleteUsbAppliance() },
-            storedVncPortFor = { viewModel.storedVncPortFor(it) },
             onSwitchDistro = { viewModel.switchActiveDistro(it) },
             onOpenShellForDistro = { viewModel.openShellForDistro(it) },
             onAddDistro = { viewModel.addDistro(it) },
             onAddForeignDistro = { distro, arch -> viewModel.addForeignDistro(distro, arch) },
             onDeleteDistro = { viewModel.deleteDistro(it.id) },
-            onInstall = { de -> viewModel.openDesktopSetup(de, viewModel.suggestVncPortFor(de)) },
+            onInstall = { de -> viewModel.openDesktopSetup(de) },
             onStart = { viewModel.startDesktop(it) },
             onStop = { viewModel.stopDesktop(it) },
             onOpenTerminalInDesktop = { viewModel.openTerminalInDesktop(it) },
             onUninstall = { viewModel.uninstallDesktop(it) },
             onRetryRootfs = { viewModel.retryRootfsInstall() },
-            customDesktopCommand = customDesktopCommand,
-            onSetCustomDesktopCommand = { cmd, thenStart -> viewModel.setCustomDesktopCommand(cmd, thenStart) },
-        )
-
-        AppWindowsSection(
-            defs = appWindowDefs,
-            launchingIds = launchingIds,
-            defaultResolution = defaultResolution,
-            defaultScale = defaultScale,
-            onLaunch = { viewModel.launchAppWindow(it) },
-            onEdit = { def -> viewModel.openAppWindowDialog(def.toDraft()) },
-            onDelete = { viewModel.deleteAppWindow(it.id) },
-            onPinToHome = { viewModel.pinAppWindow(it) },
-            onAdd = { viewModel.openAppWindowDialog(DesktopViewModel.AppWindowDraft()) },
-            onBrowse = { viewModel.setShowInstalledApps(true) },
-            onSetDefaultResolution = { viewModel.setAppWindowDefaultResolution(it) },
-            onSetDefaultScale = { viewModel.setAppWindowDefaultScale(it) },
-        )
-
-        SystemVmSection(
-            state = systemVmState,
-            images = systemVmImages,
-            busy = systemVmBusy,
-            onImport = { viewModel.openSystemVmImport() },
-            onStart = { viewModel.startSystemVm(it.id) },
-            onStop = { viewModel.stopSystemVm() },
-            onDelete = { viewModel.deleteSystemVmImage(it.id) },
-        )
-    }
-
-    if (showImportVmDialog) {
-        SystemVmImportDialog(
-            label = importVmLabel,
-            source = importVmSource,
-            arch = importVmArch,
-            onLabelChange = { viewModel.setSystemVmImportLabel(it) },
-            onSourceChange = { viewModel.setSystemVmImportSource(it) },
-            onArchChange = { viewModel.setSystemVmImportArch(it) },
-            onImport = {
-                viewModel.importSystemVmImage(importVmLabel.trim(), importVmSource.trim(), importVmArch)
-                viewModel.dismissSystemVmImport()
-            },
-            onDismiss = { viewModel.dismissSystemVmImport() },
         )
     }
 
@@ -340,40 +270,6 @@ fun DesktopManagerScreen(viewModel: DesktopViewModel = hiltViewModel()) {
         )
     }
 
-    if (showInstalledApps) {
-        androidx.compose.runtime.LaunchedEffect(Unit) { viewModel.refreshInstalledApps() }
-        Dialog(
-            onDismissRequest = { viewModel.setShowInstalledApps(false) },
-            properties = DialogProperties(usePlatformDefaultWidth = false),
-        ) {
-            InstalledAppsScreen(
-                result = installedApps,
-                scanning = scanningApps,
-                onLaunch = { app, fullscreen -> viewModel.launchInstalledApp(app, fullscreen) },
-                onClose = { viewModel.setShowInstalledApps(false) },
-            )
-        }
-    }
-
-    // One call site for add and edit now: the draft carries editingId, so Save
-    // knows which it is without two near-identical blocks.
-    appWindowDraft?.let { draft ->
-        AppWindowDialog(
-            draft = draft,
-            onDraftChange = { viewModel.setAppWindowDraft(it) },
-            onSave = { label, command, fullscreen, resolution, scale, runAsRoot ->
-                val id = draft.editingId
-                if (id == null) {
-                    viewModel.addAppWindow(label, command, fullscreen, resolution, scale, runAsRoot)
-                } else {
-                    viewModel.updateAppWindow(id, label, command, fullscreen, resolution, scale, runAsRoot)
-                }
-                viewModel.dismissAppWindowDialog()
-            },
-            onDismiss = { viewModel.dismissAppWindowDialog() },
-        )
-    }
-
     setupDesktopDe?.let { de ->
         androidx.compose.runtime.LaunchedEffect(desktopSetupState) {
             if (desktopSetupState is ProotManager.DesktopSetupState.Complete) {
@@ -389,605 +285,12 @@ fun DesktopManagerScreen(viewModel: DesktopViewModel = hiltViewModel()) {
             activeFamily = activeFamily,
             draft = setupDraft,
             onDraftChange = { viewModel.setDesktopSetupDraft(it) },
-            onStart = { password, _, addons, vncPort ->
-                viewModel.setupDesktop(password, de, addons, vncPort)
-            },
+            onStart = { addons -> viewModel.setupDesktop(de, addons) },
             onDismiss = {
                 viewModel.dismissDesktopSetup()
                 viewModel.resetDesktopSetupState()
             },
         )
-    }
-}
-
-/**
- * "App windows" section: the user-facing half of the agent's `present_app`.
- * Lists saved single-app windows (user-defined + ones the assistant
- * launched) with Launch/delete, and an add button. Launching opens the same
- * present_media overlay the assistant uses.
- */
-@Composable
-private fun AppWindowsSection(
-    defs: List<AppWindowDef>,
-    launchingIds: Set<String>,
-    defaultResolution: String,
-    defaultScale: Float,
-    onLaunch: (AppWindowDef) -> Unit,
-    onEdit: (AppWindowDef) -> Unit,
-    onDelete: (AppWindowDef) -> Unit,
-    onPinToHome: (AppWindowDef) -> Unit,
-    onAdd: () -> Unit,
-    onBrowse: () -> Unit,
-    onSetDefaultResolution: (String) -> Unit,
-    onSetDefaultScale: (Float) -> Unit,
-) {
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 8.dp),
-    ) {
-        Column(modifier = Modifier.padding(16.dp)) {
-            Text(stringResource(AppR.string.app_desktop_app_windows_title), style = MaterialTheme.typography.titleMedium)
-            Spacer(Modifier.height(4.dp))
-            Text(
-                stringResource(AppR.string.app_desktop_app_windows_description),
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-            Spacer(Modifier.height(8.dp))
-
-            if (defs.isEmpty()) {
-                Text(
-                    stringResource(AppR.string.app_desktop_app_windows_empty),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-            } else {
-                defs.forEach { def ->
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(56.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                    ) {
-                        Column(modifier = Modifier.weight(1f)) {
-                            Text(
-                                def.label,
-                                style = MaterialTheme.typography.bodyLarge,
-                                maxLines = 1,
-                            )
-                            Text(
-                                def.command,
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                fontFamily = FontFamily.Monospace,
-                                maxLines = 1,
-                            )
-                        }
-                        if (def.id in launchingIds) {
-                            Box(
-                                modifier = Modifier.size(48.dp),
-                                contentAlignment = Alignment.Center,
-                            ) {
-                                CircularProgressIndicator(modifier = Modifier.size(24.dp))
-                            }
-                        } else {
-                            IconButton(onClick = { onLaunch(def) }) {
-                                Icon(Icons.Filled.PlayArrow, contentDescription = stringResource(AppR.string.app_desktop_app_window_launch_cd, def.label))
-                            }
-                        }
-                        IconButton(onClick = { onPinToHome(def) }) {
-                            Icon(Icons.Filled.AddToHomeScreen, contentDescription = stringResource(AppR.string.app_desktop_app_window_pin_home_cd, def.label))
-                        }
-                        IconButton(onClick = { onEdit(def) }) {
-                            Icon(Icons.Filled.Edit, contentDescription = stringResource(AppR.string.app_desktop_app_window_edit_cd, def.label))
-                        }
-                        IconButton(onClick = { onDelete(def) }) {
-                            Icon(Icons.Filled.Delete, contentDescription = stringResource(AppR.string.app_desktop_app_window_delete_cd, def.label))
-                        }
-                    }
-                    HorizontalDivider()
-                }
-            }
-            Spacer(Modifier.height(8.dp))
-            Row {
-                TextButton(onClick = onBrowse) { Text(stringResource(AppR.string.app_desktop_browse_installed_apps)) }
-                Spacer(Modifier.width(8.dp))
-                TextButton(onClick = onAdd) { Text(stringResource(AppR.string.app_desktop_add_app_window)) }
-            }
-            HorizontalDivider()
-            Spacer(Modifier.height(8.dp))
-            AppWindowDefaultsRow(
-                resolution = defaultResolution,
-                scale = defaultScale,
-                onSetResolution = onSetDefaultResolution,
-                onSetScale = onSetDefaultScale,
-            )
-        }
-    }
-}
-
-/**
- * "System VM" section (#326): boots a full QEMU x86_64 Linux VM in the active
- * distro and views it over VNC on loopback. Lists imported disk images with
- * Start/Delete, an Import button, and — while one is running — a Stop control.
- * Only one VM runs at a time (TCG + phone RAM), so Start is disabled whenever
- * any VM is up or the manager is busy importing/booting.
- */
-@Composable
-private fun SystemVmSection(
-    state: SystemVmManager.VmState?,
-    images: List<SystemVmManager.VmImage>,
-    busy: Boolean,
-    onImport: () -> Unit,
-    onStart: (SystemVmManager.VmImage) -> Unit,
-    onStop: () -> Unit,
-    onDelete: (SystemVmManager.VmImage) -> Unit,
-) {
-    val running = state?.status == SystemVmManager.Status.RUNNING
-    val starting = state?.status == SystemVmManager.Status.STARTING
-    // Local copy: vncPort is a core:local property, which can't smart-cast across the module boundary.
-    val vncPort = state?.vncPort
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 8.dp),
-    ) {
-        Column(modifier = Modifier.padding(16.dp)) {
-            Text(stringResource(AppR.string.app_system_vm_title), style = MaterialTheme.typography.titleMedium)
-            Spacer(Modifier.height(4.dp))
-            Text(
-                stringResource(AppR.string.app_system_vm_description),
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-            Spacer(Modifier.height(8.dp))
-
-            if (running || starting) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text(
-                        if (running && vncPort != null) {
-                            stringResource(AppR.string.app_system_vm_running, vncPort)
-                        } else {
-                            stringResource(AppR.string.app_system_vm_starting)
-                        },
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.primary,
-                        modifier = Modifier.weight(1f),
-                    )
-                    TextButton(onClick = onStop) {
-                        Icon(Icons.Filled.Stop, contentDescription = null)
-                        Spacer(Modifier.width(4.dp))
-                        Text(stringResource(AppR.string.app_system_vm_stop))
-                    }
-                }
-                HorizontalDivider()
-            }
-
-            if (images.isEmpty()) {
-                Text(
-                    stringResource(AppR.string.app_system_vm_empty),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-            } else {
-                images.forEach { img ->
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(56.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                    ) {
-                        Column(modifier = Modifier.weight(1f)) {
-                            Text(img.label, style = MaterialTheme.typography.bodyLarge, maxLines = 1)
-                            // Arch alongside the size: it's chosen at import and
-                            // then invisible, which makes two similarly-named
-                            // images impossible to tell apart.
-                            Text(
-                                "%,d MB · %s".format(img.sizeBytes / (1024 * 1024), img.arch.id),
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            )
-                        }
-                        IconButton(
-                            onClick = { onStart(img) },
-                            enabled = !busy && !running && !starting,
-                        ) {
-                            Icon(
-                                Icons.Filled.PlayArrow,
-                                contentDescription = stringResource(AppR.string.app_system_vm_start_cd, img.label),
-                            )
-                        }
-                        IconButton(onClick = { onDelete(img) }, enabled = !busy) {
-                            Icon(
-                                Icons.Filled.Delete,
-                                contentDescription = stringResource(AppR.string.app_system_vm_delete_cd, img.label),
-                            )
-                        }
-                    }
-                    HorizontalDivider()
-                }
-            }
-            Spacer(Modifier.height(8.dp))
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                TextButton(onClick = onImport, enabled = !busy) {
-                    Text(stringResource(AppR.string.app_system_vm_import))
-                }
-                if (busy) {
-                    Spacer(Modifier.width(8.dp))
-                    CircularProgressIndicator(modifier = Modifier.size(20.dp))
-                }
-            }
-        }
-    }
-}
-
-/**
- * Import dialog for a system-VM disk image: a name, a URL or on-device path,
- * and which CPU the image is for.
- *
- * The architecture has to be asked here because a qcow2 doesn't record it and
- * nothing downstream can infer it — an arm64 image booted on the x86_64 target
- * doesn't fail, it sits on a machine with no bootable device until the user
- * gives up. Chips rather than a switch: this is an enum row, not an on/off.
- *
- * Stateless by design: the draft lives in the ViewModel so a rotation can't
- * quietly reset it (see DesktopViewModel.showSystemVmImport).
- *
- * Two containers (#558): a dialog on ordinary screens, a bottom sheet when the
- * window is height-compact (landscape phones). The dialog WINDOW caps its own
- * height at ~85% of a short screen no matter what modifier goes on the content
- * — six attempts are catalogued on the issue — so the arch chips clipped in
- * landscape and no in-dialog change could recover the space. The sheet is the
- * app's existing pattern for content that owns the short axis
- * (AttachOptionsSheet, MediaActions) and scrolls instead of clipping. Portrait
- * keeps the dialog, which renders correctly there and matches every other
- * dialog on this screen.
- */
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-private fun SystemVmImportDialog(
-    label: String,
-    source: String,
-    arch: VmArch,
-    onLabelChange: (String) -> Unit,
-    onSourceChange: (String) -> Unit,
-    onArchChange: (VmArch) -> Unit,
-    onImport: () -> Unit,
-    onDismiss: () -> Unit,
-) {
-    val heightCompact = LocalConfiguration.current.screenHeightDp < 480
-    if (heightCompact) {
-        ModalBottomSheet(
-            onDismissRequest = onDismiss,
-            sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
-        ) {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .verticalScroll(rememberScrollState())
-                    .padding(horizontal = 24.dp)
-                    .padding(bottom = 16.dp),
-            ) {
-                Text(
-                    stringResource(AppR.string.app_system_vm_import_title),
-                    style = MaterialTheme.typography.titleMedium,
-                )
-                Spacer(Modifier.height(12.dp))
-                SystemVmImportFields(label, source, arch, onLabelChange, onSourceChange, onArchChange)
-                Spacer(Modifier.height(8.dp))
-                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
-                    TextButton(onClick = onDismiss) { Text(stringResource(R.string.common_cancel)) }
-                    TextButton(
-                        onClick = onImport,
-                        enabled = label.isNotBlank() && source.isNotBlank(),
-                    ) {
-                        Text(stringResource(AppR.string.app_system_vm_import))
-                    }
-                }
-            }
-        }
-    } else {
-        AlertDialog(
-            onDismissRequest = onDismiss,
-            title = { Text(stringResource(AppR.string.app_system_vm_import_title)) },
-            text = {
-                // Scrollable: M3 doesn't scroll the text slot for you, and the arch
-                // row pushed this past what a small portrait phone shows at a large
-                // font scale.
-                Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
-                    SystemVmImportFields(label, source, arch, onLabelChange, onSourceChange, onArchChange)
-                }
-            },
-            confirmButton = {
-                TextButton(
-                    onClick = onImport,
-                    enabled = label.isNotBlank() && source.isNotBlank(),
-                ) {
-                    Text(stringResource(AppR.string.app_system_vm_import))
-                }
-            },
-            dismissButton = {
-                TextButton(onClick = onDismiss) { Text(stringResource(R.string.common_cancel)) }
-            },
-        )
-    }
-}
-
-/** The import form body, shared by the dialog and bottom-sheet containers. */
-@Composable
-private fun SystemVmImportFields(
-    label: String,
-    source: String,
-    arch: VmArch,
-    onLabelChange: (String) -> Unit,
-    onSourceChange: (String) -> Unit,
-    onArchChange: (VmArch) -> Unit,
-) {
-    OutlinedTextField(
-        value = label,
-        onValueChange = onLabelChange,
-        label = { Text(stringResource(AppR.string.app_system_vm_import_label)) },
-        singleLine = true,
-        modifier = Modifier.fillMaxWidth(),
-    )
-    Spacer(Modifier.height(8.dp))
-    OutlinedTextField(
-        value = source,
-        onValueChange = onSourceChange,
-        label = { Text(stringResource(AppR.string.app_system_vm_import_source)) },
-        singleLine = true,
-        modifier = Modifier.fillMaxWidth(),
-    )
-    Spacer(Modifier.height(12.dp))
-    Text(
-        stringResource(AppR.string.app_system_vm_import_arch),
-        style = MaterialTheme.typography.titleSmall,
-    )
-    Spacer(Modifier.height(4.dp))
-    FlowRow(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-        VmArch.entries.forEach { candidate ->
-            FilterChip(
-                selected = arch == candidate,
-                onClick = { onArchChange(candidate) },
-                label = { Text(candidate.id) },
-            )
-        }
-    }
-    Spacer(Modifier.height(4.dp))
-    Text(
-        stringResource(AppR.string.app_system_vm_import_arch_hint),
-        style = MaterialTheme.typography.bodySmall,
-        color = MaterialTheme.colorScheme.onSurfaceVariant,
-    )
-}
-
-/** The global "Default display" defaults (resolution + scale) for all app windows. */
-@Composable
-private fun AppWindowDefaultsRow(
-    resolution: String,
-    scale: Float,
-    onSetResolution: (String) -> Unit,
-    onSetScale: (Float) -> Unit,
-) {
-    var expanded by remember { mutableStateOf(false) }
-    Row(
-        modifier = Modifier.fillMaxWidth().clickable { expanded = !expanded },
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        Text(
-            stringResource(AppR.string.app_desktop_app_window_defaults),
-            style = MaterialTheme.typography.titleSmall,
-            modifier = Modifier.weight(1f),
-        )
-        Icon(
-            if (expanded) Icons.Filled.ExpandLess else Icons.Filled.ExpandMore,
-            contentDescription = null,
-        )
-    }
-    if (expanded) {
-        val isPreset = resolution in APP_WINDOW_RES_PRESETS
-        var customMode by remember(resolution) { mutableStateOf(!isPreset) }
-        var customText by remember(resolution) { mutableStateOf(if (!isPreset) resolution else "") }
-        Spacer(Modifier.height(4.dp))
-        Text(stringResource(AppR.string.app_desktop_app_window_resolution), style = MaterialTheme.typography.labelMedium)
-        ResolutionChips(
-            includeDefault = false,
-            token = if (customMode) null else resolution,
-            customMode = customMode,
-            customRes = customText,
-            onPickPreset = { customMode = false; onSetResolution(it ?: "auto") },
-            onPickCustom = { customMode = true },
-            onCustomResChange = { customText = it; if (WXH_REGEX.matches(it.trim())) onSetResolution(it.trim().lowercase()) },
-        )
-        Spacer(Modifier.height(4.dp))
-        Text(stringResource(AppR.string.app_desktop_app_window_scale), style = MaterialTheme.typography.labelMedium)
-        ScaleChips(includeDefault = false, scale = scale, onPick = { onSetScale(it ?: 1f) })
-    }
-}
-
-/** Preset resolution tokens the chips offer (everything else is "Custom"). */
-private val APP_WINDOW_RES_PRESETS = setOf("auto", "720x1280", "1080x1920", "1280x720")
-
-/**
- * Seed an edit draft from a stored def. Lives here, next to
- * [APP_WINDOW_RES_PRESETS], because deciding custom-vs-preset resolution is UI
- * knowledge the ViewModel has no business holding.
- */
-private fun AppWindowDef.toDraft(): DesktopViewModel.AppWindowDraft {
-    val isCustom = resolution != null && resolution !in APP_WINDOW_RES_PRESETS
-    return DesktopViewModel.AppWindowDraft(
-        editingId = id,
-        label = label,
-        command = command,
-        fullscreen = fullscreen,
-        runAsRoot = runAsRoot,
-        resToken = if (isCustom) null else resolution,
-        customMode = isCustom,
-        customRes = if (isCustom) resolution!! else "",
-        scale = scale,
-    )
-}
-private val WXH_REGEX = Regex("""\d{2,5}x\d{2,5}""", RegexOption.IGNORE_CASE)
-
-/**
- * Add (when [initial] is null) or edit an app-window definition. Prefills from
- * [initial]; [onSave] gets label, command, fullscreen, the resolution token
- * (null = use the global default) and scale (null = use the global default).
- */
-@Composable
-private fun AppWindowDialog(
-    draft: DesktopViewModel.AppWindowDraft,
-    onDraftChange: (DesktopViewModel.AppWindowDraft) -> Unit,
-    onSave: (label: String, command: String, fullscreen: Boolean, resolution: String?, scale: Float?, runAsRoot: Boolean) -> Unit,
-    onDismiss: () -> Unit,
-) {
-    // Stateless: the draft lives in DesktopViewModel so a rotation cannot wipe
-    // eight fields of half-entered app-window config. See AppWindowDef.toDraft()
-    // for the seeding, which is where the resolution presets stay.
-    val label = draft.label
-    val command = draft.command
-    val fullscreen = draft.fullscreen
-    val runAsRoot = draft.runAsRoot
-    val resToken = draft.resToken
-    val customMode = draft.customMode
-    val customRes = draft.customRes
-    val scale = draft.scale
-    val editing = draft.editingId != null
-    val customValid = !customMode || WXH_REGEX.matches(customRes.trim())
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text(if (editing) stringResource(AppR.string.app_desktop_edit_app_window_title) else stringResource(AppR.string.app_desktop_add_app_window_title)) },
-        text = {
-            Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
-                OutlinedTextField(
-                    value = label,
-                    onValueChange = { onDraftChange(draft.copy(label = it)) },
-                    label = { Text(stringResource(R.string.common_label)) },
-                    placeholder = { Text(stringResource(AppR.string.app_desktop_app_window_label_placeholder)) },
-                    singleLine = true,
-                    modifier = Modifier.fillMaxWidth(),
-                )
-                Spacer(Modifier.height(8.dp))
-                OutlinedTextField(
-                    value = command,
-                    onValueChange = { onDraftChange(draft.copy(command = it)) },
-                    label = { Text(stringResource(AppR.string.app_desktop_app_window_command_label)) },
-                    placeholder = { Text(stringResource(AppR.string.app_desktop_app_window_command_placeholder)) },
-                    singleLine = true,
-                    modifier = Modifier.fillMaxWidth(),
-                )
-                Spacer(Modifier.height(12.dp))
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text(stringResource(AppR.string.app_desktop_app_window_fullscreen), modifier = Modifier.weight(1f))
-                    Switch(checked = fullscreen, onCheckedChange = { onDraftChange(draft.copy(fullscreen = it)) })
-                }
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Column(modifier = Modifier.weight(1f)) {
-                        Text(stringResource(AppR.string.app_desktop_app_window_run_as_root))
-                        Text(
-                            stringResource(AppR.string.app_desktop_app_window_run_as_root_hint),
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        )
-                    }
-                    Switch(checked = runAsRoot, onCheckedChange = { onDraftChange(draft.copy(runAsRoot = it)) })
-                }
-                Spacer(Modifier.height(8.dp))
-                Text(stringResource(AppR.string.app_desktop_app_window_resolution), style = MaterialTheme.typography.labelMedium)
-                ResolutionChips(
-                    includeDefault = true,
-                    token = resToken,
-                    customMode = customMode,
-                    customRes = customRes,
-                    onPickPreset = { onDraftChange(draft.copy(resToken = it, customMode = false)) },
-                    onPickCustom = { onDraftChange(draft.copy(customMode = true)) },
-                    onCustomResChange = { onDraftChange(draft.copy(customRes = it)) },
-                )
-                Spacer(Modifier.height(8.dp))
-                Text(stringResource(AppR.string.app_desktop_app_window_scale), style = MaterialTheme.typography.labelMedium)
-                ScaleChips(includeDefault = true, scale = scale, onPick = { onDraftChange(draft.copy(scale = it)) })
-            }
-        },
-        confirmButton = {
-            TextButton(
-                onClick = {
-                    val resolution = if (customMode) customRes.trim().lowercase().ifBlank { null } else resToken
-                    onSave(label.trim(), command.trim(), fullscreen, resolution, scale, runAsRoot)
-                },
-                enabled = command.isNotBlank() && customValid,
-            ) { Text(if (editing) stringResource(R.string.common_save) else stringResource(R.string.common_add)) }
-        },
-        dismissButton = {
-            TextButton(onClick = onDismiss) { Text(stringResource(R.string.common_cancel)) }
-        },
-    )
-}
-
-/** Resolution chip row (+ a custom WxH field when Custom is picked). */
-@OptIn(ExperimentalLayoutApi::class)
-@Composable
-private fun ResolutionChips(
-    includeDefault: Boolean,
-    token: String?,
-    customMode: Boolean,
-    customRes: String,
-    onPickPreset: (String?) -> Unit,
-    onPickCustom: () -> Unit,
-    onCustomResChange: (String) -> Unit,
-) {
-    FlowRow(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-        if (includeDefault) {
-            FilterChip(
-                selected = !customMode && token == null,
-                onClick = { onPickPreset(null) },
-                label = { Text(stringResource(AppR.string.app_desktop_opt_default)) },
-            )
-        }
-        FilterChip(
-            selected = !customMode && token == "auto",
-            onClick = { onPickPreset("auto") },
-            label = { Text(stringResource(AppR.string.app_desktop_res_auto)) },
-        )
-        FilterChip(selected = !customMode && token == "720x1280", onClick = { onPickPreset("720x1280") }, label = { Text("720p") })
-        FilterChip(selected = !customMode && token == "1080x1920", onClick = { onPickPreset("1080x1920") }, label = { Text("1080p") })
-        FilterChip(
-            selected = !customMode && token == "1280x720",
-            onClick = { onPickPreset("1280x720") },
-            label = { Text(stringResource(AppR.string.app_desktop_res_landscape)) },
-        )
-        FilterChip(
-            selected = customMode,
-            onClick = onPickCustom,
-            label = { Text(stringResource(AppR.string.app_desktop_res_custom)) },
-        )
-    }
-    if (customMode) {
-        OutlinedTextField(
-            value = customRes,
-            onValueChange = onCustomResChange,
-            singleLine = true,
-            placeholder = { Text(stringResource(AppR.string.app_desktop_res_custom_hint)) },
-            modifier = Modifier.fillMaxWidth(),
-        )
-    }
-}
-
-/** Scale chip row (1×/1.5×/2×, plus Default when [includeDefault]). */
-@OptIn(ExperimentalLayoutApi::class)
-@Composable
-private fun ScaleChips(includeDefault: Boolean, scale: Float?, onPick: (Float?) -> Unit) {
-    FlowRow(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-        if (includeDefault) {
-            FilterChip(
-                selected = scale == null,
-                onClick = { onPick(null) },
-                label = { Text(stringResource(AppR.string.app_desktop_opt_default)) },
-            )
-        }
-        FilterChip(selected = scale == 1f, onClick = { onPick(1f) }, label = { Text("1×") })
-        FilterChip(selected = scale == 1.5f, onClick = { onPick(1.5f) }, label = { Text("1.5×") })
-        FilterChip(selected = scale == 2f, onClick = { onPick(2f) }, label = { Text("2×") })
     }
 }
 
@@ -1222,7 +525,6 @@ private fun DesktopManagerSection(
     onUnlockUsbDrivePartition: (busid: String, devicePath: String, passphrase: String) -> Unit,
     applianceProvisioned: Boolean,
     onDeleteUsbAppliance: () -> Unit,
-    storedVncPortFor: (ProotManager.DesktopEnvironment) -> Int?,
     onSwitchDistro: (String) -> Unit,
     onOpenShellForDistro: (String) -> Unit,
     onAddDistro: (Distro) -> Unit,
@@ -1234,10 +536,8 @@ private fun DesktopManagerSection(
     onOpenTerminalInDesktop: (ProotManager.DesktopEnvironment) -> Unit,
     onUninstall: (ProotManager.DesktopEnvironment) -> Unit,
     onRetryRootfs: () -> Unit,
-    customDesktopCommand: String,
-    onSetCustomDesktopCommand: (command: String, thenStart: Boolean) -> Unit,
     // Dialog drafts live in the ViewModel so a rotation cannot take a
-    // half-filled dialog with it; this section owns four of them, and threading
+    // half-filled dialog with it; this section owns several of them, and threading
     // a dozen state+callback parameters for that would be worse than the
     // coupling.
     viewModel: DesktopViewModel,
@@ -1245,9 +545,6 @@ private fun DesktopManagerSection(
     var distroMenuOpen by remember { mutableStateOf(false) }
     val showImportDialog by viewModel.showImportRootfs.collectAsState()
     val showCustomBindsDialog by viewModel.showCustomBinds.collectAsState()
-    // #361: non-null while the Custom (X11) command dialog is open; true =
-    // opened via Start on a blank command, so Save also starts the desktop.
-    val customCmdDialogStartAfter by viewModel.customCmdStartAfter.collectAsState()
     val showWritableConfirm by viewModel.showUsbWritableConfirm.collectAsState()
     // #379: which distro's delete is awaiting confirmation (null = none).
     // The delete IconButton sits one tap away from Open-shell, so guard the
@@ -1760,8 +1057,10 @@ private fun DesktopManagerSection(
             }
 
             val activeDistro = DistroCatalog.lookup(activeDistroId)
+            // Only native (labwc / Xwayland) desktops: the Xvnc / nested-Wayland
+            // ones needed the VNC viewer, which has been removed.
             val compatibleDes = ProotManager.DesktopEnvironment.entries
-                .filter { !it.hidden }
+                .filter { !it.hidden && it.isNative }
                 .filter { de ->
                     activeDistro == null ||
                         de.spec.packagesPerFamily.containsKey(activeDistro.family)
@@ -1769,7 +1068,6 @@ private fun DesktopManagerSection(
             compatibleDes.forEach { de ->
                 val isInstalled = de in installedDesktops
                 val instance = desktopStates[de]
-                val isCustom = de == ProotManager.DesktopEnvironment.CUSTOM_X11
                 DesktopRow(
                     de = de,
                     isInstalled = isInstalled,
@@ -1782,19 +1080,8 @@ private fun DesktopManagerSection(
                     isAnySetupBusy = desktopSetupState is ProotManager.DesktopSetupState.Installing,
                     activeFamily = activeDistro?.family,
                     isRootfsReady = isRootfsReady,
-                    storedVncPort = storedVncPortFor(de),
-                    customCommand = if (isCustom) customDesktopCommand else null,
-                    onEditCommand = if (isCustom) {
-                        { viewModel.openCustomCmdDialog(customDesktopCommand, startAfterSave = false) }
-                    } else null,
                     onInstall = { onInstall(de) },
-                    onStart = {
-                        // #361: a blank custom command can't launch anything —
-                        // route Start into the command dialog instead.
-                        if (isCustom && customDesktopCommand.isBlank()) {
-                            viewModel.openCustomCmdDialog(customDesktopCommand, startAfterSave = true)
-                        } else onStart(de)
-                    },
+                    onStart = { onStart(de) },
                     onStop = { onStop(de) },
                     onOpenTerminal = { onOpenTerminalInDesktop(de) },
                     onUninstall = { onUninstall(de) },
@@ -1803,19 +1090,6 @@ private fun DesktopManagerSection(
         }
     }
 
-    customCmdDialogStartAfter?.let { startAfter ->
-        val draft by viewModel.customCmdDraft.collectAsState()
-        CustomDesktopCommandDialog(
-            command = draft,
-            onCommandChange = { viewModel.setCustomCmdDraft(it) },
-            startAfterSave = startAfter,
-            onDismiss = { viewModel.dismissCustomCmdDialog() },
-            onSave = { cmd ->
-                onSetCustomDesktopCommand(cmd, startAfter)
-                viewModel.dismissCustomCmdDialog()
-            },
-        )
-    }
     if (showImportDialog) {
         val draft by viewModel.importRootfsDraft.collectAsState()
         ImportRootfsDialog(
@@ -1916,62 +1190,6 @@ private fun DesktopManagerSection(
             },
         )
     }
-}
-
-/**
- * Set the session command for the Custom (X11) desktop (#361). Saved to
- * preferences; applied on the next start (the launch path reads it live).
- * [startAfterSave] relabels the confirm button when the dialog was reached
- * via Start on a blank command — saving then also launches the desktop.
- */
-@Composable
-private fun CustomDesktopCommandDialog(
-    command: String,
-    onCommandChange: (String) -> Unit,
-    startAfterSave: Boolean,
-    onDismiss: () -> Unit,
-    onSave: (String) -> Unit,
-) {
-    // Stateless: the draft lives in DesktopViewModel, because rememberSaveable
-    // here did not survive a rotation (measured — this composable is gone by the
-    // time state is saved).
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text(stringResource(AppR.string.app_desktop_custom_cmd_title)) },
-        text = {
-            Column {
-                Text(
-                    stringResource(AppR.string.app_desktop_custom_cmd_description),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-                Spacer(Modifier.height(12.dp))
-                OutlinedTextField(
-                    value = command,
-                    onValueChange = onCommandChange,
-                    label = { Text(stringResource(AppR.string.app_desktop_custom_cmd_label)) },
-                    textStyle = LocalTextStyle.current.copy(
-                        fontFamily = androidx.compose.ui.text.font.FontFamily.Monospace,
-                    ),
-                    singleLine = true,
-                    modifier = Modifier.fillMaxWidth(),
-                )
-            }
-        },
-        confirmButton = {
-            TextButton(onClick = { onSave(command.trim()) }, enabled = command.isNotBlank()) {
-                Text(
-                    stringResource(
-                        if (startAfterSave) AppR.string.app_desktop_custom_cmd_save_start
-                        else R.string.common_save,
-                    ),
-                )
-            }
-        },
-        dismissButton = {
-            TextButton(onClick = onDismiss) { Text(stringResource(R.string.common_cancel)) }
-        },
-    )
 }
 
 @Composable
@@ -2195,11 +1413,6 @@ private fun DesktopRow(
     isAnySetupBusy: Boolean = false,
     activeFamily: PackageFamily? = null,
     isRootfsReady: Boolean = true,
-    storedVncPort: Int? = null,
-    // #361: non-null only for the Custom (X11) DE — the user's session command
-    // ("" = unset) and the affordance to edit it.
-    customCommand: String? = null,
-    onEditCommand: (() -> Unit)? = null,
     onInstall: () -> Unit,
     onStart: () -> Unit,
     onStop: () -> Unit,
@@ -2260,13 +1473,7 @@ private fun DesktopRow(
                 }
             }
             when {
-                instance?.state == DesktopManager.DesktopState.RUNNING && !de.isNative ->
-                    Text(
-                        stringResource(AppR.string.app_desktop_vnc_running, instance.displayNumber, instance.vncPort),
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
-                instance?.state == DesktopManager.DesktopState.RUNNING && de.isNative ->
+                instance?.state == DesktopManager.DesktopState.RUNNING ->
                     Text(
                         stringResource(R.string.connections_desktop_native_running),
                         style = MaterialTheme.typography.bodySmall,
@@ -2282,27 +1489,6 @@ private fun DesktopRow(
                     Text(
                         de.sizeEstimate +
                             if (!isRootfsReady) stringResource(AppR.string.app_desktop_install_distro_first) else "",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
-                // #361: surface the custom session command (or its absence) on
-                // the idle row — the launch refuses to start on a blank one.
-                isInstalled && customCommand != null &&
-                    instance?.state != DesktopManager.DesktopState.RUNNING &&
-                    instance?.state != DesktopManager.DesktopState.STARTING ->
-                    Text(
-                        customCommand.ifBlank { stringResource(AppR.string.app_desktop_custom_cmd_unset) },
-                        style = MaterialTheme.typography.bodySmall,
-                        fontFamily = if (customCommand.isBlank()) null else androidx.compose.ui.text.font.FontFamily.Monospace,
-                        color = if (customCommand.isBlank()) MaterialTheme.colorScheme.tertiary
-                        else MaterialTheme.colorScheme.onSurfaceVariant,
-                        maxLines = 1,
-                        overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis,
-                    )
-                isInstalled && instance?.state != DesktopManager.DesktopState.RUNNING &&
-                    instance?.state != DesktopManager.DesktopState.STARTING && storedVncPort != null && !de.isNative ->
-                    Text(
-                        stringResource(AppR.string.app_desktop_vnc_port_stored, storedVncPort),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
@@ -2336,16 +1522,6 @@ private fun DesktopRow(
                 DesktopManager.DesktopState.STARTING ->
                     CircularProgressIndicator(modifier = Modifier.size(20.dp), strokeWidth = 2.dp)
                 else -> {
-                    if (onEditCommand != null) {
-                        IconButton(onClick = onEditCommand) {
-                            Icon(
-                                Icons.Filled.Edit,
-                                contentDescription = stringResource(AppR.string.app_desktop_custom_cmd_edit),
-                                modifier = Modifier.size(18.dp),
-                                tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                            )
-                        }
-                    }
                     IconButton(onClick = onStart) {
                         Icon(Icons.Filled.PlayArrow, contentDescription = stringResource(R.string.connections_desktop_start))
                     }
@@ -2371,27 +1547,15 @@ private fun DesktopSetupDialog(
     activeFamily: PackageFamily? = null,
     draft: DesktopViewModel.DesktopSetupDraft,
     onDraftChange: (DesktopViewModel.DesktopSetupDraft) -> Unit,
-    onStart: (
-        password: String,
-        de: ProotManager.DesktopEnvironment,
-        addons: Set<ProotManager.DesktopAddon>,
-        vncPort: Int?,
-    ) -> Unit,
+    onStart: (addons: Set<ProotManager.DesktopAddon>) -> Unit,
     onDismiss: () -> Unit,
 ) {
     val compatibility = activeFamily?.let { selectedDe.spec.compatibilityOn(it) }
         ?: Compatibility.Stable
     val compatibilityNote = activeFamily?.let { selectedDe.spec.compatibilityNoteOn(it) }
-    // Stateless: the draft lives in DesktopViewModel. The port used to seed from
-    // rememberSaveable(selectedDe, suggestedVncPort), which only ever
-    // re-initialised on open — selectedDe is a parameter and cannot change while
-    // the dialog is up — so openDesktopSetup() seeding it is the same behaviour.
-    val password = draft.password
+    // Stateless: the draft lives in DesktopViewModel.
     val shellCmd = draft.shellCmd
-    val portText = draft.portText
     val selectedAddons = draft.addons
-    val portInt = portText.toIntOrNull()
-    val portValid = portInt != null && portInt in 5901..5999
     val isInstalling = desktopState is ProotManager.DesktopSetupState.Installing
 
     AlertDialog(
@@ -2427,44 +1591,9 @@ private fun DesktopSetupDialog(
                             }
                         }
                         Text(
-                            when {
-                                selectedDe.isWayland -> stringResource(R.string.connections_desktop_wayland_description)
-                                selectedDe == ProotManager.DesktopEnvironment.OPENBOX -> stringResource(R.string.connections_desktop_openbox_description)
-                                else -> stringResource(R.string.connections_desktop_vnc_description)
-                            },
+                            stringResource(R.string.connections_desktop_wayland_description),
                             style = MaterialTheme.typography.bodySmall,
                         )
-                        if (!selectedDe.isWayland) {
-                            OutlinedTextField(
-                                value = password,
-                                onValueChange = { onDraftChange(draft.copy(password = it)) },
-                                label = { Text(stringResource(R.string.connections_desktop_vnc_password)) },
-                                singleLine = true,
-                                modifier = Modifier.fillMaxWidth(),
-                            )
-                            // Per-DE VNC port. Defaults to the next free
-                            // 5900+N for the active distro; the user can
-                            // override (e.g. to match an SSH tunnel they
-                            // already have set up, or to dodge a port
-                            // that's in use elsewhere on the network).
-                            // Range 5901-5999 is enforced; outside that
-                            // we keep the field editable but disable
-                            // Install via portValid.
-                            OutlinedTextField(
-                                value = portText,
-                                onValueChange = { v -> onDraftChange(draft.copy(portText = v.filter { it.isDigit() }.take(4))) },
-                                label = { Text(stringResource(AppR.string.app_desktop_vnc_port_label)) },
-                                supportingText = {
-                                    Text(
-                                        if (portValid) stringResource(AppR.string.app_desktop_vnc_display, portInt!! - 5900)
-                                        else stringResource(AppR.string.app_desktop_vnc_port_range),
-                                    )
-                                },
-                                isError = !portValid,
-                                singleLine = true,
-                                modifier = Modifier.fillMaxWidth(),
-                            )
-                        }
                         if (selectedDe.isNative) {
                             var shellExpanded by remember { mutableStateOf(false) }
                             val shellOptions = listOf("/bin/sh", "/bin/ash", "/bin/bash", "/bin/zsh", "/bin/fish")
@@ -2583,14 +1712,9 @@ private fun DesktopSetupDialog(
         },
         confirmButton = {
             if (desktopState is ProotManager.DesktopSetupState.Idle) {
-                // Wayland DEs don't surface a VNC port (no Xvnc), so
-                // the dialog skips the port field and we pass null —
-                // setupDesktop handles null as "no preference".
-                val portArg = if (selectedDe.isWayland) null else portInt
-                TextButton(
-                    onClick = { onStart(password, selectedDe, selectedAddons, portArg) },
-                    enabled = selectedDe.isWayland || portValid,
-                ) { Text(stringResource(R.string.common_install)) }
+                TextButton(onClick = { onStart(selectedAddons) }) {
+                    Text(stringResource(R.string.common_install))
+                }
             }
         },
         dismissButton = {

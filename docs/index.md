@@ -64,14 +64,13 @@ sideloads track the GitHub Releases key.
   <img src="https://raw.githubusercontent.com/GlassHaven/Haven/main/fastlane/metadata/android/en-US/images/phoneScreenshots/2_connections.png" width="160" alt="Connections" />
   <img src="https://raw.githubusercontent.com/GlassHaven/Haven/main/fastlane/metadata/android/en-US/images/phoneScreenshots/3_wayland_desktop.png" width="160" alt="Wayland desktop" />
   <img src="https://raw.githubusercontent.com/GlassHaven/Haven/main/fastlane/metadata/android/en-US/images/phoneScreenshots/4_cloud_storage.png" width="160" alt="Cloud storage" />
-  <img src="https://raw.githubusercontent.com/GlassHaven/Haven/main/fastlane/metadata/android/en-US/images/phoneScreenshots/6_vnc_desktop.png" width="160" alt="VNC desktop" />
   <img src="https://raw.githubusercontent.com/GlassHaven/Haven/main/fastlane/metadata/android/en-US/images/phoneScreenshots/7_keys.png" width="160" alt="Keys" />
 </p>
 
 ## At a glance
 
 - **[Terminal](features/terminal.md)** — Mosh / Eternal Terminal / SSH, USB / Bluetooth / BLE serial consoles with a serial↔TCP bridge, tmux session restore, configurable keyboard toolbar, OSC 7/8/9/52/133/777 integration.
-- **[Desktops](features/desktops.md)** — VNC (RFB 3.8 / VeNCrypt), RDP (IronRDP + EGFX), SPICE (QEMU/KVM, GLZ/QUIC), a GPU-accelerated native Wayland compositor, and a multi-distro local-desktop manager.
+- **[Desktops](features/desktops.md)** — a GPU-accelerated native Wayland compositor and a multi-distro local-desktop manager.
 - **[Files & cloud](features/files-and-cloud.md)** — SFTP/SCP, SMB, 60+ cloud providers (rclone), cross-filesystem copy/move; plus FFmpeg transcode, HLS, and DLNA.
 - **[Connections](features/connections.md)** — port forwarding (-L/-R/-D/-J), SOCKS/HTTP/Tor proxies, per-app WireGuard & Tailscale tunnels, port knocking + fwknop SPA, SSH keys & FIDO2.
 - **[Email](features/email.md)** — ProtonMail + IMAP/SMTP, compose/reply/forward, multi-account, Mail Rules automation.
@@ -88,7 +87,6 @@ Browse the [full feature index](FEATURES.md).
 The list above is the parts; the point is how they compose. Each of these is one flow inside Haven — no second app, no `curl | ssh` incantation:
 
 - Tap a 4K MKV in Google Drive → FFmpeg transcodes it over HTTP and the result lands back in the same Drive folder, never touching local disk.
-- SSH to a box, forward its port, tap the VNC profile that targets `localhost` — the desktop opens in the same app, keyboard and clipboard shared.
 - Cut a log directory from an S3 bucket, switch tabs, paste it onto an SFTP server — rclone does the server-side copy when it can, otherwise Haven streams it through.
 - Run your agent CLI in the on-device Linux shell; it pushes over the SSH agent you forwarded from your laptop while you watch on the same screen.
 - Cast a cloud video to the TV across the room over HLS, copy the LAN URL from the snackbar, send it to a friend so they can watch too.
@@ -103,10 +101,10 @@ Available in 12 languages: English, Chinese (simplified), Spanish, Hindi, Arabic
 
 ## Why Haven?
 
-- **One app covers the whole loop.** SSH + Mosh + ET + VNC + RDP + SFTP + cloud storage + on-device Linux + media transcode, from a single tab bar.
+- **One app covers the whole loop.** SSH + Mosh + ET + SFTP + cloud storage + on-device Linux + media transcode, from a single tab bar.
 - **No telemetry, no ads, no account.** Nothing is phoned home. See the [privacy policy](privacy-policy.html).
 - **Per-app tunnels.** Route individual SSH profiles through WireGuard or Tailscale *without* taking Android's one VPN slot — other apps keep using the direct network.
-- **Native everything.** FFmpeg, labwc, IronRDP, rclone, and the Kotlin Reticulum transport are all compiled from source — no Python runtime, no Chaquopy.
+- **Native everything.** FFmpeg, labwc, rclone, and the Kotlin Reticulum transport are all compiled from source — no Python runtime, no Chaquopy.
 - **Ships often.** Releases reach F-Droid within 24 hours via an automated MR. See the [release history](https://github.com/GlassHaven/Haven/releases).
 
 ## Build from source
@@ -114,7 +112,7 @@ Available in 12 languages: English, Chinese (simplified), Spanish, Hindi, Arabic
 Requires [Rust](https://rustup.rs/) with Android targets, `cargo-ndk`, [Go](https://go.dev/dl/) 1.26+, and `gomobile`:
 
 ```bash
-# Rust (for RDP)
+# Rust (native libraries)
 rustup target add aarch64-linux-android x86_64-linux-android
 cargo install cargo-ndk
 

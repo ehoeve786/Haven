@@ -441,7 +441,7 @@ internal class McpTools(
         ) { args -> unpairMcpClient(args) },
 
         "list_connections" to ToolHandler(
-            description = "List saved connection profiles (SSH, Mosh, VNC, RDP, SMB, rclone, local, Reticulum, OPENAI). Secrets like passwords and keys are redacted. SSH profiles also report `sshOptions` (the ssh_config-style lines set on the profile) and `sshEngine` — \"jsch\" (default) or \"sshlib\" (the experimental whole-connection engine, opted into with the 'HavenSshEngine sshlib' directive) — so an agent that sets the engine can confirm which one a profile is actually on.",
+            description = "List saved connection profiles (SSH, Mosh, SMB, rclone, local, Reticulum, OPENAI). Secrets like passwords and keys are redacted. SSH profiles also report `sshOptions` (the ssh_config-style lines set on the profile) and `sshEngine` — \"jsch\" (default) or \"sshlib\" (the experimental whole-connection engine, opted into with the 'HavenSshEngine sshlib' directive) — so an agent that sets the engine can confirm which one a profile is actually on.",
             inputSchema = emptyObjectSchema(),
         ) { _ -> listConnections() },
 
@@ -453,7 +453,7 @@ internal class McpTools(
         ) { args -> readExitedSession(args) },
 
         "list_sessions" to ToolHandler(
-            description = "List currently registered sessions across all transports (ssh, mosh, et, reticulum, rdp, smb, local, mail, openai, and Bluetooth/BLE/USB serial) with sessionId, profileId, label, status (connecting, connected, reconnecting, disconnected, error), transport, and isAgentRepl — a screen heuristic (Claude Code TUI chrome in the bottom lines) marking which terminal session is an agent REPL, so a conversation peer can be picked without guessing; null when the session has no attached terminal tab. SSH sessions additionally include sessionManager, chosenSessionName (the stable tmux/zellij identity that survives reconnects), channel state, jump-session linkage, and active port forwards.",
+            description = "List currently registered sessions across all transports (ssh, mosh, et, reticulum, smb, local, mail, openai, and Bluetooth/BLE/USB serial) with sessionId, profileId, label, status (connecting, connected, reconnecting, disconnected, error), transport, and isAgentRepl — a screen heuristic (Claude Code TUI chrome in the bottom lines) marking which terminal session is an agent REPL, so a conversation peer can be picked without guessing; null when the session has no attached terminal tab. SSH sessions additionally include sessionManager, chosenSessionName (the stable tmux/zellij identity that survives reconnects), channel state, jump-session linkage, and active port forwards.",
             inputSchema = emptyObjectSchema(),
         ) { _ -> listSessions() },
 
@@ -601,7 +601,7 @@ internal class McpTools(
 
     private fun toolsPart2(): Map<String, ToolHandler> = linkedMapOf(
         "present_web" to ToolHandler(
-            description = "Show the user HTML, an SVG, or a PDF inline in an in-app WebView — the interactive rung between present_media (a static image) and present_app (a full live VNC app). Pass a `url` (e.g. a serve_file loopback URL or any web page), or reference a file with `profileId` (\"local\" for the device / proot-guest cache, or an SSH/SMB/rclone profile id) + `path`, which Haven serves over a loopback URL. A PDF is paged; HTML/SVG render live (pinch-zoom + pan). Floats in a bottom sheet over whatever screen the user is on; bytes never pass through the agent context. Returns immediately: a `url` acks with { presented, id, url }; a file reference acks with { presented } and is staged/shown in the background (a staging failure is logged, not returned). The user dismisses it at their leisure.",
+            description = "Show the user HTML, an SVG, or a PDF inline in an in-app WebView — the interactive rung above present_media (a static image). Pass a `url` (e.g. a serve_file loopback URL or any web page), or reference a file with `profileId` (\"local\" for the device / proot-guest cache, or an SSH/SMB/rclone profile id) + `path`, which Haven serves over a loopback URL. A PDF is paged; HTML/SVG render live (pinch-zoom + pan). Floats in a bottom sheet over whatever screen the user is on; bytes never pass through the agent context. Returns immediately: a `url` acks with { presented, id, url }; a file reference acks with { presented } and is staged/shown in the background (a staging failure is logged, not returned). The user dismisses it at their leisure.",
             inputSchema = objectSchema {
                 string("url", "An http(s) URL to load (e.g. a serve_file loopback URL or any web page). Alternative to profileId+path.")
                 string("profileId", "Backend holding the file: \"local\" (device / proot-guest cache, default) or an SSH/SMB/rclone profile id. Used with `path`.")
@@ -610,34 +610,6 @@ internal class McpTools(
             },
             consentLevel = ConsentLevel.NEVER,
         ) { args -> presentWeb(args) },
-
-        "present_app" to ToolHandler(
-            description = "Show the user a LIVE, interactive single application window inline in Haven. Launches `command` as a Wayland app under a `cage` kiosk inside the active proot guest, exposes it over VNC, and embeds the live view in a bottom sheet over whatever screen the user is on (pinch-zoom, pan, drag and fullscreen all work; the user can interact). Use this to collaborate in a real GUI app — an image viewer, a media/audio player, a PDF/whiteboard tool — rather than pushing a static image with present_media. `command` is the guest shell command cage runs (e.g. 'imv /root/board.png', 'mpv /root/clip.mp4'); the app and any Wayland deps must already be installed in the guest. Returns { presented, sessionId, vncPort, state } once the window is up. Multiple app windows can run at once: each call launches another cage; the newest is shown full-overlay and any previous one is backgrounded to a draggable edge icon (tap to bring it back). The user backgrounds a window by tapping outside it (keeps it running) and tears it down with the Dismiss button or the edge-icon close. If the window comes up grey/blank or vanishes, read the app's own stdout/stderr with read_app_window_log (works even after it crashed) instead of wrapping the command in a logging script.",
-            inputSchema = objectSchema {
-                string("command", "Guest shell command for the GUI app cage runs, e.g. 'imv /root/x.png'.", required = true)
-                string("caption", "Optional one-line caption shown above the window.")
-                boolean("fullscreen", "Open the window filling the whole screen (immersive) instead of the bottom sheet. Default false.")
-                string("resolution", "Cage display resolution: 'auto' (portrait, fills the screen — default) or a 'WxH' token like '1280x720'. Lower resolution = bigger fonts.")
-                number("scale", "Output scale factor (wlroots HiDPI; foot/GTK honour it). 1.0 default; 1.5/2 enlarge fonts + UI.")
-                boolean("runAsRoot", "Run the app as root via fakeroot-tcp (the cage compositor itself runs non-root, so system tools like package managers go read-only otherwise). Installs fakeroot if missing. APT distros only today. Default false.")
-                boolean("multiWindow", "Float the app's windows instead of force-fullscreening them. Required for apps that open several toplevels (qmmp's skinned main/EQ/playlist deck) — under the default kiosk rule they stack and only the last-raised window is visible. Default false.")
-                stringArray("swayRules", "Extra sway config lines appended to the kiosk config — per-title placement for multiWindow apps (sway centers every floating window, stacking a deck), e.g. 'for_window [title=\"^Playlist$\"] move position 20 136'.")
-            },
-            consentLevel = ConsentLevel.ONCE_PER_SESSION,
-            summarise = { args ->
-                "Launch a GUI app window for the agent: ${args.optString("command")}"
-            },
-        ) { args -> presentApp(args) },
-
-        "read_app_window_log" to ToolHandler(
-            description = "Read the captured output log of a present_app cage window. The cage redirects BOTH the sway compositor AND the GUI app it runs (stdout+stderr merged) into one log, so this is how the agent SEES a present_app app's own output — startup errors, GL/Mesa diagnostics, a crash trace — without wrapping the command in a logging script. Pass the sessionId returned by present_app for a live window; OMIT it to read the most-recent app-window log, which still works after the app crashed or exited (the session is gone but the log survives on disk). Returns { sessionId?, display, bytes, truncated, log }. For a GUI app that came up then died (a grey/blank or vanished window), this is the first thing to read.",
-            inputSchema = objectSchema {
-                string("sessionId", "present_app sessionId for a live window. Omit to read the newest app-window log (survives a crashed/exited app).")
-                integer("maxBytes", "Return at most the last N bytes of the log. Default 16384, clamped 256..262144.")
-            },
-            consentLevel = ConsentLevel.NEVER,
-            summarise = { _ -> "Read a present_app window's output log" },
-        ) { args -> readAppWindowLog(args) },
 
 
         "raise_notification" to ToolHandler(
@@ -760,7 +732,7 @@ internal class McpTools(
         // --- Write tools (require consent) ------------------------------
 
         "disconnect_profile" to ToolHandler(
-            description = "Disconnect every live session for a profile across all transports (SSH, Mosh, Eternal Terminal, RDP, VNC, SMB, Reticulum, local, Bluetooth/BLE/USB serial). Use list_connections to find profileIds.",
+            description = "Disconnect every live session for a profile across all transports (SSH, Mosh, Eternal Terminal, SMB, Reticulum, local, Bluetooth/BLE/USB serial). Use list_connections to find profileIds.",
             inputSchema = objectSchema {
                 string("profileId", "ID of the connection profile to disconnect.", required = true)
             },
@@ -1278,7 +1250,7 @@ internal class McpTools(
         ) { args -> setCustomBindsTool(args) },
 
         "capture_haven_ui" to ToolHandler(
-            description = "Capture HAVEN'S OWN rendered screen — the app UI the user is looking at right now (Connections list, terminal tab, a dialog, the file browser, an agent overlay), NOT a remote desktop (capture_desktop_tab) or the terminal text (read_terminal_snapshot). This is the 'perceive' half of the self-hosting loop: after install_apk_from_backend deploys a build, capture_haven_ui lets the agent see the result and diff it. Returns the image plus { width, height, imageWidth, imageHeight, format }. width/height are the FULL window in pixels — pass tap_haven_ui / swipe_haven_ui coordinates in THAT space even when the returned image was downscaled via maxWidth. If Settings → screen security (FLAG_SECURE) is on, returns { secure: true } with no image (capture is intentionally blocked). Errors if Haven is not in the foreground.",
+            description = "Capture HAVEN'S OWN rendered screen — the app UI the user is looking at right now (Connections list, terminal tab, a dialog, the file browser, an agent overlay), NOT the terminal text (read_terminal_snapshot). This is the 'perceive' half of the self-hosting loop: after install_apk_from_backend deploys a build, capture_haven_ui lets the agent see the result and diff it. Returns the image plus { width, height, imageWidth, imageHeight, format }. width/height are the FULL window in pixels — pass tap_haven_ui / swipe_haven_ui coordinates in THAT space even when the returned image was downscaled via maxWidth. If Settings → screen security (FLAG_SECURE) is on, returns { secure: true } with no image (capture is intentionally blocked). Errors if Haven is not in the foreground.",
             inputSchema = objectSchema {
                 integer("maxWidth", "Downscale so the returned image is at most this many pixels wide (the reported width/height stay full-window). Default 1080 (clamped 160–4096).")
                 string("format", "\"jpeg\" (default, smaller) or \"png\" (lossless, larger).")
@@ -1458,7 +1430,7 @@ internal class McpTools(
         ) { _ -> listAppPacks() },
 
         "install_app_pack" to ToolHandler(
-            description = "Install a curated guest-app pack (from list_app_packs) into the ACTIVE distro: package install via the distro's package manager, idempotent config drops, optional pinned-asset downloads, then — app-side — a verify-binary check, app-window def registration (so the app appears in Installed Apps / present_app-launchable), and audio-bridge start if the pack needs it. Long-running (a package install): returns { jobId, status: \"running\" } immediately; poll by calling again with that jobId — the response carries accumulated output and, once finished, the exitCode (0 = installed AND registered; non-zero = a phase failed, see output tail). Requires an installed active distro whose family the pack supports.",
+            description = "Install a curated guest-app pack (from list_app_packs) into the ACTIVE distro: package install via the distro's package manager, idempotent config drops, optional pinned-asset downloads, then — app-side — a verify-binary check, app-window def registration, and audio-bridge start if the pack needs it. Long-running (a package install): returns { jobId, status: \"running\" } immediately; poll by calling again with that jobId — the response carries accumulated output and, once finished, the exitCode (0 = installed AND registered; non-zero = a phase failed, see output tail). Requires an installed active distro whose family the pack supports.",
             inputSchema = objectSchema {
                 string("id", "Pack id from list_app_packs (e.g. \"qmmp\"). Required unless polling via jobId.")
                 boolean("includeAssets", "Also fetch the pack's optional pinned assets (skins, sample content). Default true.")
@@ -1631,29 +1603,16 @@ internal class McpTools(
         ) { args -> setProfileRouting(args) },
 
         "create_connection" to ToolHandler(
-            description = "Create a saved connection profile. Supports connectionType=SSH, SMB, VNC, RDP, SPICE, EMAIL, RETICULUM. SSH-family fields: username (required), password (optional, stored), keyId (optional — references list_ssh_keys), ignoreSavedKeys (force password-only auth, never offer saved keys), useMosh (turn an SSH profile into a Mosh profile), sessionManager (optional: TMUX | ZELLIJ | SCREEN | BYOBU | HERDR | PSMUX — attach through that multiplexer; omit for a plain shell), remoteCommand (run a command via an SSH exec request instead of a login shell — e.g. 'tmux new -A -s work' to attach-or-create that session before shell startup files run) + requestPty (PTY for it, default true), bindAddress (local address the outgoing SSH socket binds to, ssh -b — direct connections only). SMB: smbShare (required), username + password, smbDomain. VNC: vncUsername, vncPassword, vncPort, and vncSshForward + vncSshProfileId to tunnel VNC through a saved SSH profile. RDP: rdpUsername (required), rdpPassword, rdpDomain, rdpPort. SPICE: spicePassword (optional ticket — no username/domain), spicePort (default 5900), and spiceSshForward + spiceSshProfileId to tunnel SPICE through a saved SSH profile. EMAIL: emailProvider (\"imap\" default, or \"proton\"); username = the email address; password = the account/app-password; for IMAP set emailServer (required) + emailPort (993) + emailSmtpPort (465) + emailTls (true), plus emailSmtpServer when the SMTP host differs (e.g. smtp.gmail.com); for Proton add emailMailboxPassword if two-password mode. EMAIL host is optional (the tunnel-ingress/bastion SPA/knock guards), not the mail server. OPENAI (OpenAI-compatible endpoint, e.g. llama-server or CLIProxyAPI): host = server IP/hostname (a full http:// URL also works), port = TCP port (default 80), optional password arg = the API key (sent as a Bearer token; omit for keyless servers), openaiPathPrefix = optional path inserted before /v1 (e.g. \"/api\"). Connect verifies via GET /v1/models; chat via the chat screen or openai_chat. BTSERIAL (Bluetooth-serial console, #406): host = the paired device's Bluetooth MAC (from list_bluetooth_devices); no other fields. The device must already be paired in Android Settings. BLESERIAL (Bluetooth-LE-serial console — Nordic UART Service / HM-10): host = the BLE peripheral's MAC; no other fields. It needn't be paired — scan-and-pick in the editor; the GATT service/characteristics are auto-detected (NUS 6E400001…, then HM-10 FFE0/FFE1). USBSERIAL (USB-serial console, #408 — Arduino / Duet3D G-code / ESP32 / USB-TTL): host = the device's vendorId:productId hex, e.g. 1a86:7523, from list_usb_devices; usbBaudRate = baud (default 115200); usbDataBits/usbParity/usbStopBits/usbFlowControl set the rest of the line format (default 8N1, no flow control). Plug the adapter in first; connect_profile pops the Android USB-permission prompt. Chipsets: CDC-ACM, CH34x, FTDI, CP21xx, Prolific. RETICULUM: destinationHash (required, 32 hex chars) is the address; reticulumHost + reticulumPort are only how this phone reaches the mesh, defaulting to 127.0.0.1:37428 which is a Sideband or Columba shared instance on this device — any other host is a TCP gateway. reticulumNetworkName + reticulumPassphrase set IFAC on an authenticated gateway. The new profile id is returned for follow-up calls (set_profile_routing, connect_profile). For rclone / local create the profile in the UI — those need an OAuth flow the agent can't drive.",
+            description = "Create a saved connection profile. Supports connectionType=SSH, SMB, EMAIL, RETICULUM. SSH-family fields: username (required), password (optional, stored), keyId (optional — references list_ssh_keys), ignoreSavedKeys (force password-only auth, never offer saved keys), useMosh (turn an SSH profile into a Mosh profile), sessionManager (optional: TMUX | ZELLIJ | SCREEN | BYOBU | HERDR | PSMUX — attach through that multiplexer; omit for a plain shell), remoteCommand (run a command via an SSH exec request instead of a login shell — e.g. 'tmux new -A -s work' to attach-or-create that session before shell startup files run) + requestPty (PTY for it, default true), bindAddress (local address the outgoing SSH socket binds to, ssh -b — direct connections only). SMB: smbShare (required), username + password, smbDomain. EMAIL: emailProvider (\"imap\" default, or \"proton\"); username = the email address; password = the account/app-password; for IMAP set emailServer (required) + emailPort (993) + emailSmtpPort (465) + emailTls (true), plus emailSmtpServer when the SMTP host differs (e.g. smtp.gmail.com); for Proton add emailMailboxPassword if two-password mode. EMAIL host is optional (the tunnel-ingress/bastion SPA/knock guards), not the mail server. OPENAI (OpenAI-compatible endpoint, e.g. llama-server or CLIProxyAPI): host = server IP/hostname (a full http:// URL also works), port = TCP port (default 80), optional password arg = the API key (sent as a Bearer token; omit for keyless servers), openaiPathPrefix = optional path inserted before /v1 (e.g. \"/api\"). Connect verifies via GET /v1/models; chat via the chat screen or openai_chat. BTSERIAL (Bluetooth-serial console, #406): host = the paired device's Bluetooth MAC (from list_bluetooth_devices); no other fields. The device must already be paired in Android Settings. BLESERIAL (Bluetooth-LE-serial console — Nordic UART Service / HM-10): host = the BLE peripheral's MAC; no other fields. It needn't be paired — scan-and-pick in the editor; the GATT service/characteristics are auto-detected (NUS 6E400001…, then HM-10 FFE0/FFE1). USBSERIAL (USB-serial console, #408 — Arduino / Duet3D G-code / ESP32 / USB-TTL): host = the device's vendorId:productId hex, e.g. 1a86:7523, from list_usb_devices; usbBaudRate = baud (default 115200); usbDataBits/usbParity/usbStopBits/usbFlowControl set the rest of the line format (default 8N1, no flow control). Plug the adapter in first; connect_profile pops the Android USB-permission prompt. Chipsets: CDC-ACM, CH34x, FTDI, CP21xx, Prolific. RETICULUM: destinationHash (required, 32 hex chars) is the address; reticulumHost + reticulumPort are only how this phone reaches the mesh, defaulting to 127.0.0.1:37428 which is a Sideband or Columba shared instance on this device — any other host is a TCP gateway. reticulumNetworkName + reticulumPassphrase set IFAC on an authenticated gateway. The new profile id is returned for follow-up calls (set_profile_routing, connect_profile). For rclone / local create the profile in the UI — those need an OAuth flow the agent can't drive.",
             inputSchema = objectSchema {
                 string("label", "User-facing label.", required = true)
-                string("connectionType", "SSH | SMB | VNC | RDP | SPICE | EMAIL | BTSERIAL | BLESERIAL | USBSERIAL | RETICULUM | GUEST.", required = true)
+                string("connectionType", "SSH | SMB | EMAIL | BTSERIAL | BLESERIAL | USBSERIAL | RETICULUM | GUEST.", required = true)
                 string("host", "Target hostname or IP. For EMAIL this is the optional tunnel ingress/bastion (SPA/knock target), NOT the mail server — leave blank for a direct IMAP connection.", required = true)
-                integer("port", "TCP port. Defaults: SSH 22, SMB 445, VNC 5900, RDP 3389, SPICE 5900. Type-specific vncPort/rdpPort/spicePort override this.")
+                integer("port", "TCP port. Defaults: SSH 22, SMB 445.")
                 string("username", "Username for SSH/SMB.")
-                string("password", "Password (stored). Optional for SSH if a key is used; some VNC/SMB setups allow guest.")
+                string("password", "Password (stored). Optional for SSH if a key is used; some SMB setups allow guest.")
                 string("smbShare", "Share name (SMB). Required when connectionType=SMB.")
                 string("smbDomain", "AD/workgroup domain (SMB). Optional.")
-                string("vncUsername", "Username for VeNCrypt VNC.")
-                string("vncPassword", "VNC password.")
-                integer("vncPort", "VNC only: TCP port (default 5900). Overrides the generic `port`.")
-                boolean("vncSshForward", "VNC only: tunnel the VNC connection through a saved SSH profile (set vncSshProfileId). The VNC target is reached at 127.0.0.1:<port> from the SSH server. Default false.")
-                string("vncSshProfileId", "VNC only: id of the SSH profile (from list_connections) to tunnel through when vncSshForward is true.")
-                string("rdpUsername", "Windows username (RDP). Required when connectionType=RDP.")
-                string("rdpPassword", "Windows password (RDP).")
-                string("rdpDomain", "AD domain (RDP). Optional.")
-                integer("rdpPort", "RDP only: TCP port (default 3389). Overrides the generic `port`.")
-                string("spicePassword", "SPICE only: ticket/password (stored). Optional — omit for an unticketed server.")
-                integer("spicePort", "SPICE only: TCP port (default 5900). Overrides the generic `port`.")
-                boolean("spiceSshForward", "SPICE only: tunnel through a saved SSH profile (set spiceSshProfileId). The SPICE target is reached at 127.0.0.1:<port> from the SSH server. Default false.")
-                string("spiceSshProfileId", "SPICE only: id of the SSH profile (from list_connections) to tunnel through when spiceSshForward is true.")
                 string("emailProvider", "EMAIL only: \"imap\" (generic IMAP/SMTP, default) or \"proton\".")
                 string("emailServer", "EMAIL/imap only: IMAP server hostname (required for imap). Reached through the tunnel when one is set.")
                 string("emailSmtpServer", "EMAIL/imap only: SMTP submission host, when it differs from the IMAP host (e.g. smtp.gmail.com vs imap.gmail.com). Optional — defaults to emailServer.")
@@ -1704,14 +1663,14 @@ internal class McpTools(
         ) { args -> createConnection(args) },
 
         "update_connection" to ToolHandler(
-            description = "Edit fields on an existing connection profile (load → change → save). Pass profileId (required) plus only the fields you want to change — anything omitted is left as-is. Common SSH-family fields: label, host, port, username, password (stored, mapped to the profile's transport), keyId, ignoreSavedKeys (force password-only auth), useMosh, forwardAgent, remoteCommand (SSH exec instead of a login shell; empty string clears) + requestPty, bindAddress (ssh -b; direct connections only, empty string clears). Desktop tunnels: vncSshForward + vncSshProfileId, rdpSshForward + rdpSshProfileId, spiceSshForward + spiceSshProfileId, smbSshForward + smbSshProfileId. USB/IP auto-forward: usbForwardVidPid (export a phone-attached USB device to this host on every connect). Passwords are stored encrypted and never echoed back. OPENAI: password maps to the API key (empty string clears). For routing/proxy use set_profile_routing; for port-knock/SPA use set_port_knock/set_spa. Returns the updated profile (secrets redacted).",
+            description = "Edit fields on an existing connection profile (load → change → save). Pass profileId (required) plus only the fields you want to change — anything omitted is left as-is. Common SSH-family fields: label, host, port, username, password (stored, mapped to the profile's transport), keyId, ignoreSavedKeys (force password-only auth), useMosh, forwardAgent, remoteCommand (SSH exec instead of a login shell; empty string clears) + requestPty, bindAddress (ssh -b; direct connections only, empty string clears). SMB tunnel: smbSshForward + smbSshProfileId. USB/IP auto-forward: usbForwardVidPid (export a phone-attached USB device to this host on every connect). Passwords are stored encrypted and never echoed back. OPENAI: password maps to the API key (empty string clears). For routing/proxy use set_profile_routing; for port-knock/SPA use set_port_knock/set_spa. Returns the updated profile (secrets redacted).",
             inputSchema = objectSchema {
                 string("profileId", "Profile id from list_connections.", required = true)
                 string("label", "New user-facing label.")
                 string("host", "New hostname or IP.")
                 integer("port", "New TCP port.")
                 string("username", "New username (SSH/SMB).")
-                string("password", "New password (stored encrypted). Mapped to the profile's transport (SSH/VNC/RDP/SMB). Pass an empty string to clear it.")
+                string("password", "New password (stored encrypted). Mapped to the profile's transport (SSH/SMB). Pass an empty string to clear it.")
                 string("keyId", "SSH only: id of a saved key (list_ssh_keys). Empty string clears.")
                 string("sshOptions", "SSH only: replace the profile's ssh_config-style option lines (e.g. 'HavenSshEngine sshlib' opts this profile into the EXPERIMENTAL sshlib engine for the whole connection — terminal, exec, SFTP and tunnels; it refuses jump/proxy, FIDO2, OpenSSH certs and MFA chains). Empty string clears. Ignored on non-SSH profiles (USB-serial packs its line format here).")
                 string("remoteCommand", "SSH only (#436): run this command via an SSH exec request instead of a login shell (e.g. 'tmux new -A -s work'). Empty string clears (back to the normal shell).")
@@ -1721,16 +1680,10 @@ internal class McpTools(
                 boolean("ignoreSavedKeys", "SSH-family only: force password-only auth, never offer saved keystore keys (#121).")
                 boolean("useMosh", "SSH only: use Mosh on top of the SSH bootstrap.")
                 boolean("forwardAgent", "SSH only: enable SSH agent forwarding. Keys with a stored passphrase (or none) are exposed to the remote's ssh-agent socket (#377).")
-                boolean("vncSshForward", "VNC only: tunnel through a saved SSH profile (set vncSshProfileId).")
-                string("vncSshProfileId", "VNC only: SSH profile id to tunnel through. Empty string clears.")
                 string("openaiPathPrefix", "OPENAI only: path prefix inserted before /v1 (e.g. \"/api\"). Empty string clears.")
                 string("protocol", "OPENAI only: wire protocol — OPENAI (default), OLLAMA, ANTHROPIC, or GEMINI. Empty string clears (back to OPENAI).")
-                boolean("rdpSshForward", "RDP only: tunnel through a saved SSH profile (set rdpSshProfileId).")
-                string("rdpSshProfileId", "RDP only: SSH profile id to tunnel through. Empty string clears.")
                 boolean("smbSshForward", "SMB only: tunnel through a saved SSH profile (set smbSshProfileId).")
                 string("smbSshProfileId", "SMB only: SSH profile id to tunnel through. Empty string clears.")
-                boolean("spiceSshForward", "SPICE only: tunnel through a saved SSH profile (set spiceSshProfileId).")
-                string("spiceSshProfileId", "SPICE only: SSH profile id to tunnel through. Empty string clears.")
                 string("moshServerCommand", "Mosh only: override the command Haven runs over SSH to start mosh-server (default 'mosh-server new -s -c 256 …'). It must print a 'MOSH CONNECT <port> <key>' line, which Haven parses to find the session — so a wrapper can point Haven at a different port (e.g. scripts/mosh-fault-rig.py bootstrap, which puts a fault-injecting relay in front). Empty string restores the default.")
                 string("usbForwardVidPid", "SSH only: VID:PID of a phone-attached USB device (e.g. '1050:0406' — see list_usb_devices) to auto-export over USB/IP whenever this profile connects. Haven opens the device, starts the usbip server on loopback, adds the remote forward, and runs `usbip attach` on the host, re-attaching after a tunnel drop. Empty string clears (no auto-forward).")
             },
@@ -2205,9 +2158,6 @@ internal class McpTools(
             // every build, but the terminal flavour's is built without the
             // rclone package (#510), so its presence proves nothing.
             if (sh.haven.rclone.bridge.RcloneBridge.available) put("rclone")
-            if (native.vnc) put("vnc")
-            if (native.rdp) put("rdp")
-            if (native.spice) put("spice")
             if (sh.haven.core.wayland.WaylandBridge.available) put("wayland")
             if (native.ffmpeg) put("ffmpeg")
             if (native.uml) put("uml")
@@ -2325,12 +2275,6 @@ internal class McpTools(
             put("sshEngine", sh.haven.core.ssh.sshEngineFromOptionsText(p.sshOptions).name.lowercase())
             if (!p.bindAddress.isNullOrBlank()) put("bindAddress", p.bindAddress)
         }
-        // VNC-specific fields
-        if (p.vncPort != null) put("vncPort", p.vncPort)
-        if (!p.vncUsername.isNullOrEmpty()) put("vncUsername", p.vncUsername)
-        // RDP
-        if (!p.rdpUsername.isNullOrEmpty()) put("rdpUsername", p.rdpUsername)
-        if (!p.rdpDomain.isNullOrEmpty()) put("rdpDomain", p.rdpDomain)
         // SMB
         if (!p.smbShare.isNullOrEmpty()) put("smbShare", p.smbShare)
         // OPENAI — baseUrl is the dial target (host[+port] + prefix); the key
@@ -3070,7 +3014,7 @@ internal class McpTools(
                         if (total > MAX_PRESENT_BYTES) {
                             throw McpError(
                                 -32602,
-                                "media exceeds $MAX_PRESENT_BYTES bytes — use present_app or play_file for large media",
+                                "media exceeds $MAX_PRESENT_BYTES bytes — use play_file for large media",
                             )
                         }
                         out.write(buf, 0, r)
@@ -3098,7 +3042,7 @@ internal class McpTools(
         if (entry.size > MAX_PRESENT_BYTES) {
             throw McpError(
                 -32602,
-                "$path is ${entry.size} bytes; caps at $MAX_PRESENT_BYTES — use present_app or play_file for large media",
+                "$path is ${entry.size} bytes; caps at $MAX_PRESENT_BYTES — use play_file for large media",
             )
         }
         val ext = path.substringAfterLast('.', "").ifEmpty { "bin" }
@@ -3292,122 +3236,6 @@ internal class McpTools(
     }
 
     /**
-     * Launch [command] as a single-app cage kiosk in the guest and surface
-     * its live VNC view in the present_media overlay. Blocks (on IO) until
-     * the kiosk's VNC port is up — [DesktopManager.startAppWindow] does the
-     * wait — then enqueues an APP_WINDOW presentation pointing at it. On
-     * failure surfaces the compositor log tail for diagnosis and cleans up
-     * the dead session.
-     */
-    private suspend fun presentApp(args: JSONObject): JSONObject {
-        val command = args.optString("command").ifEmpty {
-            throw McpError(-32602, "command is required (the GUI app to run, e.g. 'imv /root/x.png')")
-        }
-        val caption = args.optString("caption", "").ifEmpty { null }
-        val fullscreen = args.optBoolean("fullscreen", false)
-        // null = use the global default; the persisted def keeps that choice.
-        val resolutionArg = args.optString("resolution", "").ifEmpty { null }
-        val scaleArg = if (args.has("scale")) args.optDouble("scale").toFloat() else null
-        val runAsRoot = args.optBoolean("runAsRoot", false)
-        val multiWindow = args.optBoolean("multiWindow", false)
-        val swayRules = args.optJSONArray("swayRules")?.let { arr ->
-            (0 until arr.length()).mapNotNull { i -> arr.optString(i).ifEmpty { null } }
-        } ?: emptyList()
-        if (!prootManager.isRootfsInstalled) {
-            throw McpError(-32603, "Active distro '${prootManager.activeDistroId}' has no installed rootfs")
-        }
-        val dm = localSessionManager.desktopManager
-        val resolution = resolutionArg ?: preferencesRepository.appWindowDefaultResolution.first()
-        val scale = scaleArg ?: preferencesRepository.appWindowDefaultScale.first()
-        // The cage runs the app as a single-app sway kiosk; install sway+wayvnc
-        // on demand (slow + non-streaming) so present_app works on a fresh distro.
-        if (!withContext(Dispatchers.IO) { dm.ensureCageRuntime() }) {
-            throw McpError(-32603, "the cage runtime (sway/wayvnc) isn't installed for '${prootManager.activeDistroId}' and couldn't be installed automatically")
-        }
-        val rooted = if (runAsRoot) dm.ensureRunAsRoot() else false
-        val session = withContext(Dispatchers.IO) { dm.startAppWindow(command, resolution, scale, runAsRoot = rooted, multiWindow = multiWindow, swayRules = swayRules) }
-        if (session.state == sh.haven.core.local.DesktopManager.DesktopState.RUNNING) {
-            presentationManager.presentAppWindow(
-                host = "127.0.0.1",
-                port = session.vncPort,
-                sessionId = session.sessionId,
-                caption = caption ?: "App: $command",
-                fullscreen = fullscreen,
-                scale = scale,
-                resolution = resolution,
-            )
-            // Record the launch so the user can restart this window from
-            // Desktop settings later. Fire-and-forget — never fail the tool
-            // because persistence hiccuped.
-            runCatching {
-                preferencesRepository.upsertAppWindowDef(
-                    label = caption ?: command,
-                    command = command,
-                    createdBy = sh.haven.core.data.preferences.AppWindowOrigin.AGENT,
-                    fullscreen = fullscreen,
-                    resolution = resolutionArg,
-                    scale = scaleArg,
-                    runAsRoot = if (runAsRoot) true else null,
-                    multiWindow = if (multiWindow) true else null,
-                    swayRules = swayRules.ifEmpty { null },
-                )
-            }
-            return JSONObject().apply {
-                put("presented", true)
-                put("sessionId", session.sessionId)
-                put("vncPort", session.vncPort)
-                put("state", "running")
-            }
-        }
-        // ERROR: capture the compositor log tail, then clean up the dead
-        // session so it doesn't linger in the registry.
-        val logTail = dm.appWindowCompositorLog(session.sessionId)?.takeLast(800)?.trim()
-        withContext(Dispatchers.IO) { dm.stopAppWindow(session.sessionId) }
-        throw McpError(
-            -32603,
-            buildString {
-                append(session.errorMessage ?: "app window failed to start")
-                append(". The app + its Wayland deps must be installed in the guest, ")
-                append("and the Sway DE installed (provides sway + wayvnc; present_app runs the ")
-                append("app as a single-app sway kiosk because cage 0.1.4 crashes on the headless backend).")
-                if (!logTail.isNullOrBlank()) append(" Compositor log: ").append(logTail)
-            },
-        )
-    }
-
-    /**
-     * Read a present_app window's captured output (compositor + app stdout/stderr,
-     * merged by the cage). By sessionId for a live window, else the newest log —
-     * which survives a crashed/exited app, the case where it's most needed.
-     */
-    private fun readAppWindowLog(args: JSONObject): JSONObject {
-        val dm = localSessionManager.desktopManager
-        val sessionId = args.optString("sessionId").ifEmpty { null }
-        val maxBytes = args.optInt("maxBytes", 16384).coerceIn(256, 262144)
-        val (display, text) = if (sessionId != null) {
-            val log = dm.appWindowCompositorLog(sessionId)
-                ?: throw McpError(
-                    -32602,
-                    "no live app window '$sessionId' (it may have exited — omit sessionId to read the newest log)",
-                )
-            (dm.appWindows.value[sessionId]?.displayNumber ?: -1) to log
-        } else {
-            val latest = dm.latestAppWindowLog()
-                ?: throw McpError(-32603, "no app-window logs yet — launch one with present_app first")
-            latest.first to latest.second.readText()
-        }
-        val truncated = text.length > maxBytes
-        val tail = if (truncated) text.takeLast(maxBytes) else text
-        return JSONObject().apply {
-            if (sessionId != null) put("sessionId", sessionId)
-            put("display", display)
-            put("bytes", tail.toByteArray().size)
-            put("truncated", truncated)
-            put("log", tail)
-        }
-    }
-
-    /**
      * Enumerate installed GUI apps in the active guest (the launcher catalog the
      * Browse-installed-apps menu shows). Reads `.desktop` files off the rootfs
      * and resolves icons via [sh.haven.core.local.GuestAppScanner]; returns a
@@ -3492,10 +3320,6 @@ internal class McpTools(
         // live, and live_tunnels surfaced the bogus "still depending" state.
         sshSessionManager.teardownTunnelDependent(profileId)
         tunnelManager.release(profileId)
-        // Direct (non-tunnelled) VNC/RDP/SPICE tabs have no lease to cascade
-        // through — close them via the tab's registered close handle, so the
-        // tab (and its status in list_desktop_sessions) actually goes away (#437).
-        desktopSessionRegistry.closeHandle(profileId)?.invoke()
         return JSONObject().apply {
             put("profileId", profileId)
             put("disconnected", true)
@@ -6383,7 +6207,7 @@ internal class McpTools(
         if (args.has("keyId") && !newKeyId.isNullOrBlank() && sshKeyRepository.getById(newKeyId) == null) {
             throw IllegalArgumentException("key $newKeyId not found")
         }
-        for (refKey in listOf("vncSshProfileId", "rdpSshProfileId", "smbSshProfileId", "spiceSshProfileId")) {
+        for (refKey in listOf("smbSshProfileId")) {
             if (args.has(refKey)) {
                 val ref = args.optString(refKey).ifBlank { null }
                 if (ref != null && connectionRepository.getById(ref) == null) {
@@ -6409,7 +6233,7 @@ internal class McpTools(
         }
 
         // `port` maps to the base port AND the transport-specific port column —
-        // VNC/RDP/SMB dial vncPort/rdpPort/smbPort, not the base port (mirrors
+        // SMB dials smbPort, not the base port (mirrors
         // create_connection, which sets both).
         val portChanged = args.has("port")
         val newPort = if (portChanged) args.optInt("port", existing.port) else existing.port
@@ -6418,16 +6242,10 @@ internal class McpTools(
             label = if (args.has("label")) args.optString("label").ifBlank { existing.label } else existing.label,
             host = if (args.has("host")) args.optString("host").ifBlank { existing.host } else existing.host,
             port = newPort,
-            vncPort = if (portChanged && existing.connectionType == "VNC") newPort else existing.vncPort,
-            rdpPort = if (portChanged && existing.connectionType == "RDP") newPort else existing.rdpPort,
             smbPort = if (portChanged && existing.connectionType == "SMB") newPort else existing.smbPort,
-            spicePort = if (portChanged && existing.connectionType == "SPICE") newPort else existing.spicePort,
             username = if (args.has("username")) args.optString("username") else existing.username,
             sshPassword = if (existing.connectionType == "SSH") newPassword(existing.sshPassword) else existing.sshPassword,
-            vncPassword = if (existing.connectionType == "VNC") newPassword(existing.vncPassword) else existing.vncPassword,
-            rdpPassword = if (existing.connectionType == "RDP") newPassword(existing.rdpPassword) else existing.rdpPassword,
             smbPassword = if (existing.connectionType == "SMB") newPassword(existing.smbPassword) else existing.smbPassword,
-            spicePassword = if (existing.connectionType == "SPICE") newPassword(existing.spicePassword) else existing.spicePassword,
             openaiApiKey = if (existing.connectionType == "OPENAI") newPassword(existing.openaiApiKey) else existing.openaiApiKey,
             openaiPathPrefix = if (existing.connectionType == "OPENAI") str("openaiPathPrefix", existing.openaiPathPrefix) else existing.openaiPathPrefix,
             aiProtocol = if (existing.connectionType == "OPENAI") {
@@ -6449,14 +6267,8 @@ internal class McpTools(
             ignoreSavedKeys = bool("ignoreSavedKeys", existing.ignoreSavedKeys),
             useMosh = bool("useMosh", existing.useMosh),
             forwardAgent = bool("forwardAgent", existing.forwardAgent),
-            vncSshForward = bool("vncSshForward", existing.vncSshForward),
-            vncSshProfileId = str("vncSshProfileId", existing.vncSshProfileId),
-            rdpSshForward = bool("rdpSshForward", existing.rdpSshForward),
-            rdpSshProfileId = str("rdpSshProfileId", existing.rdpSshProfileId),
             smbSshForward = bool("smbSshForward", existing.smbSshForward),
             smbSshProfileId = str("smbSshProfileId", existing.smbSshProfileId),
-            spiceSshForward = bool("spiceSshForward", existing.spiceSshForward),
-            spiceSshProfileId = str("spiceSshProfileId", existing.spiceSshProfileId),
             moshServerCommand = str("moshServerCommand", existing.moshServerCommand),
             usbForwardVidPid = if (existing.connectionType == "SSH") {
                 str("usbForwardVidPid", existing.usbForwardVidPid)
@@ -6473,8 +6285,8 @@ internal class McpTools(
         val type = args.optString("connectionType").uppercase().ifBlank {
             throw IllegalArgumentException("connectionType required")
         }
-        if (type !in setOf("SSH", "SMB", "VNC", "RDP", "SPICE", "EMAIL", "OPENAI", "BTSERIAL", "BLESERIAL", "USBSERIAL", "RETICULUM", "GUEST")) {
-            throw IllegalArgumentException("connectionType must be SSH, SMB, VNC, RDP, SPICE, EMAIL, OPENAI, BTSERIAL, BLESERIAL, USBSERIAL, or RETICULUM (use the UI for LOCAL / RCLONE / GUEST)")
+        if (type !in setOf("SSH", "SMB", "EMAIL", "OPENAI", "BTSERIAL", "BLESERIAL", "USBSERIAL", "RETICULUM", "GUEST")) {
+            throw IllegalArgumentException("connectionType must be SSH, SMB, EMAIL, OPENAI, BTSERIAL, BLESERIAL, USBSERIAL, or RETICULUM (use the UI for LOCAL / RCLONE / GUEST)")
         }
         // EMAIL's host is the optional tunnel-ingress/bastion (SPA/knock target),
         // not the mail server — so it may be blank; every other type requires it.
@@ -6498,9 +6310,6 @@ internal class McpTools(
         val defaultPort = when (type) {
             "SSH" -> 22
             "SMB" -> 445
-            "VNC" -> 5900
-            "RDP" -> 3389
-            "SPICE" -> 5900
             "OPENAI" -> 0
             "EMAIL" -> 0
             "BTSERIAL" -> 0
@@ -6509,14 +6318,9 @@ internal class McpTools(
             "RETICULUM" -> 0 // the mesh port lives in reticulumPort
             else -> 22
         }
-        // Honor the type-specific port field (vncPort/rdpPort/spicePort) the
-        // description advertises, preferring it over the generic `port`, then
-        // the per-type default. Previously only `port` was read, so a caller
-        // following the docs and passing spicePort silently got 5900 (#353).
+        // Honor the type-specific port field (usbBaudRate), preferring it over
+        // the generic `port`, then the per-type default (#353).
         val typePortArg = when (type) {
-            "VNC" -> "vncPort"
-            "RDP" -> "rdpPort"
-            "SPICE" -> "spicePort"
             "USBSERIAL" -> "usbBaudRate" // baud lives in `port` (#408)
             else -> null
         }
@@ -6532,8 +6336,8 @@ internal class McpTools(
         }
 
         // #121: password-only — never offer saved keys. Belongs on the SSH
-        // profile (for VNC-over-SSH set it on the referenced SSH profile, since
-        // the VNC profile itself does no SSH key auth).
+        // profile (for a desktop-over-SSH profile set it on the referenced SSH
+        // profile, since the desktop profile itself does no SSH key auth).
         val ignoreSavedKeys = args.optBoolean("ignoreSavedKeys", false)
 
         // #166: optional ordered auth-method list. Each element is a token:
@@ -6662,77 +6466,6 @@ internal class McpTools(
                     smbShare = share,
                     smbDomain = args.optString("smbDomain").ifBlank { null },
                     smbPassword = password.ifBlank { null },
-                    tunnelConfigId = tunnelConfigId,
-                    portKnockSequence = knockSequence,
-                    portKnockDelayMs = knockDelay,
-                )
-            }
-            "VNC" -> {
-                // VNC-over-SSH-tunnel: forward the VNC connection through a
-                // saved SSH profile (vncSshProfileId). Validate the referenced
-                // profile exists so a typo fails at create time, not connect.
-                val vncSshForward = args.optBoolean("vncSshForward", false)
-                val vncSshProfileId = args.optString("vncSshProfileId").ifBlank { null }
-                if (vncSshForward && vncSshProfileId != null &&
-                    connectionRepository.getById(vncSshProfileId) == null
-                ) {
-                    throw IllegalArgumentException("vncSshProfileId $vncSshProfileId not found")
-                }
-                ConnectionProfile(
-                    label = label,
-                    host = host,
-                    port = port,
-                    username = "",
-                    connectionType = "VNC",
-                    vncPort = port,
-                    vncUsername = args.optString("vncUsername").ifBlank { null },
-                    vncPassword = args.optString("vncPassword").ifBlank { null },
-                    vncSshForward = vncSshForward,
-                    vncSshProfileId = vncSshProfileId,
-                    tunnelConfigId = tunnelConfigId,
-                    portKnockSequence = knockSequence,
-                    portKnockDelayMs = knockDelay,
-                )
-            }
-            "RDP" -> {
-                val rdpUser = args.optString("rdpUsername").ifBlank {
-                    throw IllegalArgumentException("rdpUsername required for RDP")
-                }
-                ConnectionProfile(
-                    label = label,
-                    host = host,
-                    port = port,
-                    username = rdpUser,
-                    connectionType = "RDP",
-                    rdpPort = port,
-                    rdpUsername = rdpUser,
-                    rdpPassword = args.optString("rdpPassword").ifBlank { null },
-                    rdpDomain = args.optString("rdpDomain").ifBlank { null },
-                    rdpSshForward = false,
-                    tunnelConfigId = tunnelConfigId,
-                    portKnockSequence = knockSequence,
-                    portKnockDelayMs = knockDelay,
-                )
-            }
-            "SPICE" -> {
-                // SPICE-over-SSH-tunnel: forward through a saved SSH profile.
-                val spiceSshForward = args.optBoolean("spiceSshForward", false)
-                val spiceSshProfileId = args.optString("spiceSshProfileId").ifBlank { null }
-                if (spiceSshForward && spiceSshProfileId != null &&
-                    connectionRepository.getById(spiceSshProfileId) == null
-                ) {
-                    throw IllegalArgumentException("spiceSshProfileId $spiceSshProfileId not found")
-                }
-                ConnectionProfile(
-                    label = label,
-                    host = host,
-                    port = port,
-                    username = "",
-                    connectionType = "SPICE",
-                    spicePort = port,
-                    spicePassword = args.optString("spicePassword").ifBlank { null },
-                    spiceSshForward = spiceSshForward,
-                    spiceSshProfileId = spiceSshProfileId,
                     tunnelConfigId = tunnelConfigId,
                     portKnockSequence = knockSequence,
                     portKnockDelayMs = knockDelay,

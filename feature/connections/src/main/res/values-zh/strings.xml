@@ -551,10 +551,8 @@
     <string name="rclone_import_select_count">导入 %1$d 个远程</string>
     <string name="rclone_import_done">已导入 %1$d 个，跳过 %2$d 个，失败 %3$d 个。</string>
     <string name="rclone_import_menu">导入 rclone 配置…</string>
-    <string name="connections_section_spice">SPICE 设置</string>
     <string name="connections_section_mcp">AI 代理（MCP）</string>
     <string name="connections_rclone_configure_first">请先点按“配置并验证”保存此远程，然后才能保存连接。</string>
-    <string name="connections_helper_spice_auth">SPICE 使用单个可选的票据/密码。服务器未启用票据时请留空。</string>
     <string name="connections_auth_any_hardware_key">任意硬件密钥（FIDO）</string>
     <string name="connections_deeplink_confirm_title">要连接吗？</string>
     <string name="connections_deeplink_confirm_message">一个链接请求连接到 %1$s。</string>

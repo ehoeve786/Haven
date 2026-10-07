@@ -965,7 +965,7 @@ class McpToolsConsentTest {
         // (open_desktop_terminal just surfaces a terminal; the guest shell it
         // attaches has its own gate).
         for (name in listOf(
-            "list_desktop_sessions", "list_guest_apps", "list_desktop_environments",
+            "list_guest_apps", "list_desktop_environments",
             "read_desktop_log", "open_desktop_terminal",
         )) {
             assertTrue("$name missing from definitions()", name in names)
@@ -977,8 +977,7 @@ class McpToolsConsentTest {
         for (name in listOf(
             "list_desktop_windows",
             "install_desktop", "uninstall_desktop", "start_desktop", "stop_desktop",
-            "capture_desktop", "capture_desktop_tab", "tap_desktop_tab", "scroll_desktop_tab",
-            "send_desktop_clipboard", "launch_app_in_desktop",
+            "capture_desktop", "launch_app_in_desktop",
         )) {
             assertTrue("$name missing from definitions()", name in names)
             assertNotEquals("$name should gate (not NEVER)", ConsentLevel.NEVER, tools.consentFor(name)!!.level)

@@ -463,7 +463,6 @@ fun TerminalScreen(
     showTabBar: Boolean = true,
     onFullscreenChanged: (Boolean) -> Unit = {},
     onNavigateToConnections: () -> Unit = {},
-    onNavigateToVnc: (host: String, port: Int, username: String?, password: String?, sshForward: Boolean, sshSessionId: String?, colorDepth: String) -> Unit = { _, _, _, _, _, _, _ -> },
     onSelectionActiveChanged: (Boolean) -> Unit = {},
     // Reports the latched swipe-arrows mode (#524b) so the host can suppress
     // the tab-switch pager gesture while the Swipe key owns horizontal swipes.
@@ -562,8 +561,6 @@ fun TerminalScreen(
     val newTabLoading by viewModel.newTabLoading.collectAsState()
     val newTabMessage by viewModel.newTabMessage.collectAsState()
     val fidoTouchPrompt by viewModel.fidoTouchPrompt.collectAsState()
-    var vncDialogInfo by remember { mutableStateOf<VncInfo?>(null) }
-    var localVncLoading by remember { mutableStateOf(false) }
     val coroutineScope = androidx.compose.runtime.rememberCoroutineScope()
 
     val context = LocalContext.current
@@ -737,7 +734,6 @@ fun TerminalScreen(
     // lint-banned (LocalContextGetResourceValueCall).
     val linkOpenFailedMessage = stringResource(R.string.terminal_link_open_failed)
     val linkSchemeBlockedMessage = stringResource(R.string.terminal_link_scheme_blocked)
-    val localVncFailedMessage = stringResource(R.string.terminal_local_vnc_failed)
     fun launchCameraScan(mode: TerminalViewModel.ScanMode) {
         val cacheRoot = java.io.File(context.cacheDir, "scan").apply { mkdirs() }
         val file = java.io.File(cacheRoot, "scan_${System.currentTimeMillis()}.jpg")
@@ -1028,26 +1024,6 @@ fun TerminalScreen(
         if (openLocalShellProfileId != null) {
             viewModel.addLocalTabForProfile(openLocalShellProfileId, desktopDeId = openLocalShellDeId)
         }
-    }
-
-    // VNC settings dialog
-    vncDialogInfo?.let { info ->
-        VncSettingsDialog(
-            host = info.host,
-            initialPort = info.port,
-            initialUsername = info.username,
-            initialPassword = info.password,
-            initialSshForward = info.sshForward,
-            initialColorDepth = info.colorDepth,
-            onConnect = { port, username, password, sshForward, colorDepth, save ->
-                if (save) {
-                    viewModel.saveVncSettings(info.profileId, port, username, password, sshForward, colorDepth)
-                }
-                vncDialogInfo = null
-                onNavigateToVnc(info.host, port, username, password, sshForward, info.sessionId, colorDepth)
-            },
-            onDismiss = { vncDialogInfo = null },
-        )
     }
 
     // Session picker dialog for new tab — shared composable from core/ui
@@ -2098,42 +2074,6 @@ fun TerminalScreen(
                         minKeyWidth = toolbarMinKeyWidth.dp,
                         onToggleCtrl = viewModel::toggleCtrl,
                         onToggleAlt = viewModel::toggleAlt,
-                        onVncTap = if (activeTab.transportType == "SSH") {{
-                            coroutineScope.launch {
-                                val info = viewModel.getActiveVncInfo() ?: return@launch
-                                if (info.stored) {
-                                    onNavigateToVnc(info.host, info.port, info.username, info.password, info.sshForward, info.sessionId, info.colorDepth)
-                                } else {
-                                    vncDialogInfo = info
-                                }
-                            }
-                        }} else if (activeTab.transportType == "LOCAL" && viewModel.isLocalDesktopInstalled) {{
-                            if (!localVncLoading) {
-                                localVncLoading = true
-                                coroutineScope.launch {
-                                    // try/finally so a failure (e.g. keystore decrypt,
-                                    // server start) can't leave the spinner stuck true and
-                                    // lock the button out forever. (#208 finding 17)
-                                    try {
-                                        viewModel.ensureLocalVncProfile()
-                                        viewModel.startLocalVncServer()
-                                        kotlinx.coroutines.delay(4000)
-                                        val pwd = viewModel.getLocalVncPassword()
-                                        onNavigateToVnc("localhost", 5901, null, pwd, false, null, "BPP_24_TRUE")
-                                    } catch (e: Exception) {
-                                        android.util.Log.e("TerminalScreen", "local VNC launch failed", e)
-                                        android.widget.Toast.makeText(
-                                            context,
-                                            localVncFailedMessage,
-                                            android.widget.Toast.LENGTH_LONG,
-                                        ).show()
-                                    } finally {
-                                        localVncLoading = false
-                                    }
-                                }
-                            }
-                        }} else null,
-                        vncLoading = localVncLoading,
                         selectionController = selectionController,
                         selectionActive = selectionActive,
                         hyperlinkUri = currentHyperlinkUri,
@@ -2514,130 +2454,6 @@ internal fun pagerSwipeOwnedByArrows(latchedSwipeArrows: Boolean, hasTab: Boolea
  * time instead of flashing through it (#524 reporter feedback).
  */
 internal const val SWIPE_ARROWS_SCROLL_QUANTUM = 4f
-
-@OptIn(androidx.compose.material3.ExperimentalMaterial3Api::class)
-@Composable
-private fun VncSettingsDialog(
-    host: String,
-    initialPort: Int,
-    initialUsername: String?,
-    initialPassword: String?,
-    initialSshForward: Boolean,
-    initialColorDepth: String = "BPP_24_TRUE",
-    onConnect: (port: Int, username: String?, password: String?, sshForward: Boolean, colorDepth: String, save: Boolean) -> Unit,
-    onDismiss: () -> Unit,
-) {
-    var port by remember { mutableStateOf(initialPort.toString()) }
-    var username by remember { mutableStateOf(initialUsername ?: "") }
-    var password by remember { mutableStateOf(initialPassword ?: "") }
-    var sshForward by remember { mutableStateOf(initialSshForward) }
-    var colorDepth by remember { mutableStateOf(initialColorDepth) }
-    var save by remember { mutableStateOf(true) }
-
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text(stringResource(R.string.terminal_vnc_desktop)) },
-        text = {
-            // Scrollable so the full form (colour depth + save) stays reachable
-            // in landscape, where the dialog's text area is short. (#224)
-            Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
-                Text(stringResource(R.string.terminal_connect_to_host, host), style = MaterialTheme.typography.bodyMedium)
-                androidx.compose.foundation.layout.Spacer(Modifier.size(12.dp))
-                OutlinedTextField(
-                    value = port,
-                    onValueChange = { port = it },
-                    label = { Text(stringResource(R.string.terminal_port)) },
-                    singleLine = true,
-                    modifier = Modifier.fillMaxWidth(),
-                )
-                androidx.compose.foundation.layout.Spacer(Modifier.size(8.dp))
-                OutlinedTextField(
-                    value = username,
-                    onValueChange = { username = it },
-                    label = { Text(stringResource(R.string.terminal_vnc_username_label)) },
-                    placeholder = { Text(stringResource(R.string.terminal_vnc_username_placeholder)) },
-                    singleLine = true,
-                    modifier = Modifier.fillMaxWidth(),
-                )
-                androidx.compose.foundation.layout.Spacer(Modifier.size(8.dp))
-                OutlinedTextField(
-                    value = password,
-                    onValueChange = { password = it },
-                    label = { Text(stringResource(R.string.terminal_password)) },
-                    singleLine = true,
-                    modifier = Modifier.fillMaxWidth(),
-                )
-                androidx.compose.foundation.layout.Spacer(Modifier.size(8.dp))
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    androidx.compose.material3.Checkbox(
-                        checked = sshForward,
-                        onCheckedChange = { sshForward = it },
-                    )
-                    Text(stringResource(R.string.terminal_tunnel_through_ssh))
-                }
-                androidx.compose.foundation.layout.Spacer(Modifier.size(8.dp))
-                val depthOptions = listOf(
-                    "BPP_24_TRUE" to stringResource(R.string.terminal_vnc_depth_24bit),
-                    "BPP_16_TRUE" to stringResource(R.string.terminal_vnc_depth_16bit),
-                    "BPP_8_INDEXED" to stringResource(R.string.terminal_vnc_depth_256),
-                )
-                var depthExpanded by remember { mutableStateOf(false) }
-                val selectedDepth = depthOptions.firstOrNull { it.first == colorDepth } ?: depthOptions.first()
-                ExposedDropdownMenuBox(
-                    expanded = depthExpanded,
-                    onExpandedChange = { depthExpanded = it },
-                ) {
-                    OutlinedTextField(
-                        value = selectedDepth.second,
-                        onValueChange = {},
-                        readOnly = true,
-                        label = { Text(stringResource(R.string.terminal_vnc_color_depth)) },
-                        trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(depthExpanded) },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .menuAnchor(MenuAnchorType.PrimaryNotEditable),
-                    )
-                    ExposedDropdownMenu(
-                        expanded = depthExpanded,
-                        onDismissRequest = { depthExpanded = false },
-                    ) {
-                        depthOptions.forEach { (value, label) ->
-                            DropdownMenuItem(
-                                text = { Text(label) },
-                                onClick = {
-                                    colorDepth = value
-                                    depthExpanded = false
-                                },
-                            )
-                        }
-                    }
-                }
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    androidx.compose.material3.Checkbox(
-                        checked = save,
-                        onCheckedChange = { save = it },
-                    )
-                    Text(stringResource(R.string.terminal_save_for_connection))
-                }
-            }
-        },
-        confirmButton = {
-            TextButton(
-                onClick = {
-                    val p = port.toIntOrNull() ?: 5900
-                    onConnect(p, username.ifEmpty { null }, password.ifEmpty { null }, sshForward, colorDepth, save)
-                },
-            ) {
-                Text(stringResource(R.string.terminal_connect))
-            }
-        },
-        dismissButton = {
-            TextButton(onClick = onDismiss) {
-                Text(stringResource(R.string.common_cancel))
-            }
-        },
-    )
-}
 
 /**
  * Top-aligned banner shown over the terminal when the transport has gone
