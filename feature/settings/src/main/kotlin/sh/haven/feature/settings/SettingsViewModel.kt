@@ -562,6 +562,19 @@ class SettingsViewModel @Inject constructor(
         }
     }
 
+    /** Whether MCP is published via Tailscale Funnel as a claude.ai connector. */
+    val mcpClaudeConnectorEnabled: StateFlow<Boolean> = preferencesRepository.mcpClaudeConnectorEnabled
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), false)
+
+    /** The connector's public URL, or why it isn't up. */
+    val mcpConnectorStatus: StateFlow<String?> = mcpStatusHolder.connectorStatus
+
+    fun setMcpClaudeConnectorEnabled(enabled: Boolean) {
+        viewModelScope.launch {
+            preferencesRepository.setMcpClaudeConnectorEnabled(enabled)
+        }
+    }
+
     /** Whether the MCP server also binds the device's Wi-Fi/LAN address. */
     val mcpLanBindEnabled: StateFlow<Boolean> = preferencesRepository.mcpLanBindEnabled
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), false)

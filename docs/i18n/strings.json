@@ -34341,6 +34341,46 @@
      }
     },
     {
+     "name": "settings_mcp_claude_connector_title",
+     "en": "Claude connector",
+     "comment": "MCP agent endpoint",
+     "args": [],
+     "t": {
+      "ar": "موصّل Claude",
+      "bn": "Claude কানেক্টর",
+      "de": "Claude-Connector",
+      "es": "Conector de Claude",
+      "fr": "Connecteur Claude",
+      "hi": "Claude कनेक्टर",
+      "ja": "Claude コネクタ",
+      "ko": "Claude 커넥터",
+      "pt": "Conector do Claude",
+      "ru": "Коннектор Claude",
+      "sr": "Claude конектор",
+      "zh": "Claude 连接器"
+     }
+    },
+    {
+     "name": "settings_mcp_claude_connector_subtitle",
+     "en": "Publish this endpoint through your Tailscale tunnel\\'s Funnel so claude.ai can add it as a custom connector",
+     "comment": "MCP agent endpoint",
+     "args": [],
+     "t": {
+      "ar": "انشر نقطة النهاية هذه عبر Funnel في نفق Tailscale لتتمكن claude.ai من إضافتها كموصّل مخصص",
+      "bn": "আপনার Tailscale টানেলের Funnel দিয়ে এই এন্ডপয়েন্ট প্রকাশ করুন, যাতে claude.ai এটিকে কাস্টম কানেক্টর হিসেবে যোগ করতে পারে",
+      "de": "Diesen Endpunkt über den Funnel deines Tailscale-Tunnels veröffentlichen, damit claude.ai ihn als benutzerdefinierten Connector hinzufügen kann",
+      "es": "Publica este endpoint mediante el Funnel de tu túnel de Tailscale para que claude.ai pueda añadirlo como conector personalizado",
+      "fr": "Publier ce point d\\'accès via le Funnel de votre tunnel Tailscale pour que claude.ai puisse l\\'ajouter comme connecteur personnalisé",
+      "hi": "इस एंडपॉइंट को अपनी Tailscale टनल के Funnel से प्रकाशित करें ताकि claude.ai इसे कस्टम कनेक्टर के रूप में जोड़ सके",
+      "ja": "Tailscale トンネルの Funnel でこのエンドポイントを公開し、claude.ai でカスタムコネクタとして追加できるようにします",
+      "ko": "Tailscale 터널의 Funnel로 이 엔드포인트를 공개하여 claude.ai에서 사용자 지정 커넥터로 추가할 수 있게 합니다",
+      "pt": "Publique este endpoint pelo Funnel do seu túnel Tailscale para que o claude.ai possa adicioná-lo como conector personalizado",
+      "ru": "Опубликовать эту точку доступа через Funnel вашего туннеля Tailscale, чтобы claude.ai мог добавить её как пользовательский коннектор",
+      "sr": "Објави ову крајњу тачку преко Funnel-а твог Tailscale тунела да би је claude.ai могао додати као прилагођени конектор",
+      "zh": "通过 Tailscale 隧道的 Funnel 公开此端点，以便 claude.ai 将其添加为自定义连接器"
+     }
+    },
+    {
      "name": "settings_mcp_wireguard_collision",
      "en": "Another VPN (%1$s) is using %2$s — the same address this endpoint binds, so it\\'s shadowed and unreachable from peers. Stop that VPN, or point your MCP client at the loopback (127.0.0.1) endpoint instead.",
      "comment": "MCP agent endpoint",

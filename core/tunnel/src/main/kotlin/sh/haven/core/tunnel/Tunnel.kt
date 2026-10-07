@@ -71,6 +71,15 @@ interface Tunnel {
     fun localAddress(): String? = null
 
     /**
+     * Accept connections from the public internet (Tailscale Funnel, TLS
+     * already terminated), or null if the backend can't. Caller owns the
+     * socket. [publicUrl] is the https:// origin it serves.
+     */
+    fun listenPublic(): TunneledServerSocket? = null
+
+    fun publicUrl(): String? = null
+
+    /**
      * Tear down the tunnel. All outstanding connections are invalidated.
      * Idempotent.
      */

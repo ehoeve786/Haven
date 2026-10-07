@@ -517,4 +517,6 @@
     <string name="settings_inline_images_off">إيقاف</string>
     <string name="settings_inline_images_ask">اسأل</string>
     <string name="settings_inline_images_always">دائمًا</string>
+    <string name="settings_mcp_claude_connector_title">موصّل Claude</string>
+    <string name="settings_mcp_claude_connector_subtitle">انشر نقطة النهاية هذه عبر Funnel في نفق Tailscale لتتمكن claude.ai من إضافتها كموصّل مخصص</string>
 </resources>

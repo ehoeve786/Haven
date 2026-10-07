@@ -1217,6 +1217,19 @@ fun SettingsScreen(
                 onCheckedChange = viewModel::setMcpWireguardEnabled,
             )
 
+            // Publish the endpoint through the in-app Tailscale tunnel's
+            // Funnel so claude.ai can add it as a custom connector (OAuth).
+            val mcpClaudeConnectorEnabled by viewModel.mcpClaudeConnectorEnabled.collectAsState()
+            val mcpConnectorStatus by viewModel.mcpConnectorStatus.collectAsState()
+            SettingsToggleItem(
+                icon = Icons.Filled.Hub,
+                title = stringResource(R.string.settings_mcp_claude_connector_title),
+                subtitle = mcpConnectorStatus?.takeIf { mcpClaudeConnectorEnabled }
+                    ?: stringResource(R.string.settings_mcp_claude_connector_subtitle),
+                checked = mcpClaudeConnectorEnabled,
+                onCheckedChange = viewModel::setMcpClaudeConnectorEnabled,
+            )
+
             // Warn when another app's system VPN holds the same address Haven's
             // userspace WireGuard netstack binds — the kernel VPN shadows our
             // listener so the WG endpoint is silently unreachable.

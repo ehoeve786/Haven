@@ -69,6 +69,14 @@ class McpStatusHolder @Inject constructor() {
         _wireguardCollision.value = info
     }
 
+    /** Claude connector: its public `…/mcp` URL when live, else why not, or null when off. */
+    private val _connectorStatus = MutableStateFlow<String?>(null)
+    val connectorStatus: StateFlow<String?> = _connectorStatus.asStateFlow()
+
+    fun setConnectorStatus(status: String?) {
+        _connectorStatus.value = status
+    }
+
     private val _nearCarrier = MutableStateFlow(NearCarrierStatus())
     val nearCarrier: StateFlow<NearCarrierStatus> = _nearCarrier.asStateFlow()
 

@@ -515,4 +515,6 @@
     <string name="settings_inline_images_off">Выкл</string>
     <string name="settings_inline_images_ask">Спрашивать</string>
     <string name="settings_inline_images_always">Всегда</string>
+    <string name="settings_mcp_claude_connector_title">Коннектор Claude</string>
+    <string name="settings_mcp_claude_connector_subtitle">Опубликовать эту точку доступа через Funnel вашего туннеля Tailscale, чтобы claude.ai мог добавить её как пользовательский коннектор</string>
 </resources>

@@ -513,4 +513,6 @@ Cada chave privada já armazenada no Tidegate precisará ser importada ou gerada
     <string name="settings_inline_images_off">Desligado</string>
     <string name="settings_inline_images_ask">Perguntar</string>
     <string name="settings_inline_images_always">Sempre</string>
+    <string name="settings_mcp_claude_connector_title">Conector do Claude</string>
+    <string name="settings_mcp_claude_connector_subtitle">Publique este endpoint pelo Funnel do seu túnel Tailscale para que o claude.ai possa adicioná-lo como conector personalizado</string>
 </resources>

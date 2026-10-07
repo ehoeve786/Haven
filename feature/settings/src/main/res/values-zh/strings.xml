@@ -511,4 +511,6 @@ Tidegate 中已存储的每一个私钥都需要重新导入或生成。它们�
     <string name="settings_inline_images_off">关闭</string>
     <string name="settings_inline_images_ask">询问</string>
     <string name="settings_inline_images_always">总是</string>
+    <string name="settings_mcp_claude_connector_title">Claude 连接器</string>
+    <string name="settings_mcp_claude_connector_subtitle">通过 Tailscale 隧道的 Funnel 公开此端点，以便 claude.ai 将其添加为自定义连接器</string>
 </resources>

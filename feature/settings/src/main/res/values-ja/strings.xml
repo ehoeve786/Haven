@@ -512,4 +512,6 @@ Tidegate にすでに保存されているすべての秘密鍶は、再びイ�
     <string name="settings_inline_images_off">オフ</string>
     <string name="settings_inline_images_ask">確認</string>
     <string name="settings_inline_images_always">常に</string>
+    <string name="settings_mcp_claude_connector_title">Claude コネクタ</string>
+    <string name="settings_mcp_claude_connector_subtitle">Tailscale トンネルの Funnel でこのエンドポイントを公開し、claude.ai でカスタムコネクタとして追加できるようにします</string>
 </resources>
