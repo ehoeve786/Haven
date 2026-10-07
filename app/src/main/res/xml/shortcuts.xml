@@ -7,7 +7,7 @@
         android:shortcutShortLabel="@string/shortcut_pull_backup_label">
         <intent
             android:action="sh.haven.app.ACTION_PULL_BACKUP"
-            android:targetPackage="app.moorline"
+            android:targetPackage="app.tidegate"
             android:targetClass="sh.haven.app.backup.PullBackupShortcutActivity" />
     </shortcut>
 </shortcuts>

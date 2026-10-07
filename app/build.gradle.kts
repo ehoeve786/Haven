@@ -10,7 +10,7 @@ android {
     compileSdk = 37
 
     defaultConfig {
-        applicationId = "app.moorline"
+        applicationId = "app.tidegate"
         minSdk = 26
         targetSdk = 35
         versionCode = 870
