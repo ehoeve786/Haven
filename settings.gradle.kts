@@ -43,20 +43,6 @@ includeBuild("termlib") {
     }
 }
 
-// Pure Kotlin ET transport library (submodule).
-includeBuild("et-kotlin") {
-    dependencySubstitution {
-        substitute(module("sh.haven:et-transport")).using(project(":"))
-    }
-}
-
-// Pure Kotlin SSP transport library (submodule).
-includeBuild("mosh-kotlin") {
-    dependencySubstitution {
-        substitute(module("sh.haven:ssp-transport")).using(project(":"))
-    }
-}
-
 // Prns (Personal Reticulum, Rust engine) JVM SDK — upstream's own Gradle
 // project inside the submodule, consumed unmodified so the submodule tracks
 // pure upstream trunk (Prns#94: app-supplied Pipe transports). The native
@@ -76,26 +62,6 @@ includeBuild("prns/prns-host/bindings/jvm") {
 includeBuild("rclone-android") {
     dependencySubstitution {
         substitute(module("sh.haven:rclone-transport")).using(project(":"))
-    }
-}
-
-// rnsh-kt: Kotlin rnsh client library (submodule).
-includeBuild("rnsh-kt") {
-    dependencySubstitution {
-        substitute(module("tech.torlando:rnsh-core"))
-            .using(project(":rnsh-core"))
-    }
-}
-
-// reticulum-kt upstream (submodule, pinned to 83c92af). See issue #79.
-includeBuild("reticulum-kt") {
-    dependencySubstitution {
-        substitute(module("network.reticulum:rns-core"))
-            .using(project(":rns-core"))
-        substitute(module("network.reticulum:rns-interfaces"))
-            .using(project(":rns-interfaces"))
-        substitute(module("network.reticulum:rns-android"))
-            .using(project(":rns-android"))
     }
 }
 
@@ -123,9 +89,6 @@ include(":feature:mail")
 include(":feature:chat")
 include(":feature:keys")
 include(":feature:tunnel")
-include(":core:reticulum")
-include(":core:mosh")
-include(":core:et")
 include(":core:btserial")
 include(":core:usbserial")
 include(":core:bleserial")
@@ -144,5 +107,3 @@ include(":core:scan")
 include(":feature:settings")
 include(":feature:editor")
 include(":feature:imagetools")
-
-include(":integration-tests")

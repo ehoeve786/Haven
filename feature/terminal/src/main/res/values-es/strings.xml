@@ -67,7 +67,6 @@
     <string name="terminal_new_tab_host_key_changed">La clave de host de %s cambió: conexión rechazada por seguridad</string>
     <string name="terminal_new_tab_connection_failed">No se pudo conectar: %s</string>
     <string name="terminal_new_tab_shell_failed">No se pudo abrir la shell: %s</string>
-    <string name="terminal_new_tab_reticulum_no_session">No hay sesión de Reticulum activa que clonar</string>
     <string name="terminal_new_tab_connecting">Connecting…</string>
     <!-- Backfilled translations (i18n drift fix) -->
     <string name="terminal_no_contact">Sin respuesta del servidor desde hace %1$ds — reintentando</string>

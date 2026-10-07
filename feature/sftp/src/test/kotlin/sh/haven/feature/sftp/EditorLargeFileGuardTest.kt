@@ -55,11 +55,8 @@ class EditorLargeFileGuardTest {
         } returns "TOO_LARGE"
         return SftpViewModel(
             sessionManager = mockk(relaxed = true),
-            moshSessionManager = mockk(relaxed = true),
-            etSessionManager = mockk(relaxed = true),
             smbSessionManager = mockk(relaxed = true),
             rcloneSessionManager = mockk(relaxed = true),
-            reticulumSessionManager = mockk(relaxed = true),
             rcloneClient = mockk(relaxed = true),
             repository = mockk(relaxed = true),
             connectionLogRepository = mockk(relaxed = true),

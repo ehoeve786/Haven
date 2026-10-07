@@ -30,7 +30,6 @@ class OpenAiRouteTest {
 
     @Test fun routedRequiresCoherentTypeAndCarrier() {
         assertTrue(AiRoute.isRouted("SSH", "carrier"))
-        assertTrue(AiRoute.isRouted("RETICULUM", "carrier"))
     }
 
     @Test fun routedFalseForStaleOrUnknownPairs() {
@@ -42,7 +41,7 @@ class OpenAiRouteTest {
 
     @Test fun knownRouteTypes() {
         assertTrue(AiRoute.isKnownRouteType("SSH"))
-        assertTrue(AiRoute.isKnownRouteType("RETICULUM"))
+        assertFalse(AiRoute.isKnownRouteType("RETICULUM"))
         assertFalse(AiRoute.isKnownRouteType("BOGUS"))
         assertFalse(AiRoute.isKnownRouteType(null))
     }

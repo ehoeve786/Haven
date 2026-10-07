@@ -129,7 +129,6 @@ fun ConnectionEditDialog(
      * user is typing the value, so revealing it needs no auth.
      */
     onRevealSavedSecret: (suspend () -> Boolean)? = null,
-    discoveredDestinations: List<sh.haven.core.reticulum.DiscoveredDestination> = emptyList(),
     discoveredHosts: List<DiscoveredHost> = emptyList(),
     discoveredSmbHosts: List<DiscoveredHost> = emptyList(),
     sshProfiles: List<ConnectionProfile> = emptyList(),
@@ -168,18 +167,12 @@ fun ConnectionEditDialog(
     globalSessionManagerLabel: String = "None",
     subnetScanning: Boolean = false,
     smbSubnetScanning: Boolean = false,
-    reticulumScanning: Boolean = false,
-    /** This device's rnsh identity hash, or null if none exists yet (#585). */
-    reticulumIdentityHash: String? = null,
-    /** Open the picker for a Reticulum identity file the user supplies (#585). */
-    onImportReticulumIdentity: () -> Unit = {},
     onScanSubnet: () -> Unit = {},
     onScanSubnetSmb: () -> Unit = {},
     /** Scanning the network behind the selected jump host (#NNN). Opt-in. */
     jumpScanning: Boolean = false,
     jumpScanError: String? = null,
     onScanSubnetViaJump: (jumpProfileId: String) -> Unit = {},
-    onScanReticulum: (host: String, port: Int, networkName: String?, passphrase: String?) -> Unit = { _, _, _, _ -> },
     /** Optional callback wired by the screen to fire a test knock and
      *  return `(ok, message)`. When null the "Test knock" button is
      *  hidden — useful for previews / tests. */
@@ -203,7 +196,7 @@ fun ConnectionEditDialog(
     // connection, an optional deep-link [prefill] (#305). [existing] alone
     // drives edit-mode (title, save semantics); [seed] only drives initials.
     val seed = existing ?: prefill
-    // Transport dropdown maps to: connectionType + useMosh + useEternalTerminal
+    // Transport dropdown maps to: connectionType
     val initialTransport = when {
         seed?.isLocal == true -> "LOCAL"
         seed?.isGuest == true -> "GUEST"
@@ -214,9 +207,6 @@ fun ConnectionEditDialog(
         seed?.isRclone == true -> "RCLONE"
         seed?.isEmail == true -> "EMAIL"
         seed?.isOpenai == true -> "OPENAI"
-        seed?.isEternalTerminal == true -> "ET"
-        seed?.isMosh == true -> "MOSH"
-        seed?.isReticulum == true -> "RETICULUM"
         else -> "SSH"
     }
     var selectedTransport by rememberSaveable { mutableStateOf(initialTransport) }
@@ -227,7 +217,6 @@ fun ConnectionEditDialog(
         "BTSERIAL" -> "BTSERIAL"
         "BLESERIAL" -> "BLESERIAL"
         "USBSERIAL" -> "USBSERIAL"
-        "RETICULUM" -> "RETICULUM"
         "SMB" -> "SMB"
         "RCLONE" -> "RCLONE"
         "EMAIL" -> "EMAIL"
@@ -269,7 +258,6 @@ fun ConnectionEditDialog(
     var smbDomain by rememberSaveable { mutableStateOf(existing?.smbDomain ?: "") }
     var smbSshForward by rememberSaveable { mutableStateOf(existing?.smbSshForward ?: false) }
     var smbSshProfileId by rememberSaveable { mutableStateOf(existing?.smbSshProfileId) }
-    var destinationHash by rememberSaveable { mutableStateOf(existing?.destinationHash ?: "") }
     var jumpProfileId by rememberSaveable { mutableStateOf(existing?.jumpProfileId) }
     var proxyType by rememberSaveable { mutableStateOf(existing?.proxyType) }
     var proxyHost by rememberSaveable { mutableStateOf(existing?.proxyHost ?: "") }
@@ -342,7 +330,6 @@ fun ConnectionEditDialog(
             blob.jumpDestination.isNotBlank()
     }
     var sshOptions by rememberSaveable { mutableStateOf(existing?.sshOptions ?: "") }
-    var moshServerCommand by rememberSaveable { mutableStateOf(existing?.moshServerCommand ?: "") }
     var postLoginCommand by rememberSaveable { mutableStateOf(existing?.postLoginCommand ?: "") }
     var postLoginBeforeSessionManager by rememberSaveable { mutableStateOf(existing?.postLoginBeforeSessionManager ?: true) }
     var remoteCommand by rememberSaveable { mutableStateOf(existing?.remoteCommand ?: "") }
@@ -370,15 +357,6 @@ fun ConnectionEditDialog(
     var addressFamily by rememberSaveable { mutableStateOf(existing?.addressFamily ?: "AUTO") }
     var bindAddress by rememberSaveable { mutableStateOf(existing?.bindAddress ?: "") }
     var selectedSessionManager by rememberSaveable { mutableStateOf(seed?.sessionManager) }
-    var etPort by rememberSaveable { mutableStateOf(existing?.etPort?.toString() ?: "2022") }
-    var localSideband by rememberSaveable {
-        mutableStateOf(
-            existing != null &&
-                existing.reticulumHost in listOf("127.0.0.1", "localhost", "::1") &&
-                existing.reticulumPort == 37428,
-        )
-    }
-    var rnsHost by rememberSaveable { mutableStateOf(existing?.reticulumHost ?: "") }
     var rcloneRemoteName by rememberSaveable { mutableStateOf(existing?.rcloneRemoteName ?: "") }
     var rcloneProvider by rememberSaveable { mutableStateOf(existing?.rcloneProvider ?: "") }
     // #410: a short token that makes a fresh rclone remote name unique, so two
@@ -413,7 +391,7 @@ fun ConnectionEditDialog(
     }
     var openaiProtocolExpanded by rememberSaveable { mutableStateOf(false) }
     // AI route carrier: the OPENAI counterpart of the desktops' flag+carrier
-    // rows. Editor mode ("NONE"/"SSH"/"RETICULUM") + the carrier profile id;
+    // rows. Editor mode ("NONE"/"SSH") + the carrier profile id;
     // a stale stored pair reads Direct via [aiRouteInitialMode]'s guard.
     var aiRouteMode by rememberSaveable {
         mutableStateOf(aiRouteInitialMode(existing?.aiRouteType, existing?.aiRouteProfileId))
@@ -426,9 +404,6 @@ fun ConnectionEditDialog(
     var emailPreset by rememberSaveable {
         mutableStateOf(EmailProviderPreset.fromServer(existing?.emailServer).name)
     }
-    var rnsPort by rememberSaveable { mutableStateOf(existing?.reticulumPort?.toString() ?: "4242") }
-    var rnsNetworkName by rememberSaveable { mutableStateOf(existing?.reticulumNetworkName ?: "") }
-    var rnsPassphrase by rememberSaveable { mutableStateOf(existing?.reticulumPassphrase ?: "") }
     var fileTransport by rememberSaveable { mutableStateOf(existing?.fileTransport ?: "AUTO") }
     // Per-profile terminal colour-scheme override (#144). null = inherit
     // the global preference; otherwise one of the
@@ -1054,8 +1029,6 @@ fun ConnectionEditDialog(
                 // editable result again. (#114)
                 val allTransportOptions = listOf(
                     "SSH" to "SSH",
-                    "MOSH" to "Mosh",
-                    "ET" to "Eternal Terminal",
                     "LOCAL" to "Local Shell (PRoot)",
                     "GUEST" to "Linux Guest (UML)",
                     "BTSERIAL" to "Bluetooth Serial",
@@ -1065,7 +1038,6 @@ fun ConnectionEditDialog(
                     "RCLONE" to "Cloud Storage (rclone)",
                     "EMAIL" to "Email (IMAP / Proton)",
                     "OPENAI" to "AI Endpoint (OpenAI-compatible)",
-                    "RETICULUM" to "Reticulum",
                 )
                 // #510: the terminal build ships no rclone or UML guest, so
                 // offering them here would only produce a profile that fails
@@ -1124,7 +1096,6 @@ fun ConnectionEditDialog(
                                     val defaultPort = when (value) {
                                         "SMB" -> "445"
                                         "OPENAI" -> "80"
-                                        "ET" -> "22"
                                         else -> "22"
                                     }
                                     if (port == "22" || port == "5900" || port == "445" || port == "2022") {
@@ -1150,7 +1121,6 @@ fun ConnectionEditDialog(
                                 "RCLONE" -> "My Google Drive"
                                 "EMAIL" -> "My Mail"
                                 "OPENAI" -> "My AI Endpoint"
-                                "RETICULUM" -> "My Node"
                                 else -> "My Server"
                             }
                         )
@@ -1816,7 +1786,7 @@ fun ConnectionEditDialog(
                         modifier = Modifier.padding(top = 4.dp),
                     )
                     // AI route carrier: route the endpoint's HTTP through an
-                    // SSH forward or a Reticulum bridge, like the desktops'
+                    // SSH forward, like the desktops'
                     // Tunnel-through-SSH rows. Picking a carrier here clears
                     // the Route-through tunnel below (the carrier IS the
                     // transport — stacking both is a double-hop).
@@ -2358,52 +2328,6 @@ fun ConnectionEditDialog(
                         }
                     }
 
-                    // ET port (shown only for Eternal Terminal)
-                    if (selectedTransport == "ET") {
-                        Spacer(Modifier.height(4.dp))
-                        OutlinedTextField(
-                            value = etPort,
-                            onValueChange = { etPort = it.filter { c -> c.isDigit() } },
-                            label = { Text(stringResource(R.string.connections_field_et_port)) },
-                            singleLine = true,
-                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                            modifier = Modifier.width(120.dp),
-                        )
-                    }
-
-                    // Transport helper text
-                    if (selectedTransport == "MOSH") {
-                        Spacer(Modifier.height(4.dp))
-                        Text(
-                            stringResource(R.string.connections_helper_mosh_required),
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        )
-                        Spacer(Modifier.height(4.dp))
-                        OutlinedTextField(
-                            value = moshServerCommand,
-                            onValueChange = { moshServerCommand = it },
-                            label = { Text(stringResource(R.string.connections_field_mosh_server_command)) },
-                            placeholder = { Text("mosh-server new -s -c 256 -l LANG=en_US.UTF-8") },
-                            supportingText = { Text(stringResource(R.string.connections_helper_mosh_server)) },
-                            singleLine = false,
-                            minLines = 1,
-                            maxLines = 3,
-                            modifier = Modifier.fillMaxWidth(),
-                        )
-                    }
-                    if (selectedTransport == "ET") {
-                        Spacer(Modifier.height(4.dp))
-                        Text(
-                            stringResource(
-                                R.string.connections_helper_et_required,
-                                etPort.ifBlank { "2022" },
-                            ),
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        )
-                    }
-
                     // SSH options
                     Spacer(Modifier.height(4.dp))
                     OutlinedTextField(
@@ -2447,29 +2371,25 @@ fun ConnectionEditDialog(
                     }
 
                     // Remote command runs as an SSH exec request, before any
-                    // interactive shell startup file can take control. Mosh
-                    // forwards it to mosh-server with `--`; ET has no matching
-                    // bootstrap contract, so it intentionally does not expose it.
-                    if (selectedTransport != "ET") {
-                        Spacer(Modifier.height(4.dp))
-                        OutlinedTextField(
-                            value = remoteCommand,
-                            onValueChange = { remoteCommand = it },
-                            label = { Text(stringResource(R.string.connections_field_remote_command)) },
-                            placeholder = { Text("tmux new -A -s work") },
-                            supportingText = { Text(stringResource(R.string.connections_helper_remote_command)) },
-                            singleLine = false,
-                            minLines = 1,
-                            maxLines = 3,
-                            modifier = Modifier.fillMaxWidth(),
+                    // interactive shell startup file can take control.
+                    Spacer(Modifier.height(4.dp))
+                    OutlinedTextField(
+                        value = remoteCommand,
+                        onValueChange = { remoteCommand = it },
+                        label = { Text(stringResource(R.string.connections_field_remote_command)) },
+                        placeholder = { Text("tmux new -A -s work") },
+                        supportingText = { Text(stringResource(R.string.connections_helper_remote_command)) },
+                        singleLine = false,
+                        minLines = 1,
+                        maxLines = 3,
+                        modifier = Modifier.fillMaxWidth(),
+                    )
+                    if (remoteCommand.isNotBlank()) {
+                        BooleanToggleRow(
+                            label = stringResource(R.string.connections_toggle_request_pty),
+                            checked = requestPty,
+                            onCheckedChange = { requestPty = it },
                         )
-                        if (remoteCommand.isNotBlank()) {
-                            BooleanToggleRow(
-                                label = stringResource(R.string.connections_toggle_request_pty),
-                                checked = requestPty,
-                                onCheckedChange = { requestPty = it },
-                            )
-                        }
                     }
 
                     // USB/IP device forwarding (SSH) — export a phone-attached USB
@@ -2887,7 +2807,7 @@ fun ConnectionEditDialog(
                             description = stringResource(R.string.connections_helper_mcp_enabled),
                         )
                         // Outbound exposure: reverse-tunnel Haven's own MCP back to the
-                        // remote host. SSH only (mosh/ET can't carry an SSH -R forward);
+                        // remote host. SSH only;
                         // disabled while inbound MCP is off.
                         if (selectedTransport == "SSH") {
                             Spacer(Modifier.height(8.dp))
@@ -2940,193 +2860,11 @@ fun ConnectionEditDialog(
                         )
                     }
 
-                } else {
-                    // --- Reticulum connection form ---
-                    // Order: gateway config → scan → destination hash
-                    ConnectionSection(stringResource(R.string.connections_section_reticulum))
-
-                    // 1. Gateway configuration
-                    BooleanToggleRow(
-                        label = stringResource(R.string.connections_toggle_local_sideband),
-                        checked = localSideband,
-                        onCheckedChange = { newValue ->
-                            localSideband = newValue
-                            if (newValue) {
-                                rnsHost = "127.0.0.1"
-                                rnsPort = "37428"
-                            }
-                        },
-                    )
-                    if (!localSideband) {
-                        Spacer(Modifier.height(4.dp))
-                        Row(
-                            horizontalArrangement = Arrangement.spacedBy(8.dp),
-                        ) {
-                            OutlinedTextField(
-                                value = rnsHost,
-                                onValueChange = { rnsHost = it },
-                                label = { Text(stringResource(R.string.connections_field_gateway_host)) },
-                                placeholder = { Text("192.168.0.2") },
-                                singleLine = true,
-                                modifier = Modifier.weight(1f),
-                            )
-                            OutlinedTextField(
-                                value = rnsPort,
-                                onValueChange = { rnsPort = it.filter { c -> c.isDigit() } },
-                                label = { Text(stringResource(R.string.connections_field_port)) },
-                                singleLine = true,
-                                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                                modifier = Modifier.width(80.dp),
-                            )
-                        }
-                        Spacer(Modifier.height(4.dp))
-                        OutlinedTextField(
-                            value = rnsNetworkName,
-                            onValueChange = { rnsNetworkName = it },
-                            label = { Text(stringResource(R.string.connections_field_network_name)) },
-                            placeholder = { Text(stringResource(R.string.connections_helper_network_name)) },
-                            singleLine = true,
-                            modifier = Modifier.fillMaxWidth(),
-                        )
-                        Spacer(Modifier.height(4.dp))
-                        sh.haven.core.ui.PasswordField(
-                            value = rnsPassphrase,
-                            onValueChange = { rnsPassphrase = it },
-                            label = stringResource(R.string.connections_field_passphrase),
-                            placeholder = stringResource(R.string.connections_hint_ifac_passphrase),
-                            modifier = Modifier.fillMaxWidth(),
-                            onRevealRequest = onRevealSavedSecret,
-                        )
-                    }
-
-                    // 2. Scan for destinations (uses gateway config above)
-                    Spacer(Modifier.height(8.dp))
-                    OutlinedButton(
-                        onClick = {
-                            val scanHost = if (localSideband) "127.0.0.1" else rnsHost
-                            val scanPort = if (localSideband) 37428 else (rnsPort.toIntOrNull() ?: 4242)
-                            onScanReticulum(
-                                scanHost,
-                                scanPort,
-                                rnsNetworkName.ifBlank { null },
-                                rnsPassphrase.ifBlank { null },
-                            )
-                        },
-                        enabled = !reticulumScanning,
-                        modifier = Modifier.fillMaxWidth(),
-                    ) {
-                        if (reticulumScanning) {
-                            CircularProgressIndicator(
-                                modifier = Modifier.size(16.dp),
-                                strokeWidth = 2.dp,
-                            )
-                            Spacer(Modifier.width(8.dp))
-                            Text(stringResource(R.string.connections_scanning) + "…")
-                        } else {
-                            Text(stringResource(R.string.connections_action_scan_rnsh))
-                        }
-                    }
-
-                    // 3. Discovered destinations (tapping a chip fills the hash)
-                    val filtered = remember(discoveredDestinations, destinationHash) {
-                        val prefix = destinationHash.lowercase()
-                        discoveredDestinations
-                            .filter { prefix.isEmpty() || it.hash.startsWith(prefix) }
-                            .take(8)
-                    }
-                    if (filtered.isNotEmpty()) {
-                        Spacer(Modifier.height(4.dp))
-                        val hiddenCount = discoveredDestinations.size - filtered.size
-                        Text(
-                            text = if (hiddenCount > 0) {
-                                stringResource(R.string.connections_discovered_count_filtered, filtered.size, discoveredDestinations.size)
-                            } else {
-                                stringResource(R.string.connections_discovered_count, filtered.size)
-                            },
-                            style = MaterialTheme.typography.labelMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        )
-                        FlowRow(
-                            horizontalArrangement = Arrangement.spacedBy(6.dp),
-                        ) {
-                            filtered.forEach { dest ->
-                                val hopsLabel = if (dest.hops >= 0) " (${dest.hops}h)" else ""
-                                SuggestionChip(
-                                    onClick = { destinationHash = dest.hash },
-                                    label = {
-                                        Text(
-                                            text = dest.hash.take(12) + ".." + hopsLabel,
-                                            style = MaterialTheme.typography.labelSmall,
-                                        )
-                                    },
-                                )
-                            }
-                        }
-                    }
-
-                    // 4. Destination hash (auto-filled by chip tap, or manual entry)
-                    Spacer(Modifier.height(4.dp))
-                    OutlinedTextField(
-                        value = destinationHash,
-                        onValueChange = {
-                            destinationHash = it.filter { c -> c in "0123456789abcdefABCDEF" }
-                                .take(32)
-                        },
-                        label = { Text(stringResource(R.string.connections_field_destination_hash)) },
-                        placeholder = { Text(stringResource(R.string.connections_helper_destination_hash)) },
-                        singleLine = true,
-                        modifier = Modifier.fillMaxWidth(),
-                    )
-
-                    // Post-login command
-                    Spacer(Modifier.height(4.dp))
-                    OutlinedTextField(
-                        value = postLoginCommand,
-                        onValueChange = { postLoginCommand = it },
-                        label = { Text(stringResource(R.string.connections_field_post_login)) },
-                        placeholder = { Text("cd /app && clear") },
-                        supportingText = { Text(stringResource(R.string.connections_helper_post_login)) },
-                        singleLine = false,
-                        minLines = 1,
-                        maxLines = 3,
-                        modifier = Modifier.fillMaxWidth(),
-                    )
-
-                    // 5. This device's identity (#585). Deliberately shown in a
-                    // per-profile form even though it is global: this is where
-                    // the user is standing when a server refuses them for not
-                    // being on its whitelist, and the help text says it is
-                    // shared so the placement cannot be read as per-profile.
-                    Spacer(Modifier.height(12.dp))
-                    Text(
-                        text = stringResource(R.string.connections_identity_label),
-                        style = MaterialTheme.typography.labelMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
-                    Text(
-                        text = reticulumIdentityHash
-                            ?: stringResource(R.string.connections_identity_none),
-                        style = MaterialTheme.typography.bodySmall,
-                        fontFamily = if (reticulumIdentityHash != null) FontFamily.Monospace else null,
-                    )
-                    Spacer(Modifier.height(2.dp))
-                    Text(
-                        text = stringResource(R.string.connections_identity_help),
-                        style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
-                    Spacer(Modifier.height(4.dp))
-                    OutlinedButton(
-                        onClick = onImportReticulumIdentity,
-                        modifier = Modifier.fillMaxWidth(),
-                    ) {
-                        Text(stringResource(R.string.connections_identity_import))
-                    }
                 }
 
                 // Port knocking. Visible for any profile with a remote
-                // TCP host — skipped for LOCAL (no host), RCLONE (its own
-                // protocol), and RETICULUM (mesh, not TCP).
+                // TCP host — skipped for LOCAL (no host) and RCLONE (its own
+                // protocol).
                 if (connectionType in setOf("SMB", "EMAIL", "OPENAI")) {
                     ConnectionSection(stringResource(R.string.connections_section_routing))
                     routingBody()
@@ -3142,7 +2880,7 @@ fun ConnectionEditDialog(
                 // WireGuard / Tailscale tunnel. Was SSH-only until #149;
                 // SMB now also honours profile.tunnelConfigId
                 // so the picker has to surface for them too. LOCAL has no
-                // network; RCLONE and Reticulum manage their own transport.
+                // network; RCLONE manages its own transport.
                 // Mutually exclusive at the UI layer: picking any tunnel
                 // clears proxy fields; picking any proxy clears
                 // tunnelConfigId. The connect path enforces tunnel >
@@ -3170,11 +2908,10 @@ fun ConnectionEditDialog(
                 "EMAIL" -> emailUsername.isNotBlank() && emailPassword.isNotBlank() &&
                     (!emailProvider.equals("imap", ignoreCase = true) || emailServer.isNotBlank())
                 "OPENAI" -> host.isNotBlank() && aiRouteComplete(aiRouteMode, aiRouteCarrierId)
-                else -> destinationHash.length == 32 && (localSideband || rnsHost.isNotBlank())
+                else -> false
             }
             TextButton(
                 onClick = {
-                    val etPortInt = etPort.toIntOrNull() ?: 2022
                     val profile = if (connectionType == "LOCAL") {
                         (existing ?: ConnectionProfile(
                             label = label,
@@ -3419,7 +3156,7 @@ fun ConnectionEditDialog(
                         ).withRoutingSelection(
                             proxyType, proxyHost, proxyPort, proxyUser, proxyPassword, tunnelConfigId,
                         )
-                    } else if (connectionType == "SSH") {
+                    } else {
                         // CF tunnel transport forces port 22 (the tunnel
                         // dial ignores port; this keeps downstream consumers
                         // that read `profile.port` sensible).
@@ -3470,7 +3207,6 @@ fun ConnectionEditDialog(
                             // (shared standalone tunnel) is persisted as-is.
                             tunnelConfigId = if (useCloudflareTunnel) null else tunnelConfigId,
                             sshOptions = sshOptions.ifBlank { null },
-                            moshServerCommand = moshServerCommand.ifBlank { null },
                             postLoginCommand = postLoginCommand.ifBlank { null },
                             postLoginBeforeSessionManager = postLoginBeforeSessionManager,
                             remoteCommand = remoteCommand.ifBlank { null },
@@ -3490,9 +3226,6 @@ fun ConnectionEditDialog(
                             tunnelOnly = tunnelOnly,
                             mcpEnabled = mcpEnabled,
                             sessionManager = selectedSessionManager,
-                            useMosh = selectedTransport == "MOSH",
-                            useEternalTerminal = selectedTransport == "ET",
-                            etPort = etPortInt,
                             fileTransport = fileTransport,
                             colorTag = colorTag,
                             groupId = groupId,
@@ -3509,31 +3242,6 @@ fun ConnectionEditDialog(
                             spaExplicitIp = spaExplicitIp.ifBlank { null },
                             spaPort = spaPort.toIntOrNull()?.takeIf { it in 1..65535 }
                                 ?: SpaConfig.DEFAULT_SPA_PORT,
-                        )
-                    } else {
-                        val savedHost = if (localSideband) "127.0.0.1" else rnsHost
-                        val savedPort = if (localSideband) 37428 else (rnsPort.toIntOrNull() ?: 4242)
-                        (existing ?: ConnectionProfile(
-                            label = label,
-                            host = "",
-                            port = 0,
-                            username = "",
-                        )).copy(
-                            label = label.ifBlank { "RNS:${destinationHash.take(12)}" },
-                            host = "",
-                            port = 0,
-                            username = "",
-                            connectionType = "RETICULUM",
-                            destinationHash = destinationHash.lowercase(),
-                            reticulumHost = savedHost,
-                            reticulumPort = savedPort,
-                            reticulumNetworkName = rnsNetworkName.ifBlank { null },
-                            reticulumPassphrase = rnsPassphrase.ifBlank { null },
-                            postLoginCommand = postLoginCommand.ifBlank { null },
-                            postLoginBeforeSessionManager = postLoginBeforeSessionManager,
-                            colorTag = colorTag,
-                            groupId = groupId,
-                            identityId = identityId,
                         )
                     }
                     // Embedded Cloudflare Tunnel transport input — only
@@ -3862,7 +3570,7 @@ private fun SshTunnelBlock(
 
 /**
  * AI route carrier picker: the OPENAI counterpart of [SshTunnelBlock].
- * Three-way mode (Direct / Via SSH / Via Reticulum), then the carrier
+ * Two-way mode (Direct / Via SSH), then the carrier
  * dropdown for the chosen kind. Save is gated by [aiRouteComplete] — a
  * picked mode without a carrier can't be saved.
  */
@@ -3879,7 +3587,6 @@ private fun AiRouteBlock(
     val modeOptions = listOf(
         "NONE" to stringResource(R.string.connections_dropdown_none_direct),
         "SSH" to stringResource(R.string.connections_ai_route_via_ssh),
-        "RETICULUM" to stringResource(R.string.connections_ai_route_via_reticulum),
     )
     ExposedDropdownMenuBox(
         expanded = modeExpanded,
@@ -3923,52 +3630,6 @@ private fun AiRouteBlock(
             onCarrierChange = onCarrierChange,
             showToggle = false,
         )
-        "RETICULUM" -> {
-            val candidates = profiles.filter { it.isReticulum }
-            if (candidates.isNotEmpty()) {
-                Spacer(Modifier.height(4.dp))
-                var reticulumExpanded by remember { mutableStateOf(false) }
-                val selected = candidates.firstOrNull { it.id == carrierId }
-                ExposedDropdownMenuBox(
-                    expanded = reticulumExpanded,
-                    onExpandedChange = { reticulumExpanded = it },
-                ) {
-                    OutlinedTextField(
-                        value = selected?.label
-                            ?: stringResource(R.string.connections_dropdown_select_carrier),
-                        onValueChange = {},
-                        readOnly = true,
-                        label = { Text(stringResource(R.string.connections_field_ai_route_carrier)) },
-                        trailingIcon = {
-                            ExposedDropdownMenuDefaults.TrailingIcon(reticulumExpanded)
-                        },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .menuAnchor(MenuAnchorType.PrimaryNotEditable),
-                    )
-                    ExposedDropdownMenu(
-                        expanded = reticulumExpanded,
-                        onDismissRequest = { reticulumExpanded = false },
-                    ) {
-                        candidates.forEach { candidate ->
-                            DropdownMenuItem(
-                                text = { Text(candidate.label) },
-                                onClick = {
-                                    onCarrierChange(candidate.id)
-                                    reticulumExpanded = false
-                                },
-                            )
-                        }
-                    }
-                }
-            } else {
-                Text(
-                    stringResource(R.string.connections_helper_add_reticulum_first),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.error,
-                )
-            }
-        }
     }
 }
 

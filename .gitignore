@@ -15,7 +15,6 @@ local.properties
 *.jks
 *.keystore
 /releases
-build-mosh/
 com/jcraft/jsch/
 build-proot/build-*/
 build-proot/dl/

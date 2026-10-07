@@ -75,8 +75,6 @@ internal class McpTools(
     private val portForwardRepository: PortForwardRepository,
     private val sshSessionManager: SshSessionManager,
     private val sessionManagerRegistry: SessionManagerRegistry,
-    private val reticulumSessionManager: sh.haven.core.reticulum.ReticulumSessionManager,
-    private val reticulumForwardServer: sh.haven.core.reticulum.ReticulumForwardServer,
     private val rcloneClient: RcloneClient,
     private val mailSessionManager: sh.haven.core.mail.MailSessionManager,
     private val sftpStreamServer: SftpStreamServer,
@@ -441,7 +439,7 @@ internal class McpTools(
         ) { args -> unpairMcpClient(args) },
 
         "list_connections" to ToolHandler(
-            description = "List saved connection profiles (SSH, Mosh, SMB, rclone, local, Reticulum, OPENAI). Secrets like passwords and keys are redacted. SSH profiles also report `sshOptions` (the ssh_config-style lines set on the profile) and `sshEngine` — \"jsch\" (default) or \"sshlib\" (the experimental whole-connection engine, opted into with the 'HavenSshEngine sshlib' directive) — so an agent that sets the engine can confirm which one a profile is actually on.",
+            description = "List saved connection profiles (SSH, SMB, rclone, local, OPENAI). Secrets like passwords and keys are redacted. SSH profiles also report `sshOptions` (the ssh_config-style lines set on the profile) and `sshEngine` — \"jsch\" (default) or \"sshlib\" (the experimental whole-connection engine, opted into with the 'HavenSshEngine sshlib' directive) — so an agent that sets the engine can confirm which one a profile is actually on.",
             inputSchema = emptyObjectSchema(),
         ) { _ -> listConnections() },
 
@@ -453,7 +451,7 @@ internal class McpTools(
         ) { args -> readExitedSession(args) },
 
         "list_sessions" to ToolHandler(
-            description = "List currently registered sessions across all transports (ssh, mosh, et, reticulum, smb, local, mail, openai, and Bluetooth/BLE/USB serial) with sessionId, profileId, label, status (connecting, connected, reconnecting, disconnected, error), transport, and isAgentRepl — a screen heuristic (Claude Code TUI chrome in the bottom lines) marking which terminal session is an agent REPL, so a conversation peer can be picked without guessing; null when the session has no attached terminal tab. SSH sessions additionally include sessionManager, chosenSessionName (the stable tmux/zellij identity that survives reconnects), channel state, jump-session linkage, and active port forwards.",
+            description = "List currently registered sessions across all transports (ssh, smb, local, mail, openai, and Bluetooth/BLE/USB serial) with sessionId, profileId, label, status (connecting, connected, reconnecting, disconnected, error), transport, and isAgentRepl — a screen heuristic (Claude Code TUI chrome in the bottom lines) marking which terminal session is an agent REPL, so a conversation peer can be picked without guessing; null when the session has no attached terminal tab. SSH sessions additionally include sessionManager, chosenSessionName (the stable tmux/zellij identity that survives reconnects), channel state, jump-session linkage, and active port forwards.",
             inputSchema = emptyObjectSchema(),
         ) { _ -> listSessions() },
 
@@ -732,7 +730,7 @@ internal class McpTools(
         // --- Write tools (require consent) ------------------------------
 
         "disconnect_profile" to ToolHandler(
-            description = "Disconnect every live session for a profile across all transports (SSH, Mosh, Eternal Terminal, SMB, Reticulum, local, Bluetooth/BLE/USB serial). Use list_connections to find profileIds.",
+            description = "Disconnect every live session for a profile across all transports (SSH, SMB, local, Bluetooth/BLE/USB serial). Use list_connections to find profileIds.",
             inputSchema = objectSchema {
                 string("profileId", "ID of the connection profile to disconnect.", required = true)
             },
@@ -1037,7 +1035,7 @@ internal class McpTools(
         ) { _ -> openDeveloperSettings() },
 
         "install_apk_from_url" to ToolHandler(
-            description = "Download an APK from a URL and install it on the device. Validates the URL synchronously, then downloads + installs in the BACKGROUND and returns {pending:true, staging:true} immediately — a large APK on a slow link would otherwise outlast the request timeout (#331). Poll get_app_info: `activeInstall` carries the live phase (connecting/downloading/installing) and bytes/totalBytes while in flight; `lastInstall` carries the terminal outcome. With Shizuku running and granted, install is silent via `pm install`; without it a 'tap to install' prompt/notification appears on-device. A truncated transfer (dropped connection) is rejected against the advertised Content-Length rather than staged — a partial APK still passes the zip-magic check and would fail on-device with 'problem parsing the package', so `lastInstall` reports the short read instead. Useful for agent-driven self-update or sideloading over VPN where wireless ADB isn't reachable. NOTE: Android's network-security policy blocks cleartext http:// to anything but localhost, so an http:// URL on the LAN (e.g. a workstation IP) is rejected — use https://, or install_apk_from_backend (SFTP/rclone/Reticulum) which carries no cleartext.",
+            description = "Download an APK from a URL and install it on the device. Validates the URL synchronously, then downloads + installs in the BACKGROUND and returns {pending:true, staging:true} immediately — a large APK on a slow link would otherwise outlast the request timeout (#331). Poll get_app_info: `activeInstall` carries the live phase (connecting/downloading/installing) and bytes/totalBytes while in flight; `lastInstall` carries the terminal outcome. With Shizuku running and granted, install is silent via `pm install`; without it a 'tap to install' prompt/notification appears on-device. A truncated transfer (dropped connection) is rejected against the advertised Content-Length rather than staged — a partial APK still passes the zip-magic check and would fail on-device with 'problem parsing the package', so `lastInstall` reports the short read instead. Useful for agent-driven self-update or sideloading over VPN where wireless ADB isn't reachable. NOTE: Android's network-security policy blocks cleartext http:// to anything but localhost, so an http:// URL on the LAN (e.g. a workstation IP) is rejected — use https://, or install_apk_from_backend (SFTP/rclone) which carries no cleartext.",
             inputSchema = objectSchema {
                 string("url", "http(s) URL pointing at a signed APK file. Should resolve to APK bytes (no HTML wrapper).", required = true)
             },
@@ -1048,7 +1046,7 @@ internal class McpTools(
         ) { args -> installApkFromUrl(args) },
 
         "install_apk_from_backend" to ToolHandler(
-            description = "Install an APK from a path on any connected backend (local, SSH/SFTP, SMB, rclone, Reticulum). Streams APK bytes via the existing FileBackend abstraction. Same Shizuku/system-installer fallback as install_apk_from_url. Because backend transfers can be slow (a big APK over SFTP/rclone/Reticulum), this validates synchronously (missing file, directory, size cap → immediate error) then streams + installs in the background, returning {pending:true, staging:true} right away rather than blocking past the request timeout. Poll get_app_info: `activeInstall` has live phase/bytes while in flight (#331), `lastInstall` the terminal outcome (and /mcp reconnect if Haven is updating itself). Gated by Settings → Agent endpoint → \"Allow agents to read file contents\" and confirmed per-call.",
+            description = "Install an APK from a path on any connected backend (local, SSH/SFTP, SMB, rclone). Streams APK bytes via the existing FileBackend abstraction. Same Shizuku/system-installer fallback as install_apk_from_url. Because backend transfers can be slow (a big APK over SFTP/rclone), this validates synchronously (missing file, directory, size cap → immediate error) then streams + installs in the background, returning {pending:true, staging:true} right away rather than blocking past the request timeout. Poll get_app_info: `activeInstall` has live phase/bytes while in flight (#331), `lastInstall` the terminal outcome (and /mcp reconnect if Haven is updating itself). Gated by Settings → Agent endpoint → \"Allow agents to read file contents\" and confirmed per-call.",
             inputSchema = objectSchema {
                 string("profileId", "Connection profile ID, or 'local' for the device filesystem.", required = true)
                 string("path", "Absolute path to the APK file on the chosen backend.", required = true)
@@ -1603,10 +1601,10 @@ internal class McpTools(
         ) { args -> setProfileRouting(args) },
 
         "create_connection" to ToolHandler(
-            description = "Create a saved connection profile. Supports connectionType=SSH, SMB, EMAIL, RETICULUM. SSH-family fields: username (required), password (optional, stored), keyId (optional — references list_ssh_keys), ignoreSavedKeys (force password-only auth, never offer saved keys), useMosh (turn an SSH profile into a Mosh profile), sessionManager (optional: TMUX | ZELLIJ | SCREEN | BYOBU | HERDR | PSMUX — attach through that multiplexer; omit for a plain shell), remoteCommand (run a command via an SSH exec request instead of a login shell — e.g. 'tmux new -A -s work' to attach-or-create that session before shell startup files run) + requestPty (PTY for it, default true), bindAddress (local address the outgoing SSH socket binds to, ssh -b — direct connections only). SMB: smbShare (required), username + password, smbDomain. EMAIL: emailProvider (\"imap\" default, or \"proton\"); username = the email address; password = the account/app-password; for IMAP set emailServer (required) + emailPort (993) + emailSmtpPort (465) + emailTls (true), plus emailSmtpServer when the SMTP host differs (e.g. smtp.gmail.com); for Proton add emailMailboxPassword if two-password mode. EMAIL host is optional (the tunnel-ingress/bastion SPA/knock guards), not the mail server. OPENAI (OpenAI-compatible endpoint, e.g. llama-server or CLIProxyAPI): host = server IP/hostname (a full http:// URL also works), port = TCP port (default 80), optional password arg = the API key (sent as a Bearer token; omit for keyless servers), openaiPathPrefix = optional path inserted before /v1 (e.g. \"/api\"). Connect verifies via GET /v1/models; chat via the chat screen or openai_chat. BTSERIAL (Bluetooth-serial console, #406): host = the paired device's Bluetooth MAC (from list_bluetooth_devices); no other fields. The device must already be paired in Android Settings. BLESERIAL (Bluetooth-LE-serial console — Nordic UART Service / HM-10): host = the BLE peripheral's MAC; no other fields. It needn't be paired — scan-and-pick in the editor; the GATT service/characteristics are auto-detected (NUS 6E400001…, then HM-10 FFE0/FFE1). USBSERIAL (USB-serial console, #408 — Arduino / Duet3D G-code / ESP32 / USB-TTL): host = the device's vendorId:productId hex, e.g. 1a86:7523, from list_usb_devices; usbBaudRate = baud (default 115200); usbDataBits/usbParity/usbStopBits/usbFlowControl set the rest of the line format (default 8N1, no flow control). Plug the adapter in first; connect_profile pops the Android USB-permission prompt. Chipsets: CDC-ACM, CH34x, FTDI, CP21xx, Prolific. RETICULUM: destinationHash (required, 32 hex chars) is the address; reticulumHost + reticulumPort are only how this phone reaches the mesh, defaulting to 127.0.0.1:37428 which is a Sideband or Columba shared instance on this device — any other host is a TCP gateway. reticulumNetworkName + reticulumPassphrase set IFAC on an authenticated gateway. The new profile id is returned for follow-up calls (set_profile_routing, connect_profile). For rclone / local create the profile in the UI — those need an OAuth flow the agent can't drive.",
+            description = "Create a saved connection profile. Supports connectionType=SSH, SMB, EMAIL. SSH-family fields: username (required), password (optional, stored), keyId (optional — references list_ssh_keys), ignoreSavedKeys (force password-only auth, never offer saved keys), sessionManager (optional: TMUX | ZELLIJ | SCREEN | BYOBU | HERDR | PSMUX — attach through that multiplexer; omit for a plain shell), remoteCommand (run a command via an SSH exec request instead of a login shell — e.g. 'tmux new -A -s work' to attach-or-create that session before shell startup files run) + requestPty (PTY for it, default true), bindAddress (local address the outgoing SSH socket binds to, ssh -b — direct connections only). SMB: smbShare (required), username + password, smbDomain. EMAIL: emailProvider (\"imap\" default, or \"proton\"); username = the email address; password = the account/app-password; for IMAP set emailServer (required) + emailPort (993) + emailSmtpPort (465) + emailTls (true), plus emailSmtpServer when the SMTP host differs (e.g. smtp.gmail.com); for Proton add emailMailboxPassword if two-password mode. EMAIL host is optional (the tunnel-ingress/bastion SPA/knock guards), not the mail server. OPENAI (OpenAI-compatible endpoint, e.g. llama-server or CLIProxyAPI): host = server IP/hostname (a full http:// URL also works), port = TCP port (default 80), optional password arg = the API key (sent as a Bearer token; omit for keyless servers), openaiPathPrefix = optional path inserted before /v1 (e.g. \"/api\"). Connect verifies via GET /v1/models; chat via the chat screen or openai_chat. BTSERIAL (Bluetooth-serial console, #406): host = the paired device's Bluetooth MAC (from list_bluetooth_devices); no other fields. The device must already be paired in Android Settings. BLESERIAL (Bluetooth-LE-serial console — Nordic UART Service / HM-10): host = the BLE peripheral's MAC; no other fields. It needn't be paired — scan-and-pick in the editor; the GATT service/characteristics are auto-detected (NUS 6E400001…, then HM-10 FFE0/FFE1). USBSERIAL (USB-serial console, #408 — Arduino / Duet3D G-code / ESP32 / USB-TTL): host = the device's vendorId:productId hex, e.g. 1a86:7523, from list_usb_devices; usbBaudRate = baud (default 115200); usbDataBits/usbParity/usbStopBits/usbFlowControl set the rest of the line format (default 8N1, no flow control). Plug the adapter in first; connect_profile pops the Android USB-permission prompt. Chipsets: CDC-ACM, CH34x, FTDI, CP21xx, Prolific. The new profile id is returned for follow-up calls (set_profile_routing, connect_profile). For rclone / local create the profile in the UI — those need an OAuth flow the agent can't drive.",
             inputSchema = objectSchema {
                 string("label", "User-facing label.", required = true)
-                string("connectionType", "SSH | SMB | EMAIL | BTSERIAL | BLESERIAL | USBSERIAL | RETICULUM | GUEST.", required = true)
+                string("connectionType", "SSH | SMB | EMAIL | BTSERIAL | BLESERIAL | USBSERIAL | GUEST.", required = true)
                 string("host", "Target hostname or IP. For EMAIL this is the optional tunnel ingress/bastion (SPA/knock target), NOT the mail server — leave blank for a direct IMAP connection.", required = true)
                 integer("port", "TCP port. Defaults: SSH 22, SMB 445.")
                 string("username", "Username for SSH/SMB.")
@@ -1624,7 +1622,6 @@ internal class McpTools(
                 string("protocol", "OPENAI only: wire protocol — OPENAI (default, OpenAI-compatible /v1/chat/completions), OLLAMA (native /api), ANTHROPIC (Messages API /v1/messages), or GEMINI (generativelanguage /v1beta/models/{model}:generateContent).")
                 string("tunnelConfigId", "Optional: route the new profile through this tunnel (from list_tunnels). Equivalent to follow-up set_profile_routing.")
                 boolean("tunnelOnly", "SSH only: tunnel-only mode (#150). When true, the profile brings up the SSH transport and registers port forwards but does not open a terminal. Default false. Pair with auto_reconnect for autossh-style keepalive.")
-                boolean("useMosh", "SSH only: when true, the profile uses Mosh on top of the SSH bootstrap. SSH execs `mosh-server new -s`, parses MOSH CONNECT, then the UDP transport takes over. Default false.")
                 string("keyId", "SSH only: id of a saved SSH key (from list_ssh_keys) to authenticate with. Mutually optional with password.")
                 string("sshOptions", "SSH only: ssh_config-style option lines ('Key value' or 'Key=value', newline-separated) applied to this profile — e.g. 'ServerAliveInterval 60' or the Haven-internal 'HavenSshEngine sshlib' engine toggle (#58).")
                 string("remoteCommand", "SSH only (#436): run this command via an SSH exec request instead of opening a login shell — it executes before shell startup files, so e.g. 'tmux new -A -s work' attaches to/creates that named session without racing a .bashrc auto-tmux hook. Omit for the normal interactive shell.")
@@ -1639,11 +1636,6 @@ internal class McpTools(
                 string("usbParity", "USBSERIAL only: parity N|O|E|M|S (none/odd/even/mark/space, default N).")
                 string("usbStopBits", "USBSERIAL only: stop bits 1|1.5|2 (default 1).")
                 string("usbFlowControl", "USBSERIAL only: flow control none|rtscts|xonxoff (default none).")
-                string("destinationHash", "RETICULUM only: the rnsh destination hash to address, 32 hex characters. Required for RETICULUM. Discoverable by scanning in the UI, or take it from the server's `rnsh -l` output.")
-                string("reticulumHost", "RETICULUM only: how this phone reaches the mesh. Default 127.0.0.1, meaning a Sideband or Columba shared instance on this device; any other host is a TCP gateway.")
-                integer("reticulumPort", "RETICULUM only: port for reticulumHost. Default 37428, the shared-instance port. A TCP gateway is usually 4242.")
-                string("reticulumNetworkName", "RETICULUM only: IFAC network name, when the gateway is authenticated. Optional.")
-                string("reticulumPassphrase", "RETICULUM only: IFAC passphrase that goes with reticulumNetworkName. Optional, stored.")
             },
             consentLevel = ConsentLevel.EVERY_CALL,
             summarise = { args ->
@@ -1663,7 +1655,7 @@ internal class McpTools(
         ) { args -> createConnection(args) },
 
         "update_connection" to ToolHandler(
-            description = "Edit fields on an existing connection profile (load → change → save). Pass profileId (required) plus only the fields you want to change — anything omitted is left as-is. Common SSH-family fields: label, host, port, username, password (stored, mapped to the profile's transport), keyId, ignoreSavedKeys (force password-only auth), useMosh, forwardAgent, remoteCommand (SSH exec instead of a login shell; empty string clears) + requestPty, bindAddress (ssh -b; direct connections only, empty string clears). SMB tunnel: smbSshForward + smbSshProfileId. USB/IP auto-forward: usbForwardVidPid (export a phone-attached USB device to this host on every connect). Passwords are stored encrypted and never echoed back. OPENAI: password maps to the API key (empty string clears). For routing/proxy use set_profile_routing; for port-knock/SPA use set_port_knock/set_spa. Returns the updated profile (secrets redacted).",
+            description = "Edit fields on an existing connection profile (load → change → save). Pass profileId (required) plus only the fields you want to change — anything omitted is left as-is. Common SSH-family fields: label, host, port, username, password (stored, mapped to the profile's transport), keyId, ignoreSavedKeys (force password-only auth), forwardAgent, remoteCommand (SSH exec instead of a login shell; empty string clears) + requestPty, bindAddress (ssh -b; direct connections only, empty string clears). SMB tunnel: smbSshForward + smbSshProfileId. USB/IP auto-forward: usbForwardVidPid (export a phone-attached USB device to this host on every connect). Passwords are stored encrypted and never echoed back. OPENAI: password maps to the API key (empty string clears). For routing/proxy use set_profile_routing; for port-knock/SPA use set_port_knock/set_spa. Returns the updated profile (secrets redacted).",
             inputSchema = objectSchema {
                 string("profileId", "Profile id from list_connections.", required = true)
                 string("label", "New user-facing label.")
@@ -1678,13 +1670,11 @@ internal class McpTools(
                 boolean("requestPty", "SSH only (#436): allocate a PTY for remoteCommand (tmux needs one). Ignored when remoteCommand is empty.")
                 string("jumpProfileId", "SSH only: id of the SSH profile to jump through (ssh -J). The target host is dialled from the jump host, so it may be an address only the jump can reach. Empty string clears.")
                 boolean("ignoreSavedKeys", "SSH-family only: force password-only auth, never offer saved keystore keys (#121).")
-                boolean("useMosh", "SSH only: use Mosh on top of the SSH bootstrap.")
                 boolean("forwardAgent", "SSH only: enable SSH agent forwarding. Keys with a stored passphrase (or none) are exposed to the remote's ssh-agent socket (#377).")
                 string("openaiPathPrefix", "OPENAI only: path prefix inserted before /v1 (e.g. \"/api\"). Empty string clears.")
                 string("protocol", "OPENAI only: wire protocol — OPENAI (default), OLLAMA, ANTHROPIC, or GEMINI. Empty string clears (back to OPENAI).")
                 boolean("smbSshForward", "SMB only: tunnel through a saved SSH profile (set smbSshProfileId).")
                 string("smbSshProfileId", "SMB only: SSH profile id to tunnel through. Empty string clears.")
-                string("moshServerCommand", "Mosh only: override the command Haven runs over SSH to start mosh-server (default 'mosh-server new -s -c 256 …'). It must print a 'MOSH CONNECT <port> <key>' line, which Haven parses to find the session — so a wrapper can point Haven at a different port (e.g. scripts/mosh-fault-rig.py bootstrap, which puts a fault-injecting relay in front). Empty string restores the default.")
                 string("usbForwardVidPid", "SSH only: VID:PID of a phone-attached USB device (e.g. '1050:0406' — see list_usb_devices) to auto-export over USB/IP whenever this profile connects. Haven opens the device, starts the usbip server on loopback, adds the remote forward, and runs `usbip attach` on the host, re-attaching after a tunnel drop. Empty string clears (no auto-forward).")
             },
             consentLevel = ConsentLevel.EVERY_CALL,
@@ -2143,9 +2133,6 @@ internal class McpTools(
             put("ssh")
             put("sftp")
             put("smb")
-            put("reticulum")
-            put("mosh")
-            put("eternal_terminal")
             put("proot")
             // The desktop and media capabilities are reported from what the
             // build actually shipped, not asserted. The terminal flavour
@@ -2257,14 +2244,11 @@ internal class McpTools(
             put("authMethods", org.json.JSONArray(p.authMethodSpecs.map { it.serialize() }))
         }
         put("lastConnected", p.lastConnected ?: JSONObject.NULL)
-        if (p.useMosh) put("useMosh", true)
         if (!p.remoteCommand.isNullOrBlank()) {
             put("remoteCommand", p.remoteCommand)
             put("requestPty", p.requestPty)
         }
-        if (p.useEternalTerminal) put("useEternalTerminal", true)
         if (!p.usbForwardVidPid.isNullOrBlank()) put("usbForwardVidPid", p.usbForwardVidPid)
-        if (!p.moshServerCommand.isNullOrBlank()) put("moshServerCommand", p.moshServerCommand)
         // sshOptions was settable but never readable, so an agent could opt a
         // profile into the sshlib engine and then have no way to confirm which
         // engine it was actually on — the same write-only asymmetry
@@ -2284,16 +2268,6 @@ internal class McpTools(
             if (!p.openaiPathPrefix.isNullOrEmpty()) put("pathPrefix", p.openaiPathPrefix)
             put("hasApiKey", !p.openaiApiKey.isNullOrEmpty())
             put("protocol", p.aiProtocol?.takeIf { it.isNotBlank() } ?: "OPENAI")
-        }
-        // Reticulum — without these a profile the agent just created reads back
-        // as an address-less RETICULUM row it cannot tell apart from any other.
-        if (p.isReticulum) {
-            put("destinationHash", p.destinationHash ?: JSONObject.NULL)
-            put("reticulumHost", p.reticulumHost)
-            put("reticulumPort", p.reticulumPort)
-            if (!p.reticulumNetworkName.isNullOrEmpty()) {
-                put("reticulumNetworkName", p.reticulumNetworkName)
-            }
         }
         // Rclone
         if (!p.rcloneRemoteName.isNullOrEmpty()) put("rcloneRemote", p.rcloneRemoteName)
@@ -3351,29 +3325,6 @@ internal class McpTools(
         )
         portForwardRepository.save(rule)
 
-        // Reticulum profiles tunnel over the rnsh exec substrate (nc), not
-        // an SSH session — dispatch to the forward server instead.
-        if (reticulumSessionManager.isProfileConnected(profileId)) {
-            val destHash = reticulumSessionManager.getSessionsForProfile(profileId)
-                .firstOrNull { it.status == sh.haven.core.reticulum.ReticulumSessionManager.SessionState.Status.CONNECTED }
-                ?.destinationHash
-            if (destHash != null) {
-                val bound = when (rule.type) {
-                    PortForwardRule.Type.LOCAL -> reticulumForwardServer.startLocalForward(
-                        profileId, destHash, rule.bindAddress, rule.bindPort, rule.targetHost, rule.targetPort)
-                    PortForwardRule.Type.DYNAMIC -> reticulumForwardServer.startDynamicForward(
-                        profileId, destHash, rule.bindAddress, rule.bindPort)
-                    PortForwardRule.Type.REMOTE -> throw McpError(-32602,
-                        "Remote (-R) forwarding is not supported over Reticulum yet")
-                }
-                return@withContext JSONObject().apply {
-                    put("ruleId", rule.id)
-                    put("activated", true)
-                    put("actualBoundPort", bound)
-                }
-            }
-        }
-
         // Activate immediately if the profile has a connected session.
         // Mirrors the UI's savePortForwardRule path. Multiple connected
         // sessions per profile are unusual but possible (multi-tab); we
@@ -3426,24 +3377,17 @@ internal class McpTools(
         // doesn't expose getById today; iterate everyone's enabled rules
         // — list is tiny in practice (<10 rules per profile).
         var owningProfileId: String? = null
-        var owningRule: PortForwardRule? = null
         for (p in connectionRepository.getAll()) {
             val r = portForwardRepository.getEnabledForProfile(p.id).firstOrNull { it.id == ruleId }
-            if (r != null) { owningProfileId = p.id; owningRule = r; break }
+            if (r != null) { owningProfileId = p.id; break }
         }
         if (owningProfileId != null) {
-            if (reticulumSessionManager.isProfileConnected(owningProfileId)) {
-                // Reticulum forwards key on the bound port (bindPort=0 OS-pick
-                // not deactivatable by id in v1).
-                owningRule?.let { reticulumForwardServer.stopForward(owningProfileId, it.bindPort) }
-            } else {
-                val session = sshSessionManager.getSessionsForProfile(owningProfileId)
-                    .firstOrNull { it.status == SshSessionManager.SessionState.Status.CONNECTED }
-                if (session != null) {
-                    val forward = session.activeForwards.firstOrNull { it.ruleId == ruleId }
-                    if (forward != null) {
-                        sshSessionManager.removePortForward(session.sessionId, forward)
-                    }
+            val session = sshSessionManager.getSessionsForProfile(owningProfileId)
+                .firstOrNull { it.status == SshSessionManager.SessionState.Status.CONNECTED }
+            if (session != null) {
+                val forward = session.activeForwards.firstOrNull { it.ruleId == ruleId }
+                if (forward != null) {
+                    sshSessionManager.removePortForward(session.sessionId, forward)
                 }
             }
         }
@@ -4334,9 +4278,9 @@ internal class McpTools(
 
     /**
      * Write a raw string to a session's PTY on whichever transport owns it —
-     * SSH, local, mosh, ET, or Reticulum (#366: only the first two were
-     * tried, so agent input to a mosh session failed "No local session"
-     * while snapshot reads resolved it fine).
+     * SSH or local (#366: only those were tried at first, so
+     * agent input to other transports failed "No local session" while
+     * snapshot reads resolved it fine).
      */
     /** @return the transport that accepted the write (see #555). */
     private fun sendRawInput(sessionId: String, s: String): String {
@@ -4957,7 +4901,7 @@ internal class McpTools(
         }
 
         // Streaming a large APK from a backend (SFTP over a flaky tunnel,
-        // rclone over the network, Reticulum over the mesh) routinely outlasts
+        // rclone over the network) routinely outlasts
         // the MCP client's request budget — the call reads as a timeout even
         // though the install completes (observed installing Haven over itself
         // via the WG-tunnelled "near" SFTP). The existing self-install deferral
@@ -6265,11 +6209,9 @@ internal class McpTools(
             requestPty = if (existing.connectionType == "SSH") bool("requestPty", existing.requestPty) else existing.requestPty,
             jumpProfileId = str("jumpProfileId", existing.jumpProfileId),
             ignoreSavedKeys = bool("ignoreSavedKeys", existing.ignoreSavedKeys),
-            useMosh = bool("useMosh", existing.useMosh),
             forwardAgent = bool("forwardAgent", existing.forwardAgent),
             smbSshForward = bool("smbSshForward", existing.smbSshForward),
             smbSshProfileId = str("smbSshProfileId", existing.smbSshProfileId),
-            moshServerCommand = str("moshServerCommand", existing.moshServerCommand),
             usbForwardVidPid = if (existing.connectionType == "SSH") {
                 str("usbForwardVidPid", existing.usbForwardVidPid)
             } else {
@@ -6285,18 +6227,15 @@ internal class McpTools(
         val type = args.optString("connectionType").uppercase().ifBlank {
             throw IllegalArgumentException("connectionType required")
         }
-        if (type !in setOf("SSH", "SMB", "EMAIL", "OPENAI", "BTSERIAL", "BLESERIAL", "USBSERIAL", "RETICULUM", "GUEST")) {
-            throw IllegalArgumentException("connectionType must be SSH, SMB, EMAIL, OPENAI, BTSERIAL, BLESERIAL, USBSERIAL, or RETICULUM (use the UI for LOCAL / RCLONE / GUEST)")
+        if (type !in setOf("SSH", "SMB", "EMAIL", "OPENAI", "BTSERIAL", "BLESERIAL", "USBSERIAL", "GUEST")) {
+            throw IllegalArgumentException("connectionType must be SSH, SMB, EMAIL, OPENAI, BTSERIAL, BLESERIAL, or USBSERIAL (use the UI for LOCAL / RCLONE / GUEST)")
         }
         // EMAIL's host is the optional tunnel-ingress/bastion (SPA/knock target),
         // not the mail server — so it may be blank; every other type requires it.
-        // RETICULUM addresses a destination hash, not a host: the gateway or
-        // shared instance it reaches the mesh through is `reticulumHost`, and
-        // it has a working default, so `host` may be blank here too.
         // GUEST has no fields at all — kernel args are fixed, the rootfs is
         // staged locally — so its host is blank as well.
         val host = args.optString("host")
-        if (type !in setOf("EMAIL", "RETICULUM", "GUEST") && host.isBlank()) {
+        if (type !in setOf("EMAIL", "GUEST") && host.isBlank()) {
             throw IllegalArgumentException("host required")
         }
         val username = args.optString("username")
@@ -6315,7 +6254,6 @@ internal class McpTools(
             "BTSERIAL" -> 0
             "BLESERIAL" -> 0
             "USBSERIAL" -> 115200 // serial baud, stored in `port` (#408)
-            "RETICULUM" -> 0 // the mesh port lives in reticulumPort
             else -> 22
         }
         // Honor the type-specific port field (usbBaudRate), preferring it over
@@ -6377,7 +6315,6 @@ internal class McpTools(
                 username = username,
                 sshPassword = password.ifBlank { null },
                 connectionType = "SSH",
-                useMosh = args.optBoolean("useMosh", false),
                 keyId = args.optString("keyId").ifBlank { null },
                 sshOptions = args.optString("sshOptions").ifBlank { null },
                 remoteCommand = args.optString("remoteCommand").ifBlank { null },
@@ -6390,28 +6327,6 @@ internal class McpTools(
                 tunnelOnly = tunnelOnly,
                 portKnockSequence = knockSequence,
                 portKnockDelayMs = knockDelay,
-            )
-            "RETICULUM" -> ConnectionProfile(
-                // The destination hash is the address; reticulumHost/Port is
-                // only how this phone reaches the mesh — 127.0.0.1:37428 is a
-                // Sideband or Columba shared instance on the same device, any
-                // other host is a TCP gateway.
-                label = label,
-                host = "",
-                port = 0,
-                username = "",
-                connectionType = "RETICULUM",
-                destinationHash = normaliseReticulumDestinationHash(args.optString("destinationHash")),
-                reticulumHost = args.optString("reticulumHost")
-                    .ifBlank { host.ifBlank { "127.0.0.1" } },
-                reticulumPort = if (args.has("reticulumPort")) {
-                    args.optInt("reticulumPort", 37428)
-                } else {
-                    37428
-                },
-                reticulumNetworkName = args.optString("reticulumNetworkName").ifBlank { null },
-                reticulumPassphrase = args.optString("reticulumPassphrase").ifBlank { null },
-                tunnelConfigId = tunnelConfigId,
             )
             "BTSERIAL" -> ConnectionProfile(
                 // host carries the paired device's Bluetooth MAC (#406).
@@ -8382,26 +8297,6 @@ private const val PAIRING_STEPS_NOTIFICATION_ID = 0x0576
 private const val INSTALL_NOTIFICATION_CHANNEL_ID = "agent.install"
 
 /** Upper bound on lines requested from logcat in a single read_logcat call. */
-/**
- * The destination hash a RETICULUM profile addresses, normalised to lower case.
- *
- * Checked at create time rather than at connect time because a malformed hash
- * is indistinguishable from an unreachable one once it is in flight: the
- * connect spends 20s waiting for a path that can never resolve and then reports
- * a timeout, which reads as a network fault rather than a typo.
- */
-internal fun normaliseReticulumDestinationHash(raw: String): String {
-    val hash = raw.trim().lowercase()
-    require(hash.isNotBlank()) { "destinationHash required for RETICULUM" }
-    require(hash.length == RETICULUM_DEST_HASH_CHARS && hash.all { it in "0123456789abcdef" }) {
-        "destinationHash must be $RETICULUM_DEST_HASH_CHARS hex characters, got \"$raw\""
-    }
-    return hash
-}
-
-/** Reticulum truncates destination hashes to 16 bytes, so 32 hex characters. */
-private const val RETICULUM_DEST_HASH_CHARS = 32
-
 private const val MAX_LOGCAT_LINES = 5000
 
 /** Upper bound on the response payload from a single read_logcat call (256 KiB). */

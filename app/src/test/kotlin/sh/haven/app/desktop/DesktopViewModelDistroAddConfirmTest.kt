@@ -23,7 +23,6 @@ import sh.haven.core.data.desktop.DesktopSessionRegistry
 import sh.haven.core.data.preferences.UserPreferencesRepository
 import sh.haven.core.data.repository.ConnectionLogRepository
 import sh.haven.core.data.repository.ConnectionRepository
-import sh.haven.core.et.EtSessionManager
 import sh.haven.core.knock.PortKnocker
 import sh.haven.core.local.LocalSessionManager
 import sh.haven.core.local.ProotManager
@@ -31,7 +30,6 @@ import sh.haven.core.local.proot.Arch
 import sh.haven.core.local.proot.Distro
 import sh.haven.core.local.proot.PackageFamily
 import sh.haven.core.local.proot.RootfsSource
-import sh.haven.core.mosh.MoshSessionManager
 import sh.haven.core.tunnel.TunnelResolver
 import sh.haven.app.usb.UsbDriveVmManager
 
@@ -82,8 +80,6 @@ class DesktopViewModelDistroAddConfirmTest {
         every { prootManager.foreignDistroId(testDistro, Arch.ARM) } returns "test-distro-armv7"
         vm = DesktopViewModel(
             sshSessionManager = mockk(relaxed = true),
-            moshSessionManager = mockk(relaxed = true),
-            etSessionManager = mockk(relaxed = true),
             connectionLogRepository = mockk(relaxed = true),
             preferencesRepository = mockk(relaxed = true),
             connectionRepository = mockk(relaxed = true),

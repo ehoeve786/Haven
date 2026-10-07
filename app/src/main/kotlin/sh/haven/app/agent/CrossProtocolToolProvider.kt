@@ -66,7 +66,7 @@ internal class CrossProtocolToolProvider(
         ) { args -> saveWorkspace(args) },
 
         "mirror_directory_with_fallback" to ToolHandler(
-            description = "Copy a directory tree from one file backend to another (profileIds from list_connections — SSH, SMB, rclone, Reticulum, or \"local\"), creating missing destination directories. If the primary destination backend cannot be resolved, the copy is retried against fallbackProfileId/fallbackPath. Files already present in the destination with the same size are skipped (so a re-run resumes); files above maxFileMb (default 16, cap 64) are skipped and reported because the copy uses the small-file byte-array surface. Returns copied/skipped/failed counts plus per-failure reasons — verify the counts before declaring success.",
+            description = "Copy a directory tree from one file backend to another (profileIds from list_connections — SSH, SMB, rclone, or \"local\"), creating missing destination directories. If the primary destination backend cannot be resolved, the copy is retried against fallbackProfileId/fallbackPath. Files already present in the destination with the same size are skipped (so a re-run resumes); files above maxFileMb (default 16, cap 64) are skipped and reported because the copy uses the small-file byte-array surface. Returns copied/skipped/failed counts plus per-failure reasons — verify the counts before declaring success.",
             inputSchema = objectSchema {
                 string("srcProfileId", "Backend to copy from.", required = true)
                 string("srcPath", "Directory to copy (backend-relative).", required = true)
@@ -129,7 +129,7 @@ internal class CrossProtocolToolProvider(
 
     /** Same per-transport Kind mapping as WorkspaceViewModel. */
     internal fun workspaceKind(transport: Transport): WorkspaceItem.Kind? = when (transport) {
-        Transport.SSH, Transport.MOSH, Transport.ET, Transport.RETICULUM, Transport.LOCAL, Transport.GUEST,
+        Transport.SSH, Transport.LOCAL, Transport.GUEST,
         Transport.BTSERIAL, Transport.BLESERIAL, Transport.USBSERIAL,
         -> WorkspaceItem.Kind.TERMINAL
         Transport.SMB -> WorkspaceItem.Kind.FILE_BROWSER

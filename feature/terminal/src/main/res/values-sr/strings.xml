@@ -47,7 +47,6 @@
     <string name="terminal_new_tab_host_key_unknown">Непознати кључ хоста за %s — најпре отворите ову везу да је проверите и поставите поверење</string>
     <string name="terminal_new_tab_connection_failed">Не може да се повеже: %s</string>
     <string name="terminal_new_tab_shell_failed">Не може да се отвори љуска: %s</string>
-    <string name="terminal_new_tab_reticulum_no_session">Нема активне Reticulum сесије која може да се клонира</string>
     <string name="terminal_new_tab_connecting">Повезивање…</string>
     <string name="terminal_connect_prompt">Повежите се на сервер да започнете сесију.</string>
     <string name="terminal_sessions_title">%s сесија</string>

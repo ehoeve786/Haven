@@ -67,7 +67,6 @@
     <string name="terminal_new_tab_host_key_changed">Ключ хоста для %s изменился — подключение отклонено из соображений безопасности</string>
     <string name="terminal_new_tab_connection_failed">Не удалось подключиться: %s</string>
     <string name="terminal_new_tab_shell_failed">Не удалось открыть оболочку: %s</string>
-    <string name="terminal_new_tab_reticulum_no_session">Нет активного сеанса Reticulum для клонирования</string>
     <string name="terminal_new_tab_connecting">Подключение…</string>
     <!-- Backfilled translations (i18n drift fix) -->
     <string name="terminal_no_contact">Нет ответа от сервера %1$dс — повторная попытка</string>

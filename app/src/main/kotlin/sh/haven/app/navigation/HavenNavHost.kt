@@ -1117,7 +1117,7 @@ internal fun visibleScreens(
                     // Chat shows only while an OpenAI endpoint connection is
                     // open, mirroring Mail's live-session rule.
                     Screen.Chat -> hasOpenChatSession
-                    // Terminal hides until there's any SSH/Mosh/ET/Reticulum
+                    // Terminal hides until there's any terminal-capable
                     // profile (ConnectionProfile.isTerminal covers them all).
                     Screen.Terminal -> hasTerminalProfiles
                     // Keys/identity management is always shown — useful before

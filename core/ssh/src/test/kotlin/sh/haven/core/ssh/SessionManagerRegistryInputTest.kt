@@ -53,9 +53,6 @@ class SessionManagerRegistryInputTest {
     private val names = mapOf(
         Transport.SSH to "SSH",
         Transport.LOCAL to "local",
-        Transport.MOSH to "mosh",
-        Transport.ET to "ET",
-        Transport.RETICULUM to "Reticulum",
         Transport.BTSERIAL to "Bluetooth-serial",
         Transport.BLESERIAL to "BLE-serial",
         Transport.USBSERIAL to "USB-serial",
@@ -65,24 +62,6 @@ class SessionManagerRegistryInputTest {
         val overridden = overrides.map { it.transport }.toSet()
         val rest = names.filterKeys { it !in overridden }.map { (t, n) -> Disowning(t, n) }
         return SessionManagerRegistry((rest + overrides).toSet(), keepAlives = emptySet())
-    }
-
-    @Test
-    fun `input reaches a mosh-owned session`() {
-        val mosh = Owning(Transport.MOSH, "mosh")
-
-        registry(mosh).sendTerminalInput("s1", "ls\r")
-
-        assertEquals("s1" to "ls\r", mosh.received)
-    }
-
-    @Test
-    fun `input reaches an ET-owned session`() {
-        val et = Owning(Transport.ET, "ET")
-
-        registry(et).sendTerminalInput("s1", "x")
-
-        assertEquals("s1" to "x", et.received)
     }
 
     @Test

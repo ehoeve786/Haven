@@ -29,7 +29,7 @@ data class OpenAiConnectParams(
     val socketFactory: javax.net.SocketFactory? = null,
     val tunnelConfigured: Boolean = false,
     /**
-     * AI route carrier kind ("SSH" / "RETICULUM") when the endpoint's HTTP
+     * AI route carrier kind ("SSH") when the endpoint's HTTP
      * rides a live carrier. Non-null requires [socketFactory] to be the
      * carrier's loopback factory — refused otherwise, same fail-closed
      * shape as the tunnel check below.
@@ -170,7 +170,7 @@ class OpenAiSessionManager @Inject constructor(
     /**
      * Mark every session of [profileId] ERROR with [message]. The AI route
      * carrier-death cascade calls this — when the SSH forward's host session
-     * or the Reticulum bridge's carrier dies, the routed endpoint can no
+     * dies, the routed endpoint can no
      * longer be reached and the session must not sit green over a dead
      * carrier. Subsequent dials refuse (no silent fallback to direct).
      */

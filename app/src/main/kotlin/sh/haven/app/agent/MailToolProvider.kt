@@ -158,7 +158,7 @@ internal class MailToolProvider(
         ) { args -> sendMail(args) },
 
         "save_mail_attachment" to ToolHandler(
-            description = "Save one attachment from a message on a connected EMAIL profile to any connected filesystem (local, SFTP, SMB, rclone, Reticulum). Pass profileId + messageId + attachmentIndex (the index from read_mail_message), and the destination as destProfileId (\"local\" or any connected profile id) + destPath (a directory). Optional destFilename overrides the saved name. The file is named after the attachment (sanitised); a collision gets \" (1)\", \" (2)\", … Returns { saved, destProfileId, backend, destPath, filename, bytes }. Works for both IMAP and Proton. Writes a file — prompts for consent on every call.",
+            description = "Save one attachment from a message on a connected EMAIL profile to any connected filesystem (local, SFTP, SMB, rclone). Pass profileId + messageId + attachmentIndex (the index from read_mail_message), and the destination as destProfileId (\"local\" or any connected profile id) + destPath (a directory). Optional destFilename overrides the saved name. The file is named after the attachment (sanitised); a collision gets \" (1)\", \" (2)\", … Returns { saved, destProfileId, backend, destPath, filename, bytes }. Works for both IMAP and Proton. Writes a file — prompts for consent on every call.",
             inputSchema = objectSchema {
                 string("profileId", "Source EMAIL connection profile id.", required = true)
                 string("messageId", "Message id from list_mail_messages.", required = true)

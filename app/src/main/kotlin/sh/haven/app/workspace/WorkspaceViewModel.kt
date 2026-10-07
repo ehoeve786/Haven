@@ -190,7 +190,7 @@ data class CapturedDraft(
 
 /**
  * Map the unified [Transport] enum to its [WorkspaceItem.Kind]:
- * - SSH / Mosh / ET / Reticulum / Local → TERMINAL
+ * - SSH / Local → TERMINAL
  * - SMB → FILE_BROWSER
  * - RDP → DESKTOP
  *
@@ -202,7 +202,7 @@ data class CapturedDraft(
  * transport into a workspace item.
  */
 private fun Transport.toWorkspaceKind(): WorkspaceItem.Kind? = when (this) {
-    Transport.SSH, Transport.MOSH, Transport.ET, Transport.RETICULUM, Transport.LOCAL, Transport.GUEST,
+    Transport.SSH, Transport.LOCAL, Transport.GUEST,
     Transport.BTSERIAL, Transport.BLESERIAL, Transport.USBSERIAL ->
         WorkspaceItem.Kind.TERMINAL
     Transport.SMB -> WorkspaceItem.Kind.FILE_BROWSER

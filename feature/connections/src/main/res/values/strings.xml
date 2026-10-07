@@ -88,19 +88,6 @@
     <string name="process_exit_cause_anr">app not responding</string>
     <string name="process_exit_cause_system">system policy</string>
 
-    <!-- Mosh setup guide dialog -->
-    <string name="connections_mosh_not_found_title">Mosh not found on server</string>
-    <string name="connections_mosh_not_found_message">The remote host doesn\'t have mosh-server installed. Mosh (Mobile Shell) keeps your session alive across network changes and high-latency connections.</string>
-    <string name="connections_mosh_install_prompt">Install it on the server:</string>
-    <string name="connections_mosh_install_commands">\u0020 Ubuntu/Debian:  sudo apt install mosh\n\u0020 Fedora/RHEL:    sudo dnf install mosh\n\u0020 Arch:           sudo pacman -S mosh\n\u0020 macOS:          brew install mosh</string>
-    <string name="connections_mosh_firewall_note">UDP port 60001 must be open on the server firewall.</string>
-    <string name="connections_mosh_github">Mosh on GitHub</string>
-
-    <!-- Mosh client missing dialog -->
-    <string name="connections_mosh_client_missing_title">Mosh client not built</string>
-    <string name="connections_mosh_client_missing_message">The mosh-client binary is not included in this build. It needs to be cross-compiled for Android using the NDK.</string>
-    <string name="connections_mosh_client_build_instructions">Run tools/build-mosh.sh with Android NDK r27+ to build the mosh-client binary, then rebuild the app.</string>
-
     <!-- Session picker dialog -->
     <string name="connections_sessions_title">%1$s sessions</string>
     <string name="connections_restore_previous_sessions">Restore %1$d previous sessions</string>
@@ -213,9 +200,6 @@
     <string name="connections_field_proxy_username">Proxy Username</string>
     <string name="connections_field_proxy_password">Proxy Password</string>
     <string name="connections_helper_proxy_socks4_userid">SOCKS4 sends only a userid (no password).</string>
-    <string name="connections_field_et_port">ET Port</string>
-    <string name="connections_field_mosh_server_command">mosh-server command</string>
-    <string name="connections_helper_mosh_server">Leave blank for default. Use authbind for ports below 1024.</string>
     <string name="connections_username_placeholder_ask">Leave empty to ask at connect time</string>
     <string name="connections_file_transport_auto_desc">Try SFTP, fall back to SCP if the sftp-server subsystem is unavailable.</string>
     <string name="connections_file_transport_sftp_label">SFTP only</string>
@@ -257,13 +241,6 @@
     <string name="connections_field_vnc_password">VNC password</string>
     <string name="connections_field_vnc_color_depth">VNC colour depth</string>
     <string name="connections_action_clear_vnc">Clear saved VNC settings</string>
-    <string name="connections_toggle_local_sideband">Local Sideband</string>
-    <string name="connections_field_gateway_host">Gateway Host</string>
-    <string name="connections_field_network_name">Network Name</string>
-    <string name="connections_helper_network_name">IFAC network name (optional)</string>
-    <string name="connections_action_scan_rnsh">Scan for rnsh nodes</string>
-    <string name="connections_field_destination_hash">Destination Hash</string>
-    <string name="connections_helper_destination_hash">32-character hex</string>
     <string name="connections_field_color_scheme">Terminal colour scheme</string>
     <string name="connections_color_scheme_inherit">Use default (global setting)</string>
     <string name="connections_field_background_opacity">Override background opacity</string>
@@ -272,7 +249,6 @@
     <string name="connections_tunnel_dropdown_label">Tunnel: %1$s</string>
     <string name="connections_session_default_with">Default (%1$s)</string>
     <string name="connections_discovered_count">Discovered (%1$d)</string>
-    <string name="connections_discovered_count_filtered">Discovered (%1$d of %2$d)</string>
 
     <!-- #135 third pass: connection sub-dialogs (port-forward, host-key,
          deploy-key, password, FIDO PIN, KI, Linux VM setup, top-level
@@ -505,7 +481,6 @@
     <string name="connections_section_terminal">Terminal</string>
     <string name="connections_section_authentication">Authentication</string>
     <string name="connections_section_embedded_vnc">Embedded VNC</string>
-    <string name="connections_section_reticulum">Reticulum</string>
     <string name="connections_section_routing">Routing</string>
 
     <!-- MCP reverse-tunnel toggle (SSH section). -->
@@ -529,22 +504,14 @@
     <string name="connections_helper_add_ssh_first">Add an SSH connection first</string>
     <string name="connections_ai_route_section">AI route carrier</string>
     <string name="connections_ai_route_via_ssh">Via SSH</string>
-    <string name="connections_ai_route_via_reticulum">Via Reticulum</string>
-    <string name="connections_field_ai_route_carrier">Carrier connection</string>
-    <string name="connections_dropdown_select_carrier">Select connection</string>
     <string name="connections_helper_ai_route">Route the endpoint through a carrier: SSH opens a local forward through the carrier session, Reticulum bridges over the mesh. The carrier must be connected for Reticulum routes.</string>
-    <string name="connections_helper_add_reticulum_first">Add a Reticulum connection first</string>
     <string name="connections_toggle_rdp_nla">Network Level Authentication (NLA)</string>
-    <string name="connections_helper_mosh_required">Requires mosh-server on remote host</string>
-    <string name="connections_helper_et_required">Requires etserver on remote host (port %1$s)</string>
     <string name="connections_helper_run_before_session_manager">Runs before session manager starts.</string>
     <string name="connections_toggle_tunnel_only">Tunnel-only (no terminal)</string>
     <string name="connections_helper_tunnel_only">Bring up SSH for port forwards only — no terminal session is opened.</string>
     <string name="connections_toggle_auto_reconnect">Auto-reconnect on disconnect</string>
     <string name="connections_field_reconnect_max_attempts">Max attempts (0 = unlimited)</string>
     <string name="connections_toggle_reconnect_on_network_change">Reconnect on network change</string>
-    <string name="connections_field_passphrase">Passphrase</string>
-    <string name="connections_hint_ifac_passphrase">IFAC passphrase (optional)</string>
     <string name="connections_helper_vnc_host_via_ssh">Where the VNC server is reachable from the SSH server — usually 127.0.0.1 if they\'re the same machine (wayvnc etc. bind loopback only).</string>
     <string name="connections_helper_vnc_auth">Leave username blank for classic VncAuth (8-char password). Fill username for VeNCrypt (wayvnc, TigerVNC) — supports longer passwords and TLS encryption.</string>
     <string name="connections_helper_rdp_host_via_ssh">Where the RDP server is reachable from the SSH server — usually 127.0.0.1 if they\'re the same machine.</string>
@@ -631,13 +598,4 @@
     <string name="connections_deeplink_confirm_message">A link wants to connect to %1$s.</string>
     <string name="connections_deeplink_confirm_session">A link wants to connect to %1$s and attach session “%2$s”.</string>
     <string name="connections_deeplink_confirm_connect">Connect</string>
-    <string name="connections_identity_label">This device\'s identity</string>
-    <string name="connections_identity_none">None yet — connecting once creates one</string>
-    <string name="connections_identity_help">Shared by every Reticulum connection. A server that whitelists you keys on this hash.</string>
-    <string name="connections_identity_import">Import identity file…</string>
-    <string name="connections_identity_imported">Identity imported: %1$s</string>
-    <string name="connections_identity_imported_restart">Identity imported: %1$s. Restart Tidegate for connections to use it.</string>
-    <string name="connections_identity_not_an_identity">That file is not a Reticulum identity. Nothing was changed.</string>
-    <string name="connections_identity_install_failed">Could not install the identity: %1$s. The previous one is still in place.</string>
-    <string name="connections_identity_unreadable">Could not read that file.</string>
 </resources>

@@ -47,9 +47,6 @@ class UserPreferencesRepository @Inject constructor(
     private val terminalLocaleKey = stringPreferencesKey("terminal_locale")
     private val themeKey = stringPreferencesKey("theme")
     private val sessionManagerKey = stringPreferencesKey("session_manager")
-    private val reticulumRpcKeyKey = stringPreferencesKey("reticulum_rpc_key")
-    private val reticulumHostKey = stringPreferencesKey("reticulum_host")
-    private val reticulumPortKey = intPreferencesKey("reticulum_port")
     private val terminalColorSchemeKey = stringPreferencesKey("terminal_color_scheme")
     private val terminalAutoSwitchSchemeKey = booleanPreferencesKey("terminal_auto_switch_scheme")
     private val terminalLightColorSchemeKey = stringPreferencesKey("terminal_light_color_scheme")
@@ -1619,36 +1616,6 @@ class UserPreferencesRepository @Inject constructor(
         }
     }
 
-    val reticulumRpcKey: Flow<String?> = dataStore.data.map { prefs ->
-        prefs[reticulumRpcKeyKey]
-    }
-
-    val reticulumHost: Flow<String> = dataStore.data.map { prefs ->
-        prefs[reticulumHostKey] ?: DEFAULT_RETICULUM_HOST
-    }
-
-    val reticulumPort: Flow<Int> = dataStore.data.map { prefs ->
-        prefs[reticulumPortKey] ?: DEFAULT_RETICULUM_PORT
-    }
-
-    val reticulumConfigured: Flow<Boolean> = dataStore.data.map { prefs ->
-        prefs[reticulumRpcKeyKey] != null
-    }
-
-    suspend fun setReticulumConfig(rpcKey: String, host: String, port: Int) {
-        dataStore.edit { prefs ->
-            prefs[reticulumRpcKeyKey] = rpcKey
-            prefs[reticulumHostKey] = host
-            prefs[reticulumPortKey] = port
-        }
-    }
-
-    suspend fun clearReticulumConfig() {
-        dataStore.edit { prefs ->
-            prefs.remove(reticulumRpcKeyKey)
-        }
-    }
-
     /**
      * Toolbar layout as a [ToolbarLayout]. Migrates from legacy row1/row2
      * comma-separated format on first read if needed.
@@ -2405,8 +2372,6 @@ class UserPreferencesRepository @Inject constructor(
         /** Suggested presets surfaced by the Settings UI. */
         val SCROLLBACK_ROWS_PRESETS = listOf(1000, 5000, 10000, 25000)
         const val DEFAULT_TOOLBAR_ROWS = 2 // legacy
-        const val DEFAULT_RETICULUM_HOST = "127.0.0.1"
-        const val DEFAULT_RETICULUM_PORT = 37428
         const val DEFAULT_TOOLBAR_ROW1 = "keyboard,esc,tab,shift,ctrl,alt" // legacy
         const val DEFAULT_TOOLBAR_ROW2 = "arrow_left,arrow_up,arrow_down,arrow_right,sym_pipe,sym_tilde,sym_slash,sym_backslash,sym_backtick" // legacy
         const val DEFAULT_MEDIA_EXTENSIONS = "mp3 flac ogg opus m4a aac wma wav aiff alac ape mka mp4 mkv avi mov wmv flv webm m4v ts mpg mpeg 3gp"

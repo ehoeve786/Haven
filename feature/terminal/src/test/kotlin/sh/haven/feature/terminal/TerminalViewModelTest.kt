@@ -18,10 +18,7 @@ import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
-import sh.haven.core.et.EtSessionManager
 import sh.haven.core.local.LocalSessionManager
-import sh.haven.core.mosh.MoshSessionManager
-import sh.haven.core.reticulum.ReticulumSessionManager
 import sh.haven.core.ssh.SshClient
 import sh.haven.core.ssh.SshSessionManager
 
@@ -35,9 +32,6 @@ class TerminalViewModelTest {
     private val testDispatcher = StandardTestDispatcher()
 
     private lateinit var sessionManager: SshSessionManager
-    private lateinit var reticulumSessionManager: ReticulumSessionManager
-    private lateinit var moshSessionManager: MoshSessionManager
-    private lateinit var etSessionManager: EtSessionManager
     private lateinit var localSessionManager: LocalSessionManager
     private lateinit var umlGuestManager: sh.haven.core.local.uml.UmlGuestManager
     private lateinit var btSerialSessionManager: sh.haven.core.btserial.BtSerialSessionManager
@@ -54,15 +48,6 @@ class TerminalViewModelTest {
     fun setUp() {
         Dispatchers.setMain(testDispatcher)
         sessionManager = SshSessionManager(mockk(relaxed = true), mockk(relaxed = true))
-        reticulumSessionManager = mockk<ReticulumSessionManager>(relaxed = true) {
-            every { sessions } returns MutableStateFlow(emptyMap())
-        }
-        moshSessionManager = mockk<MoshSessionManager>(relaxed = true) {
-            every { sessions } returns MutableStateFlow(emptyMap())
-        }
-        etSessionManager = mockk<EtSessionManager>(relaxed = true) {
-            every { sessions } returns MutableStateFlow(emptyMap())
-        }
         localSessionManager = mockk<LocalSessionManager>(relaxed = true) {
             every { sessions } returns MutableStateFlow(emptyMap())
         }
@@ -96,9 +81,6 @@ class TerminalViewModelTest {
             mockk(relaxed = true),
             sessionManager,
             mockk(relaxed = true), // SshSessionAttacher
-            reticulumSessionManager,
-            moshSessionManager,
-            etSessionManager,
             btSerialSessionManager,
             bleSerialSessionManager,
             usbSerialSessionManager,
@@ -222,7 +204,7 @@ class TerminalViewModelTest {
 
     @Test
     fun `closeTab tears down a BLE-serial session`() {
-        // Regression: removeTabAndSync only knew SSH/mosh/et/local/reticulum, so a
+        // Regression: removeTabAndSync only knew SSH/local/reticulum, so a
         // serial session fell through to reticulum (no-op), stayed alive, and
         // syncSessions rebuilt its tab — the tab wouldn't close.
         val sessionId = "ble-1"

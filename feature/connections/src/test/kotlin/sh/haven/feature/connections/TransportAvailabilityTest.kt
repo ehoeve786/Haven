@@ -13,7 +13,6 @@ class TransportAvailabilityTest {
 
     private val all = listOf(
         "SSH" to "SSH",
-        "MOSH" to "Mosh",
         "LOCAL" to "Local Shell (PRoot)",
         "GUEST" to "Linux Guest (UML)",
         "SMB" to "SMB (File Share)",
@@ -34,7 +33,7 @@ class TransportAvailabilityTest {
     @Test
     fun `order is preserved`() {
         assertEquals(
-            listOf("SSH", "MOSH", "LOCAL", "GUEST", "SMB"),
+            listOf("SSH", "LOCAL", "GUEST", "SMB"),
             values(rclone = false),
         )
     }

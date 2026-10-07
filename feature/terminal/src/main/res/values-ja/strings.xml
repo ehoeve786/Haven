@@ -67,7 +67,6 @@
     <string name="terminal_new_tab_host_key_changed">%s のホスト鍵が変更されました — セキュリティのため接続を拒否しました</string>
     <string name="terminal_new_tab_connection_failed">接続できませんでした: %s</string>
     <string name="terminal_new_tab_shell_failed">シェルを開けませんでした: %s</string>
-    <string name="terminal_new_tab_reticulum_no_session">複製できるアクティブな Reticulum セッションがありません</string>
     <string name="terminal_new_tab_connecting">接続中…</string>
     <!-- Backfilled translations (i18n drift fix) -->
     <string name="terminal_no_contact">サーバー応答なし（%1$d 秒）— 再試行中</string>

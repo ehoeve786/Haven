@@ -80,19 +80,6 @@
     <string name="process_exit_cause_anr">অ্যাপ সাড়া দিচ্ছে না</string>
     <string name="process_exit_cause_system">সিস্টেম নীতি</string>
 
-    <!-- Mosh setup guide dialog -->
-    <string name="connections_mosh_not_found_title">সার্ভারে Mosh পাওয়া যায়নি</string>
-    <string name="connections_mosh_not_found_message">রিমোট হোস্টে mosh-server ইনস্টল নেই। Mosh (Mobile Shell) নেটওয়ার্ক পরিবর্তন ও উচ্চ লেটেন্সিতে সেশন সক্রিয় রাখে।</string>
-    <string name="connections_mosh_install_prompt">সার্ভারে ইনস্টল করুন:</string>
-    <string name="connections_mosh_install_commands">\u0020 Ubuntu/Debian:  sudo apt install mosh\n\u0020 Fedora/RHEL:    sudo dnf install mosh\n\u0020 Arch:           sudo pacman -S mosh\n\u0020 macOS:          brew install mosh</string>
-    <string name="connections_mosh_firewall_note">সার্ভার ফায়ারওয়ালে UDP পোর্ট 60001 খোলা থাকতে হবে।</string>
-    <string name="connections_mosh_github">GitHub-এ Mosh</string>
-
-    <!-- Mosh client missing dialog -->
-    <string name="connections_mosh_client_missing_title">Mosh ক্লায়েন্ট বিল্ড হয়নি</string>
-    <string name="connections_mosh_client_missing_message">এই বিল্ডে mosh-client বাইনারি অন্তর্ভুক্ত নেই। Android-এর জন্য NDK দিয়ে ক্রস-কম্পাইল করতে হবে।</string>
-    <string name="connections_mosh_client_build_instructions">mosh-client বাইনারি বিল্ড করতে Android NDK r27+ দিয়ে tools/build-mosh.sh চালান, তারপর অ্যাপ রিবিল্ড করুন।</string>
-
     <!-- Session picker dialog -->
     <string name="connections_sessions_title">%1$s সেশন</string>
     <string name="connections_restore_previous_sessions">%1$d পূর্ববর্তী সেশন পুনরুদ্ধার</string>
@@ -155,20 +142,12 @@
     <string name="connections_field_vnc_password">VNC পাসওয়ার্ড</string>
     <string name="connections_field_vnc_color_depth">VNC রঙের গভীরতা</string>
     <string name="connections_action_clear_vnc">সংরক্ষিত VNC সেটিংস মুছুন</string>
-    <string name="connections_toggle_local_sideband">লোকাল Sideband</string>
-    <string name="connections_field_gateway_host">গেটওয়ে হোস্ট</string>
-    <string name="connections_field_network_name">নেটওয়ার্কের নাম</string>
-    <string name="connections_helper_network_name">IFAC নেটওয়ার্কের নাম (ঐচ্ছিক)</string>
-    <string name="connections_action_scan_rnsh">rnsh নোড খুঁজুন</string>
-    <string name="connections_field_destination_hash">গন্তব্য হ্যাশ</string>
-    <string name="connections_helper_destination_hash">৩২-অক্ষরের হেক্স</string>
     <string name="connections_field_color_scheme">টার্মিনালের রঙের স্কিম</string>
     <string name="connections_color_scheme_inherit">ডিফল্ট ব্যবহার করুন (গ্লোবাল সেটিং)</string>
 
     <string name="connections_tunnel_dropdown_label">টানেল: %1$s</string>
     <string name="connections_session_default_with">ডিফল্ট (%1$s)</string>
     <string name="connections_discovered_count">আবিষ্কৃত (%1$d)</string>
-    <string name="connections_discovered_count_filtered">আবিষ্কৃত (%2$d এর মধ্যে %1$d)</string>
 
     <!-- #135 third pass -->
 
@@ -330,9 +309,6 @@
     <string name="connections_field_proxy_username">প্রক্সি ব্যবহারকারীর নাম</string>
     <string name="connections_field_proxy_password">প্রক্সি পাসওয়ার্ড</string>
     <string name="connections_helper_proxy_socks4_userid">SOCKS4 শুধু একটি ইউজার-আইডি পাঠায় (কোনো পাসওয়ার্ড নয়)।</string>
-    <string name="connections_field_et_port">ET পোর্ট</string>
-    <string name="connections_field_mosh_server_command">mosh-server কমান্ড</string>
-    <string name="connections_helper_mosh_server">ডিফল্টের জন্য খালি রাখুন। 1024-এর নিচের পোর্টের জন্য authbind ব্যবহার করুন।</string>
     <string name="connections_username_placeholder_ask">সংযোগের সময় জিজ্ঞাসা করতে খালি রাখুন</string>
     <string name="connections_file_transport_auto_desc">SFTP চেষ্টা করে, sftp-server সাবসিস্টেম অনুপলব্ধ হলে SCP-তে ফিরে যায়।</string>
     <string name="connections_file_transport_sftp_label">শুধু SFTP</string>
@@ -359,7 +335,6 @@
     <string name="connections_section_terminal">টার্মিনাল</string>
     <string name="connections_section_authentication">প্রমাণীকরণ</string>
     <string name="connections_section_embedded_vnc">এমবেডেড VNC</string>
-    <string name="connections_section_reticulum">Reticulum</string>
     <string name="connections_section_routing">রাউটিং</string>
     <string name="connections_toggle_mcp_tunnel">Tidegate-এর MCP সার্ভার প্রকাশ করুন</string>
     <string name="connections_helper_mcp_tunnel">এই সংযোগের প্রতিটি সেশনে Tidegate-এর MCP উন্মুক্ত করে — তারা http://127.0.0.1:8730/mcp-এ পৌঁছায় এবং (লুপব্যাকের মাধ্যমে) পেয়ারিং ও সম্মতি এড়িয়ে যায়। সংযোগের সময় প্রয়োগ হয়। কোনো সেশন খোলা ছাড়াই সর্বদা অ্যাক্সেসের জন্য, সেটিংস → এজেন্ট এন্ডপয়েন্ট-এ এটিকে সর্বদা-চালু MCP সংযোগ হিসেবে সেট করুন।</string>
@@ -375,22 +350,14 @@
     <string name="connections_helper_add_ssh_first">প্রথমে একটি SSH সংযোগ যোগ করুন</string>
     <string name="connections_ai_route_section">AI রুট ক্যারিয়ার</string>
     <string name="connections_ai_route_via_ssh">SSH-এর মাধ্যমে</string>
-    <string name="connections_ai_route_via_reticulum">Reticulum-এর মাধ্যমে</string>
-    <string name="connections_field_ai_route_carrier">ক্যারিয়ার সংযোগ</string>
-    <string name="connections_dropdown_select_carrier">সংযোগ নির্বাচন করুন</string>
     <string name="connections_helper_ai_route">একটি ক্যারিয়ারের মাধ্যমে এন্ডপয়েন্ট রাউট করুন: SSH ক্যারিয়ার সেশনের মাধ্যমে একটি লোকাল ফরওয়ার্ড খোলে, Reticulum মেশের উপর দিয়ে সেতু তৈরি করে। Reticulum রুটের জন্য ক্যারিয়ারটি সংযুক্ত থাকতে হবে।</string>
-    <string name="connections_helper_add_reticulum_first">প্রথমে একটি Reticulum সংযোগ যোগ করুন</string>
     <string name="connections_toggle_rdp_nla">নেটওয়ার্ক লেভেল প্রমাণীকরণ (NLA)</string>
-    <string name="connections_helper_mosh_required">রিমোট হোস্টে mosh-server প্রয়োজন</string>
-    <string name="connections_helper_et_required">রিমোট হোস্টে etserver প্রয়োজন (পোর্ট %1$s)</string>
     <string name="connections_helper_run_before_session_manager">সেশন ম্যানেজার শুরু হওয়ার আগে চলে।</string>
     <string name="connections_toggle_tunnel_only">শুধু টানেল (টার্মিনাল নেই)</string>
     <string name="connections_helper_tunnel_only">শুধু পোর্ট ফরওয়ার্ডের জন্য SSH চালু করে — কোনো টার্মিনাল সেশন খোলা হয় না।</string>
     <string name="connections_toggle_auto_reconnect">সংযোগ বিচ্ছিন্ন হলে স্বয়ংক্রিয় পুনঃসংযোগ</string>
     <string name="connections_field_reconnect_max_attempts">সর্বোচ্চ চেষ্টা (0 = সীমাহীন)</string>
     <string name="connections_toggle_reconnect_on_network_change">নেটওয়ার্ক পরিবর্তনে পুনঃসংযোগ</string>
-    <string name="connections_field_passphrase">পাসফ্রেজ</string>
-    <string name="connections_hint_ifac_passphrase">IFAC পাসফ্রেজ (ঐচ্ছিক)</string>
     <string name="connections_helper_vnc_host_via_ssh">SSH সার্ভার থেকে VNC সার্ভার কোথায় পৌঁছানো যায় — একই মেশিন হলে সাধারণত 127.0.0.1 (wayvnc ইত্যাদি শুধু লুপব্যাকে বাইন্ড করে)।</string>
     <string name="connections_helper_vnc_auth">ক্লাসিক VncAuth (৮-অক্ষরের পাসওয়ার্ড) এর জন্য ব্যবহারকারীর নাম খালি রাখুন। VeNCrypt (wayvnc, TigerVNC) এর জন্য ব্যবহারকারীর নাম পূরণ করুন — দীর্ঘ পাসওয়ার্ড এবং TLS এনক্রিপশন সমর্থন করে।</string>
     <string name="connections_helper_rdp_host_via_ssh">SSH সার্ভার থেকে RDP সার্ভার কোথায় পৌঁছানো যায় — একই মেশিন হলে সাধারণত 127.0.0.1।</string>
@@ -595,13 +562,4 @@
     <string name="connections_ssh_engine_jsch_desc">প্রমাণিত ইঞ্জিন। সব বৈশিষ্ট্য।</string>
     <string name="connections_ssh_engine_sshlib_label">sshlib (পরীক্ষামূলক)</string>
     <string name="connections_ssh_engine_sshlib_desc">Kotlin ইঞ্জিন: একটি সংযোগে টার্মিনাল, SFTP এবং পোর্ট ফরওয়ার্ডিং। সরাসরি সংযোগ প্রয়োজন — জাম্প হোস্ট, প্রক্সি, হার্ডওয়্যার কী, সার্টিফিকেট বা বহু-স্তর লগইন নয়।</string>
-    <string name="connections_identity_label">এই ডিভাইসের পরিচয়</string>
-    <string name="connections_identity_none">এখনও নেই — একবার সংযোগ করলে তৈরি হবে</string>
-    <string name="connections_identity_help">সব Reticulum সংযোগ এটি ভাগ করে নেয়। যে সার্ভার আপনাকে অনুমোদন করে সে এই হ্যাশ দেখে।</string>
-    <string name="connections_identity_import">পরিচয় ফাইল আমদানি করুন…</string>
-    <string name="connections_identity_imported">পরিচয় আমদানি হয়েছে: %1$s</string>
-    <string name="connections_identity_imported_restart">পরিচয় আমদানি হয়েছে: %1$s। সংযোগে ব্যবহার করতে Tidegate পুনরায় চালু করুন।</string>
-    <string name="connections_identity_not_an_identity">এই ফাইলটি Reticulum পরিচয় নয়। কিছুই পরিবর্তন হয়নি।</string>
-    <string name="connections_identity_install_failed">পরিচয় ইনস্টল করা যায়নি: %1$s। আগেরটি বহাল আছে।</string>
-    <string name="connections_identity_unreadable">এই ফাইলটি পড়া যায়নি।</string>
 </resources>

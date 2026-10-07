@@ -6,7 +6,7 @@
 
 <p align="center">
   Free, open-source remote access &amp; mobile workspace for Android —<br/>
-  SSH · Mosh · SFTP · SMB · email · cloud storage, a local Linux shell, mesh networking, and a consent-gated AI-agent endpoint
+  SSH · SFTP · SMB · email · cloud storage, a local Linux shell, and a consent-gated AI-agent endpoint
 </p>
 
 <p align="center">
@@ -37,7 +37,7 @@
 
 ## At a glance
 
-- **[Terminal](docs/features/terminal.md)** — Mosh / Eternal Terminal / SSH, tmux-aware session restore, configurable keyboard toolbar, OSC 7/8/9/52/133/777 integration.
+- **[Terminal](docs/features/terminal.md)** — SSH, tmux-aware session restore, configurable keyboard toolbar, OSC 7/8/9/52/133/777 integration.
 - **[Desktops](docs/features/desktops.md)** — a GPU-accelerated native Wayland compositor and a multi-distro local-desktop manager.
 - **[Files & cloud](docs/features/files-and-cloud.md)** — unified browser for SFTP/SCP, SMB, and 60+ cloud providers; cross-filesystem copy/move, editor and image tools; plus on-device FFmpeg transcode, HLS streaming, and DLNA.
 - **[Connections](docs/features/connections.md)** — port forwarding (-L/-R/-D/-J), SOCKS/HTTP/Tor proxies, per-app WireGuard & Tailscale tunnels, port knocking and fwknop SPA, and SSH keys (incl. FIDO2/SK).
@@ -45,7 +45,6 @@
 - **[AI chat](docs/features/chat.md)** — chat with self-hosted or API models (OpenAI-compatible, Ollama, Anthropic, Gemini) over per-profile tunnel routing; image attach for vision models, clipboard copy/paste both ways, opt-in encrypted saved transcripts.
 - **[Local Linux](docs/features/local-linux.md)** — a Linux userland via PRoot (no root, any Android 8+ device): Alpine, Debian, Arch, or Void, side-by-side.
 - **[USB forwarding](docs/features/usb.md)** — broker an attached USB device through Android and re-expose it to the agent, into the Linux guest, or over USB/IP to a **remote host** (e.g. a phone-hosted YubiKey, touch on the phone).
-- **[Reticulum](docs/features/reticulum.md)** — rnsh shell, file transfer, and `-L`/`-D` port forwarding over Reticulum mesh, pure Kotlin. The one transport that keeps working with no internet at all.
 - **[Agent transport (MCP)](docs/mcp-tools.md)** — an optional MCP server exposing ~130 consent-gated, audited tools; the agent can even **see and operate Tidegate itself** for a self-hosting build → install → verify loop. It can also be added to claude.ai as a [custom connector](docs/features/claude-connector.md) over Tailscale Funnel.
 - **[Security](docs/features/security.md)** — biometric lock, no telemetry, encrypted backup/restore (AES-256-GCM).
 
@@ -120,8 +119,6 @@ Output: `app/build/outputs/apk/debug/haven-*-debug.apk`
 | [JSch](https://github.com/mwiede/jsch) | SSH/SFTP protocol | BSD |
 | [smbj](https://github.com/hierynomus/smbj) | SMB/CIFS protocol | Apache-2.0 |
 | [ConnectBot termlib](https://github.com/connectbot/connectbot) | Terminal emulator | Apache-2.0 |
-| [reticulum-kt](https://github.com/GlassOnTin/reticulum-kt) | Reticulum mesh network transport (Kotlin) | MPL-2.0 |
-| [rnsh-kt](https://github.com/GlassOnTin/rnsh-kt) | Reticulum remote shell client (Kotlin) | AGPL-3.0 |
 | [FFmpeg](https://ffmpeg.org) | Media conversion and streaming | LGPL-2.1 / GPL-2.0 |
 | [PRoot](https://proot-me.github.io) | Local Linux shell (userspace chroot) | GPL-2.0 |
 | [labwc](https://labwc.github.io) | Wayland compositor (native desktop) | GPL-2.0 |

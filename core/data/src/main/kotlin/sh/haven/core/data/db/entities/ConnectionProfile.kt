@@ -209,8 +209,7 @@ data class ConnectionProfile(
     val aiProtocol: String? = null,
     /**
      * OPENAI: which carrier a routed endpoint's HTTP rides. "SSH" = local
-     * forward through the carrier's live SSH session, "RETICULUM" = mesh
-     * bridge to the endpoint host:port. Null = direct dial (the common
+     * forward through the carrier's live SSH session. Null = direct dial (the common
      * case). One (type, carrier) pair, so a profile can never store two
      * carriers — the mutual exclusion the Route-through picker and the
      * desktop flag+id pairs get from the editor.
@@ -515,9 +514,6 @@ data class ConnectionProfile(
         get() = runCatching { AddressFamily.valueOf(addressFamily) }.getOrDefault(AddressFamily.AUTO)
 
     val isSsh: Boolean get() = connectionType == "SSH"
-    val isReticulum: Boolean get() = connectionType == "RETICULUM"
-    val isMosh: Boolean get() = isSsh && useMosh
-    val isEternalTerminal: Boolean get() = isSsh && useEternalTerminal
     val isVnc: Boolean get() = connectionType == "VNC"
     val isRdp: Boolean get() = connectionType == "RDP"
     val isSpice: Boolean get() = connectionType == "SPICE"

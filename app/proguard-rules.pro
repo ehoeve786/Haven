@@ -61,12 +61,6 @@
 # failing for everyone.
 -keep class org.connectbot.sshlib.crypto.ed25519.Ed25519Provider { *; }
 
-# Keep mosh transport + generated protobuf classes.
-# The pure-Kotlin transport reflects on protobuf field names like `width_`.
-# If R8 renames those fields, Mosh connects but never establishes a usable
-# terminal session in release builds.
--keep class sh.haven.mosh.** { *; }
-
 # Keep smbj (reflection-based protocol handling)
 -keep class com.hierynomus.** { *; }
 -keep class net.engio.** { *; }
@@ -75,15 +69,6 @@
 # Keep protobuf generated classes — protobuf-lite uses reflection on field names
 -keep class * extends com.google.protobuf.GeneratedMessageLite { *; }
 -keep class * extends com.google.protobuf.GeneratedMessageLite$Builder { *; }
--keep class sh.haven.mosh.proto.** { *; }
-
-# Keep the entire et-kotlin submodule. The previous keep rule covered only
-# `sh.haven.et.protocol.**`, leaving `sh.haven.et.transport.EtTransport`,
-# `sh.haven.et.crypto.EtCrypto`, and `sh.haven.et.EtLogger` exposed to R8 —
-# verified against the v5.5.0 release mapping.txt where EtTransport is
-# renamed to h5.b. Eternal Terminal connections fail in release builds as
-# a result. Mirror the broad `sh.haven.mosh.**` rule for consistency.
--keep class sh.haven.et.** { *; }
 
 # Keep gomobile/rclone bindings — JNI native methods and Go runtime
 -keep class go.** { *; }
@@ -92,25 +77,6 @@
 # Keep Hilt generated classes
 -keep class dagger.hilt.** { *; }
 -keep class javax.inject.** { *; }
-
-# Keep Reticulum — rns-core and rns-interfaces do extensive class-literal
-# reflection (link::class.java.getMethod("getLinkId"), getInitiator,
-# receive, validateProof, getExpectedHops, getAttachedInterfaceHash,
-# clientCount, etc). The rns-android module has a consumer-rules.pro
-# with the correct keeps, but Haven consumes rns-core/rns-interfaces
-# directly via settings.gradle.kts substitution and rns-android is never
-# pulled in, so those consumer rules never reach the app's R8 pass.
-# Without this, every reflective link/packet operation throws
-# NoSuchMethodException in release builds (verified against v5.4.4
-# mapping.txt: Transport → w4.q, Reticulum → j4.a).
--keep class network.reticulum.** { *; }
--keep interface network.reticulum.** { *; }
-
-# Keep MessagePack — Reticulum's serialization path resolves classes
-# by string name (e.g. MessageBufferU). Same reason as above: rns-android
-# consumer rules aren't reaching us.
--keep class org.msgpack.** { *; }
--dontwarn org.msgpack.**
 
 # Keep JNA Structure subclasses — IronRDP (UniFFI-generated sh.haven.rdp.**)
 # uses @Structure.FieldOrder("capacity", "len", ...) string literals that

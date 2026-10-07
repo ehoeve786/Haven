@@ -2459,8 +2459,8 @@ internal const val SWIPE_ARROWS_SCROLL_QUANTUM = 4f
  * Top-aligned banner shown over the terminal when the transport has gone
  * silent: displays how long the server has been unreachable while the
  * transport keeps retrying (it recovers by itself when the network
- * returns). Hidden when the flow is null. Currently driven by Mosh; other
- * transports always emit null.
+ * returns). Hidden when the flow is null; no current transport emits a
+ * value.
  */
 @Composable
 private fun StallBanner(

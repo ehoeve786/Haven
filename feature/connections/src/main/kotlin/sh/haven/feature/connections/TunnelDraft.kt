@@ -48,8 +48,8 @@ internal fun tunnelCarrierForSave(enabled: Boolean, carrierId: String?): String?
 
 /**
  * AI-endpoint route carrier, the OPENAI counterpart of the four desktop
- * rows above. The editor speaks in display modes ("NONE" / "SSH" /
- * "RETICULUM"); the profile stores a single (type, carrier) pair, which is
+ * rows above. The editor speaks in display modes ("NONE" / "SSH"); the
+ * profile stores a single (type, carrier) pair, which is
  * self-exclusive — a saved profile can never carry two carriers, unlike
  * the desktop flag+id pairs that need [strictTunnelInitialEnabled] to
  * police staleness.
@@ -66,7 +66,7 @@ internal fun aiRouteTypeForSave(mode: String): String? =
  * half is dropped on the next save.
  */
 internal fun aiRouteInitialMode(storedType: String?, carrierId: String?): String =
-    if (storedType == "SSH" || storedType == "RETICULUM") {
+    if (storedType == "SSH") {
         if (carrierId != null) storedType else "NONE"
     } else "NONE"
 

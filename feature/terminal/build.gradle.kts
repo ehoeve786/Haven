@@ -38,9 +38,6 @@ dependencies {
     // Security-key (FIDO2/SK) authenticator, wired onto new-tab SshClients.
     implementation(project(":core:fido"))
     implementation(project(":core:tunnel"))
-    implementation(project(":core:reticulum"))
-    implementation(project(":core:mosh"))
-    implementation(project(":core:et"))
     implementation(project(":core:btserial"))
     implementation(project(":core:bleserial"))
     implementation(project(":core:usbserial"))

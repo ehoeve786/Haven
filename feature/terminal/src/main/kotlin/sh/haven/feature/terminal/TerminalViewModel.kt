@@ -27,23 +27,12 @@ import sh.haven.core.ssh.SshClient
 import sh.haven.core.ssh.OpenKeychainClientFactory
 import sh.haven.core.ssh.SshSessionManager
 import sh.haven.core.ssh.SshSessionManager.SessionState
-import sh.haven.core.et.EtSessionManager
-import sh.haven.core.mosh.MoshSessionManager
-import sh.haven.core.reticulum.ReticulumSessionManager
 import sh.haven.core.data.db.entities.ConnectionProfile
 import sh.haven.core.data.preferences.UserPreferencesRepository
 import javax.inject.Inject
 import sh.haven.core.redact.LogRedact
 
 private const val TAG = "TerminalViewModel"
-
-/** Transports that keep the server-side PTY alive across client disconnects;
- *  closing one needs an explicit session-manager detach key first, otherwise
- *  zellij/tmux/screen never sees the client leave. SSH gets HUP for free. */
-private val TRANSPORTS_NEEDING_EXPLICIT_DETACH = setOf("MOSH", "ET")
-
-/** How long to wait for a Mosh/ET detach packet to land before tearing down. */
-private const val SESSION_MANAGER_DETACH_DELAY_MS = 300L
 
 /** Sentinel for transports that don't report a stall countdown. */
 private val NEVER_STALLS: StateFlow<Int?> = MutableStateFlow(null)
@@ -122,7 +111,7 @@ class TerminalRecorder(
 }
 
 /**
- * Coalesces SSH/RNS data chunks into batched writes on the main thread.
+ * Coalesces SSH data chunks into batched writes on the main thread.
  *
  * Without this, every onDataReceived callback posts a separate message to
  * the main looper. During fast output this floods the queue and delays
@@ -253,8 +242,7 @@ data class TerminalTab(
     val hyperlinkUri: StateFlow<String?>,
     val isReconnecting: StateFlow<Boolean>,
     /** Non-null when the transport has gone silent and is counting down to a
-     *  forced disconnect. Currently only Mosh emits a value; other transports
-     *  stay null. */
+     *  forced disconnect. No current transport emits a value. */
     val stallSeconds: StateFlow<Int?>,
     val sendInput: (ByteArray) -> Unit,
     val resize: (Int, Int) -> Unit,
@@ -282,9 +270,6 @@ class TerminalViewModel @Inject constructor(
     @dagger.hilt.android.qualifiers.ApplicationContext private val appContext: android.content.Context,
     private val sessionManager: SshSessionManager,
     private val sshSessionAttacher: sh.haven.core.ssh.SshSessionAttacher,
-    private val reticulumSessionManager: ReticulumSessionManager,
-    private val moshSessionManager: MoshSessionManager,
-    private val etSessionManager: EtSessionManager,
     private val btSerialSessionManager: sh.haven.core.btserial.BtSerialSessionManager,
     private val bleSerialSessionManager: sh.haven.core.bleserial.BleSerialSessionManager,
     private val usbSerialSessionManager: sh.haven.core.usbserial.UsbSerialSessionManager,
@@ -523,9 +508,6 @@ class TerminalViewModel @Inject constructor(
                     // answered while no UI exists; the new VM re-adopts on recreation.
                     sshEmulatorOwner.resetSinks(tab.sessionId)
                 }
-                "RETICULUM" -> reticulumSessionManager.detachTerminalSession(tab.sessionId)
-                "MOSH" -> moshSessionManager.detachTerminalSession(tab.sessionId)
-                "ET" -> etSessionManager.detachTerminalSession(tab.sessionId)
                 "BTSERIAL" -> btSerialSessionManager.detachTerminalSession(tab.sessionId)
                 "BLESERIAL" -> bleSerialSessionManager.detachTerminalSession(tab.sessionId)
                 "USBSERIAL" -> usbSerialSessionManager.detachTerminalSession(tab.sessionId)
@@ -702,30 +684,12 @@ class TerminalViewModel @Inject constructor(
     val untabbedSessions: StateFlow<List<AvailableSession>> =
         combine(
             sessionManager.sessions,
-            reticulumSessionManager.sessions,
-            moshSessionManager.sessions,
-            etSessionManager.sessions,
             _tabs,
-        ) { ssh, rns, mosh, et, tabs ->
+        ) { ssh, tabs ->
             val tabbedSessionIds = tabs.map { it.sessionId }.toSet()
             val available = mutableListOf<AvailableSession>()
             for ((id, state) in ssh) {
                 if (id !in tabbedSessionIds && state.status == SshSessionManager.SessionState.Status.CONNECTED) {
-                    available.add(AvailableSession(state.profileId, state.label, id))
-                }
-            }
-            for ((id, state) in rns) {
-                if (id !in tabbedSessionIds && state.status == ReticulumSessionManager.SessionState.Status.CONNECTED) {
-                    available.add(AvailableSession(state.profileId, state.label, id))
-                }
-            }
-            for ((id, state) in mosh) {
-                if (id !in tabbedSessionIds && state.status == MoshSessionManager.SessionState.Status.CONNECTED) {
-                    available.add(AvailableSession(state.profileId, state.label, id))
-                }
-            }
-            for ((id, state) in et) {
-                if (id !in tabbedSessionIds && state.status == EtSessionManager.SessionState.Status.CONNECTED) {
                     available.add(AvailableSession(state.profileId, state.label, id))
                 }
             }
@@ -989,15 +953,6 @@ class TerminalViewModel @Inject constructor(
         // even when the TerminalScreen isn't actively composing.
         viewModelScope.launch {
             sessionManager.sessions.collect { syncSessions() }
-        }
-        viewModelScope.launch {
-            reticulumSessionManager.sessions.collect { syncSessions() }
-        }
-        viewModelScope.launch {
-            moshSessionManager.sessions.collect { syncSessions() }
-        }
-        viewModelScope.launch {
-            etSessionManager.sessions.collect { syncSessions() }
         }
         viewModelScope.launch {
             btSerialSessionManager.sessions.collect { syncSessions() }
@@ -1354,9 +1309,6 @@ class TerminalViewModel @Inject constructor(
      */
     suspend fun syncSessions() {
         val sshSessions = sessionManager.sessions.value
-        val rnsSessions = reticulumSessionManager.sessions.value
-        val moshSessions = moshSessionManager.sessions.value
-        val etSessions = etSessionManager.sessions.value
         val btSerialSessions = btSerialSessionManager.sessions.value
         val bleSerialSessions = bleSerialSessionManager.sessions.value
         val usbSerialSessions = usbSerialSessionManager.sessions.value
@@ -1371,9 +1323,6 @@ class TerminalViewModel @Inject constructor(
         val profilesById = withContext(Dispatchers.IO) {
             buildSet {
                 sshSessions.values.forEach { add(it.profileId) }
-                rnsSessions.values.forEach { add(it.profileId) }
-                moshSessions.values.forEach { add(it.profileId) }
-                etSessions.values.forEach { add(it.profileId) }
                 btSerialSessions.values.forEach { add(it.profileId) }
                 bleSerialSessions.values.forEach { add(it.profileId) }
                 usbSerialSessions.values.forEach { add(it.profileId) }
@@ -1387,30 +1336,6 @@ class TerminalViewModel @Inject constructor(
             .filter {
                 it.status == SessionState.Status.CONNECTED ||
                     it.status == SessionState.Status.RECONNECTING
-            }
-            .map { it.sessionId }
-            .toSet()
-
-        // Find Reticulum sessions that are connected
-        val activeRnsIds = rnsSessions.values
-            .filter {
-                it.status == ReticulumSessionManager.SessionState.Status.CONNECTED
-            }
-            .map { it.sessionId }
-            .toSet()
-
-        // Find Mosh sessions that are connected
-        val activeMoshIds = moshSessions.values
-            .filter {
-                it.status == MoshSessionManager.SessionState.Status.CONNECTED
-            }
-            .map { it.sessionId }
-            .toSet()
-
-        // Find ET sessions that are connected
-        val activeEtIds = etSessions.values
-            .filter {
-                it.status == EtSessionManager.SessionState.Status.CONNECTED
             }
             .map { it.sessionId }
             .toSet()
@@ -1454,7 +1379,7 @@ class TerminalViewModel @Inject constructor(
             .map { it.sessionId }
             .toSet()
 
-        val allActiveIds = activeSshIds + activeRnsIds + activeMoshIds + activeEtIds + activeBtIds + activeBleIds + activeUsbIds + activeLocalIds + activeGuestIds
+        val allActiveIds = activeSshIds + activeBtIds + activeBleIds + activeUsbIds + activeLocalIds + activeGuestIds
 
         val currentTabs = _tabs.value.toMutableList()
 
@@ -1463,12 +1388,6 @@ class TerminalViewModel @Inject constructor(
             when (tab.transportType) {
                 "SSH" -> tab.sessionId !in activeSshIds ||
                     sshSessions[tab.sessionId]?.terminalSession == null
-                "RETICULUM" -> tab.sessionId !in activeRnsIds ||
-                    rnsSessions[tab.sessionId]?.reticulumSession == null
-                "MOSH" -> tab.sessionId !in activeMoshIds ||
-                    moshSessions[tab.sessionId]?.moshSession == null
-                "ET" -> tab.sessionId !in activeEtIds ||
-                    etSessions[tab.sessionId]?.etSession == null
                 "LOCAL" -> tab.sessionId !in activeLocalIds ||
                     localSessions[tab.sessionId]?.localSession == null
                 "GUEST" -> tab.sessionId !in activeGuestIds ||
@@ -1548,101 +1467,6 @@ class TerminalViewModel @Inject constructor(
                 )
             )
             trackedSessionIds.add(sessionId)
-        }
-
-        // Create tabs for new Reticulum sessions
-        for (sessionId in activeRnsIds) {
-            if (sessionId in trackedSessionIds) {
-                if (currentTabs.none { it.sessionId == sessionId }) {
-                    Log.w(TAG, "syncSessions RNS $sessionId: tracked but no tab — ghost session, will not re-create")
-                }
-                continue
-            }
-            if (!reticulumSessionManager.isReadyForTerminal(sessionId)) {
-                Log.w(TAG, "syncSessions RNS $sessionId: CONNECTED but not ready for terminal")
-                continue
-            }
-
-            val session = rnsSessions[sessionId] ?: continue
-            val tabLabel = generateTabLabel(session.label, session.profileId, currentTabs)
-
-            lateinit var emulator: TerminalEmulator
-            val rnsWriteBuffer = EmulatorWriteBuffer({ emulator }, createRecorderIfEnabled(sessionId))
-            val rnsMouseTracker = MouseModeTracker()
-            val rnsOscHandler = OscHandler()
-            val rnsCwdFlow = MutableStateFlow<String?>(null)
-            val rnsHyperlinkFlow = MutableStateFlow<String?>(null)
-            rnsOscHandler.onCwdChanged = { rnsCwdFlow.value = it }
-            rnsOscHandler.onHyperlink = { uri -> rnsHyperlinkFlow.value = uri }
-            val rnsFeedOutput: (ByteArray, Int, Int) -> Unit = { data, offset, length ->
-                synchronized(rnsOscHandler) {
-                    rnsOscHandler.process(data, offset, length)
-                    rnsMouseTracker.process(rnsOscHandler.outputBuf, 0, rnsOscHandler.outputLen)
-                    val len = rnsOscHandler.outputLen
-                    if (len > 0) {
-                        rnsWriteBuffer.append(rnsOscHandler.outputBuf, 0, len)
-                    }
-                }
-            }
-            val rnsSession = reticulumSessionManager.createTerminalSession(
-                sessionId = sessionId,
-                onDataReceived = { data, offset, length ->
-                    rnsFeedOutput(data, offset, length)
-                },
-            ) ?: continue
-
-            val rnsCoalescer = InputCoalescer { data -> rnsSession.sendInput(data) }
-            val rnsProfile = profilesById[session.profileId]
-            val rnsScheme = effectiveColorScheme(rnsProfile)
-            val rnsInitialScheme = initialEmulatorScheme(rnsScheme)
-            emulator = TerminalEmulatorFactory.create(
-                autoDetectUrls = true,
-                initialRows = 24,
-                initialCols = 80,
-                defaultForeground = Color(rnsInitialScheme.foreground),
-                defaultBackground = Color(rnsInitialScheme.background),
-                enableAltScreen = rnsProfile?.disableAltScreen != true && rnsProfile?.sessionManager != "screen",
-                onKeyboardInput = { data -> rnsCoalescer.send(applyModifiers(data)) },
-                onResize = { dims ->
-                    Log.d(TAG, "RNS onResize: ${dims.columns}x${dims.rows}")
-                    for (tab in _tabs.value) {
-                        tab.resize(dims.columns, dims.rows)
-                    }
-                    rnsSession.resize(dims.columns, dims.rows)
-                },
-                maxScrollbackLines = terminalScrollbackRows.value,
-                inlineImages = inlineImagesPolicy(terminalInlineImages.value, inlineImageConsent.state(sessionId)),
-            )
-
-            rnsSession.start()
-
-            currentTabs.add(
-                TerminalTab(
-                    sessionId = session.sessionId,
-                    profileId = session.profileId,
-                    colorTag = rnsProfile?.colorTag ?: 0,
-                    label = tabLabel,
-                    transportType = "RETICULUM",
-                    emulator = emulator,
-                    mouseMode = rnsMouseTracker.mouseMode,
-                    activeMouseMode = rnsMouseTracker.activeMouseMode,
-                    bracketPasteMode = rnsMouseTracker.bracketPasteMode,
-                    altScreen = rnsMouseTracker.altScreen,
-                    cursorKeyAppMode = rnsMouseTracker.cursorKeyAppMode,
-                    oscHandler = rnsOscHandler,
-                    feedOutput = rnsFeedOutput,
-                    cwd = rnsCwdFlow,
-                    hyperlinkUri = rnsHyperlinkFlow,
-                    isReconnecting = MutableStateFlow(false),
-                    stallSeconds = NEVER_STALLS,
-                    sendInput = { data -> rnsSession.sendInput(data) },
-                    resize = { cols, rows -> rnsSession.resize(cols, rows) },
-                    close = { rnsSession.close() },
-                    colorScheme = rnsScheme,
-                    backgroundOpacity = effectiveOpacity(rnsProfile),
-                )
-            )
-            trackedSessionIds.add(session.sessionId)
         }
 
         // Create tabs for new Bluetooth-serial sessions (#406). A raw serial link
@@ -1880,223 +1704,6 @@ class TerminalViewModel @Inject constructor(
             trackedSessionIds.add(session.sessionId)
         }
 
-        // Create tabs for new Mosh sessions
-        for (sessionId in activeMoshIds) {
-            if (sessionId in trackedSessionIds) continue
-            if (!moshSessionManager.isReadyForTerminal(sessionId)) continue
-
-            val session = moshSessions[sessionId] ?: continue
-            val moshProfile = profilesById[session.profileId]
-            val tabLabel = generateTabLabel(session.label, session.profileId, currentTabs, sessionName = moshProfile?.lastSessionName)
-
-            lateinit var emulator: TerminalEmulator
-            val moshWriteBuffer = EmulatorWriteBuffer({ emulator }, createRecorderIfEnabled(sessionId))
-            val moshMouseTracker = MouseModeTracker()
-            val moshOscHandler = OscHandler()
-            val moshCwdFlow = MutableStateFlow<String?>(null)
-            val moshHyperlinkFlow = MutableStateFlow<String?>(null)
-            moshOscHandler.onCwdChanged = { moshCwdFlow.value = it }
-            moshOscHandler.onHyperlink = { uri -> moshHyperlinkFlow.value = uri }
-            val moshFeedOutput: (ByteArray, Int, Int) -> Unit = { data, offset, length ->
-                synchronized(moshOscHandler) {
-                    moshOscHandler.process(data, offset, length)
-                    moshMouseTracker.process(moshOscHandler.outputBuf, 0, moshOscHandler.outputLen)
-                    val len = moshOscHandler.outputLen
-                    if (len > 0) {
-                        moshWriteBuffer.append(moshOscHandler.outputBuf, 0, len)
-                    }
-                }
-            }
-
-            // Defer initial command until shell prompt detected
-            val moshInitialCmd = session.initialCommand
-            val moshPendingSent = java.util.concurrent.atomic.AtomicBoolean(false)
-            // Holder so lambda can reference session before it's assigned
-            val moshSessionRef = arrayOfNulls<sh.haven.core.mosh.MoshSession>(1)
-
-            val moshSession = moshSessionManager.createTerminalSession(
-                sessionId = sessionId,
-                onDataReceived = { data, offset, length ->
-                    moshFeedOutput(data, offset, length)
-                    // Send session manager command once shell prompt detected
-                    if (moshInitialCmd != null && !moshPendingSent.get()) {
-                        val raw = String(data, offset, length)
-                        val stripped = raw.replace(Regex("\u001b(?:\\[[^a-zA-Z]*[a-zA-Z]|][^\u0007]*\u0007)"), "").trimEnd()
-                        if (stripped.isNotEmpty()) {
-                            val last = stripped.last()
-                            if (last == '$' || last == '#' || last == '%' || last == '>') {
-                                if (moshPendingSent.compareAndSet(false, true)) {
-                                    Log.d(TAG, "Mosh: shell prompt detected ('$last'), sending session manager command")
-                                    moshSessionRef[0]?.sendInput((moshInitialCmd + "\n").toByteArray())
-                                }
-                            }
-                        }
-                    }
-                },
-            ) ?: continue
-            moshSessionRef[0] = moshSession
-
-            val moshCoalescer = InputCoalescer { data -> moshSession.sendInput(data) }
-            val moshScheme = effectiveColorScheme(moshProfile)
-            val moshInitialScheme = initialEmulatorScheme(moshScheme)
-            emulator = TerminalEmulatorFactory.create(
-                autoDetectUrls = true,
-                initialRows = 24,
-                initialCols = 80,
-                defaultForeground = Color(moshInitialScheme.foreground),
-                enableAltScreen = moshProfile?.disableAltScreen != true && moshProfile?.sessionManager != "screen",
-                defaultBackground = Color(moshInitialScheme.background),
-                onKeyboardInput = { data -> moshCoalescer.send(applyModifiers(data)) },
-                onResize = { dims ->
-                    Log.d(TAG, "MOSH onResize: ${dims.columns}x${dims.rows}")
-                    for (tab in _tabs.value) {
-                        tab.resize(dims.columns, dims.rows)
-                    }
-                    moshSession.resize(dims.columns, dims.rows)
-                },
-                maxScrollbackLines = terminalScrollbackRows.value,
-                inlineImages = inlineImagesPolicy(terminalInlineImages.value, inlineImageConsent.state(sessionId)),
-            )
-
-            moshSession.start()
-
-            currentTabs.add(
-                TerminalTab(
-                    sessionId = session.sessionId,
-                    profileId = session.profileId,
-                    colorTag = moshProfile?.colorTag ?: 0,
-                    label = tabLabel,
-                    transportType = "MOSH",
-                    emulator = emulator,
-                    mouseMode = moshMouseTracker.mouseMode,
-                    activeMouseMode = moshMouseTracker.activeMouseMode,
-                    bracketPasteMode = moshMouseTracker.bracketPasteMode,
-                    altScreen = moshMouseTracker.altScreen,
-                    cursorKeyAppMode = moshMouseTracker.cursorKeyAppMode,
-                    oscHandler = moshOscHandler,
-                    feedOutput = moshFeedOutput,
-                    cwd = moshCwdFlow,
-                    hyperlinkUri = moshHyperlinkFlow,
-                    isReconnecting = MutableStateFlow(false),
-                    stallSeconds = moshSession.stallSeconds,
-                    sendInput = { data -> moshSession.sendInput(data) },
-                    resize = { cols, rows -> moshSession.resize(cols, rows) },
-                    close = { moshSession.close() },
-                    colorScheme = moshScheme,
-                    backgroundOpacity = effectiveOpacity(moshProfile),
-                )
-            )
-            trackedSessionIds.add(session.sessionId)
-        }
-
-        // Create tabs for new ET sessions
-        for (sessionId in activeEtIds) {
-            if (sessionId in trackedSessionIds) continue
-            if (!etSessionManager.isReadyForTerminal(sessionId)) continue
-
-            val session = etSessions[sessionId] ?: continue
-            val etProfile = profilesById[session.profileId]
-            val tabLabel = generateTabLabel(session.label, session.profileId, currentTabs, sessionName = etProfile?.lastSessionName)
-
-            lateinit var emulator: TerminalEmulator
-            val etWriteBuffer = EmulatorWriteBuffer({ emulator }, createRecorderIfEnabled(sessionId))
-            val etMouseTracker = MouseModeTracker()
-            val etOscHandler = OscHandler()
-            val etCwdFlow = MutableStateFlow<String?>(null)
-            val etHyperlinkFlow = MutableStateFlow<String?>(null)
-            etOscHandler.onCwdChanged = { etCwdFlow.value = it }
-            etOscHandler.onHyperlink = { uri -> etHyperlinkFlow.value = uri }
-            val etFeedOutput: (ByteArray, Int, Int) -> Unit = { data, offset, length ->
-                synchronized(etOscHandler) {
-                    etOscHandler.process(data, offset, length)
-                    etMouseTracker.process(etOscHandler.outputBuf, 0, etOscHandler.outputLen)
-                    val len = etOscHandler.outputLen
-                    if (len > 0) {
-                        etWriteBuffer.append(etOscHandler.outputBuf, 0, len)
-                    }
-                }
-            }
-
-            // Defer initial command until shell prompt detected
-            val etInitialCmd = session.initialCommand
-            val etPendingSent = java.util.concurrent.atomic.AtomicBoolean(false)
-            val etSessionRef = arrayOfNulls<sh.haven.core.et.EtSession>(1)
-
-            val etSession = etSessionManager.createTerminalSession(
-                sessionId = sessionId,
-                onDataReceived = { data, offset, length ->
-                    etFeedOutput(data, offset, length)
-                    // Send session manager command once shell prompt detected
-                    if (etInitialCmd != null && !etPendingSent.get()) {
-                        val raw = String(data, offset, length)
-                        val stripped = raw.replace(Regex("\u001b(?:\\[[^a-zA-Z]*[a-zA-Z]|][^\u0007]*\u0007)"), "").trimEnd()
-                        if (stripped.isNotEmpty()) {
-                            val last = stripped.last()
-                            if (last == '$' || last == '#' || last == '%' || last == '>') {
-                                if (etPendingSent.compareAndSet(false, true)) {
-                                    Log.d(TAG, "ET: shell prompt detected ('$last'), sending session manager command")
-                                    etSessionRef[0]?.sendInput((etInitialCmd + "\n").toByteArray())
-                                }
-                            }
-                        }
-                    }
-                },
-            ) ?: continue
-            etSessionRef[0] = etSession
-
-            val etCoalescer = InputCoalescer { data -> etSession.sendInput(data) }
-            val etScheme = effectiveColorScheme(etProfile)
-            val etInitialScheme = initialEmulatorScheme(etScheme)
-            emulator = TerminalEmulatorFactory.create(
-                autoDetectUrls = true,
-                initialRows = 24,
-                initialCols = 80,
-                defaultForeground = Color(etInitialScheme.foreground),
-                defaultBackground = Color(etInitialScheme.background),
-                enableAltScreen = etProfile?.disableAltScreen != true && etProfile?.sessionManager != "screen",
-                onKeyboardInput = { data -> etCoalescer.send(applyModifiers(data)) },
-                onResize = { dims ->
-                    Log.d(TAG, "ET onResize: ${dims.columns}x${dims.rows}")
-                    for (tab in _tabs.value) {
-                        tab.resize(dims.columns, dims.rows)
-                    }
-                    etSession.resize(dims.columns, dims.rows)
-                },
-                maxScrollbackLines = terminalScrollbackRows.value,
-                inlineImages = inlineImagesPolicy(terminalInlineImages.value, inlineImageConsent.state(sessionId)),
-            )
-
-            etSession.start()
-
-            currentTabs.add(
-                TerminalTab(
-                    sessionId = session.sessionId,
-                    profileId = session.profileId,
-                    colorTag = etProfile?.colorTag ?: 0,
-                    label = tabLabel,
-                    transportType = "ET",
-                    emulator = emulator,
-                    mouseMode = etMouseTracker.mouseMode,
-                    activeMouseMode = etMouseTracker.activeMouseMode,
-                    bracketPasteMode = etMouseTracker.bracketPasteMode,
-                    altScreen = etMouseTracker.altScreen,
-                    cursorKeyAppMode = etMouseTracker.cursorKeyAppMode,
-                    oscHandler = etOscHandler,
-                    feedOutput = etFeedOutput,
-                    cwd = etCwdFlow,
-                    hyperlinkUri = etHyperlinkFlow,
-                    isReconnecting = MutableStateFlow(false),
-                    stallSeconds = NEVER_STALLS,
-                    sendInput = { data -> etSession.sendInput(data) },
-                    resize = { cols, rows -> etSession.resize(cols, rows) },
-                    close = { etSession.close() },
-                    colorScheme = etScheme,
-                    backgroundOpacity = effectiveOpacity(etProfile),
-                )
-            )
-            trackedSessionIds.add(session.sessionId)
-        }
-
         // Create tabs for new Local + UML-guest sessions. Both transports run
         // a LocalSession-backed PTY (a real pty owned by PtyBridge), so one
         // loop serves both through a per-transport [PtyTabSource]; only the
@@ -2208,8 +1815,8 @@ class TerminalViewModel @Inject constructor(
         // localSessions but never appear in currentTabs; sweeping by
         // tab presence alone tore those out immediately and broke
         // every snapshot-style MCP tool against agent-owned shells.
-        val knownSessionIds = sshSessions.keys + rnsSessions.keys +
-            moshSessions.keys + etSessions.keys + btSerialSessions.keys + bleSerialSessions.keys + usbSerialSessions.keys +
+        val knownSessionIds = sshSessions.keys +
+            btSerialSessions.keys + bleSerialSessions.keys + usbSerialSessions.keys +
             localSessions.keys + guestSessions.keys
         for (id in terminalSessionRegistry.sessions.value.keys.toList()) {
             if (id !in knownSessionIds) terminalSessionRegistry.unregister(id)
@@ -2304,43 +1911,17 @@ class TerminalViewModel @Inject constructor(
     }
 
     fun closeTab(sessionId: String) {
-        val tab = _tabs.value.firstOrNull { it.sessionId == sessionId }
-        if (tab != null && tab.transportType in TRANSPORTS_NEEDING_EXPLICIT_DETACH) {
-            viewModelScope.launch(Dispatchers.IO) {
-                sendSessionManagerDetach(tab)
-                removeTabAndSync(sessionId)
-            }
-        } else {
-            removeTabAndSync(sessionId)
-        }
+        removeTabAndSync(sessionId)
     }
 
     /** Close all sessions for a profile (called from connections disconnect). */
     fun closeSession(profileId: String) {
-        val profileTabs = _tabs.value.filter { it.profileId == profileId }
-        val needsDetach = profileTabs.filter { it.transportType in TRANSPORTS_NEEDING_EXPLICIT_DETACH }
-        if (needsDetach.isNotEmpty()) {
-            viewModelScope.launch(Dispatchers.IO) {
-                val smName = effectiveSessionManagerName(profileId)
-                val detachBytes = detachBytesFor(smName)
-                if (detachBytes != null) {
-                    needsDetach.forEach { it.sendInput(detachBytes) }
-                    kotlinx.coroutines.delay(SESSION_MANAGER_DETACH_DELAY_MS)
-                }
-                removeAllForProfileAndSync(profileId)
-            }
-        } else {
-            removeAllForProfileAndSync(profileId)
-        }
+        removeAllForProfileAndSync(profileId)
     }
 
     private fun removeTabAndSync(sessionId: String) {
         if (sessionManager.sessions.value.containsKey(sessionId)) {
             sessionManager.removeSession(sessionId)
-        } else if (moshSessionManager.sessions.value.containsKey(sessionId)) {
-            moshSessionManager.removeSession(sessionId)
-        } else if (etSessionManager.sessions.value.containsKey(sessionId)) {
-            etSessionManager.removeSession(sessionId)
         } else if (localSessionManager.sessions.value.containsKey(sessionId)) {
             localSessionManager.removeSession(sessionId)
         } else if (btSerialSessionManager.sessions.value.containsKey(sessionId)) {
@@ -2357,8 +1938,6 @@ class TerminalViewModel @Inject constructor(
             viewModelScope.launch(kotlinx.coroutines.Dispatchers.IO) {
                 umlGuestManager.closeGuest(sessionId)
             }
-        } else {
-            reticulumSessionManager.removeSession(sessionId)
         }
         trackedSessionIds.remove(sessionId)
         // Removal is synchronous; the tab reconciliation (now suspending, since
@@ -2380,9 +1959,6 @@ class TerminalViewModel @Inject constructor(
 
     private fun removeAllForProfileAndSync(profileId: String) {
         sessionManager.removeAllSessionsForProfile(profileId)
-        reticulumSessionManager.removeAllSessionsForProfile(profileId)
-        moshSessionManager.removeAllSessionsForProfile(profileId)
-        etSessionManager.removeAllSessionsForProfile(profileId)
         localSessionManager.removeAllSessionsForProfile(profileId)
         btSerialSessionManager.removeAllSessionsForProfile(profileId)
         bleSerialSessionManager.removeAllSessionsForProfile(profileId)
@@ -2399,35 +1975,6 @@ class TerminalViewModel @Inject constructor(
                 _navigateToConnections.value = true
             }
         }
-    }
-
-    /**
-     * Send the session manager's detach key sequence over a Mosh or ET tab so
-     * the server-side multiplexer (zellij/tmux/screen) drops this client before
-     * we tear the transport down. SSH gets HUP for free when the channel
-     * closes; Mosh and ET keep the PTY alive across disconnects, so without
-     * this nudge the next reconnect looks like a second concurrent client.
-     */
-    private suspend fun sendSessionManagerDetach(tab: TerminalTab) {
-        val smName = effectiveSessionManagerName(tab.profileId)
-        val detachBytes = detachBytesFor(smName) ?: return
-        tab.sendInput(detachBytes)
-        kotlinx.coroutines.delay(SESSION_MANAGER_DETACH_DELAY_MS)
-    }
-
-    private suspend fun effectiveSessionManagerName(profileId: String): String {
-        val profile = connectionRepository.getById(profileId)
-        return profile?.sessionManager?.uppercase()
-            ?: preferencesRepository.sessionManager.first().name
-    }
-
-    private fun detachBytesFor(smName: String): ByteArray? = when (smName) {
-        "TMUX", "BYOBU" -> byteArrayOf(0x02, 'd'.code.toByte()) // Ctrl+B d
-        "ZELLIJ" -> byteArrayOf(0x0F, 'd'.code.toByte())        // Ctrl+O d
-        "SCREEN" -> byteArrayOf(0x01, 'd'.code.toByte())        // Ctrl+A d
-        "HERDR" -> byteArrayOf(0x02, 'q'.code.toByte())         // Ctrl+B q (herdr default prefix+detach)
-        "PSMUX" -> byteArrayOf(0x02, 'd'.code.toByte())         // Ctrl+B d (psmux default prefix+detach)
-        else -> null
     }
 
     /** When non-null, the UI should show a session picker for a new tab. */
@@ -2470,37 +2017,6 @@ class TerminalViewModel @Inject constructor(
         if (activeTab == null) {
             Log.w(TAG, "addTab: no active tab (index=${_activeTabIndex.value}, tabs=${_tabs.value.size})")
             _newTabMessage.value = appContext.getString(R.string.terminal_new_tab_no_active)
-            return
-        }
-
-        if (activeTab.transportType == "RETICULUM") {
-            addReticulumTab(activeTab)
-            return
-        }
-
-        if (activeTab.transportType == "MOSH") {
-            // Mosh tunnels each session via its own UDP exchange, so a "new
-            // tab" means a fresh Mosh connection — same shape as SSH multi-
-            // tab. We don't support that yet. Within the existing tab,
-            // Zellij/tmux session-switching keys still work to add named
-            // sessions to the same tunnel. (#113)
-            _newTabMessage.value = "Mosh supports one tab per connection. " +
-                "To open another session inside this tab, use Zellij " +
-                "(Ctrl-o then s) or tmux's prefix. For multiple tabs, " +
-                "switch the profile to SSH transport."
-            return
-        }
-
-        if (activeTab.transportType == "ET") {
-            // Same shape as Mosh — ET tunnels each session via its own SSH
-            // bootstrap, so a new tab means a new connection. The picker
-            // dialog's "Create new session" option is for sessions inside
-            // the existing tunnel, not for new tabs — clarify the
-            // distinction. (#113)
-            _newTabMessage.value = "Eternal Terminal supports one tab per " +
-                "connection. To open another session inside this tab, use " +
-                "Zellij (Ctrl-o then s) or tmux's prefix. For multiple " +
-                "tabs, switch the profile to SSH transport."
             return
         }
 
@@ -2931,70 +2447,6 @@ class TerminalViewModel @Inject constructor(
         }
     }
 
-    /**
-     * Add a new Reticulum tab to the same destination as the current tab.
-     */
-    private fun addReticulumTab(activeTab: TerminalTab) {
-        val profileId = activeTab.profileId
-        val rnsSession = reticulumSessionManager.sessions.value.values
-            .firstOrNull { it.profileId == profileId }
-        if (rnsSession == null) {
-            _newTabMessage.value = appContext.getString(R.string.terminal_new_tab_reticulum_no_session)
-            return
-        }
-        val label = activeTab.label
-        viewModelScope.launch {
-            _newTabLoading.value = true
-            var sessionId: String? = null
-            try {
-                // Re-issue the profile's own stack parameters, not blanks.
-                // The stack is already up, so a blank host:0 is classified as
-                // a gateway request: against a shared-instance stack that is
-                // rejected outright (IllegalStateException), and against a
-                // gateway stack it registers a bogus "<blank>:0" interface
-                // instead of reusing the live one (#601). connectSession
-                // matches the running stack by host/port, so the profile's
-                // values return AlreadySatisfied and only a genuinely new
-                // gateway gets an interface added.
-                val profile = connectionRepository.getById(profileId)
-                val configDir = java.io.File(
-                    appContext.filesDir, "reticulum",
-                ).apply { mkdirs() }.absolutePath
-                sessionId = reticulumSessionManager.registerSession(
-                    profileId = profileId,
-                    label = label,
-                    destinationHash = rnsSession.destinationHash,
-                )
-                withContext(Dispatchers.IO) {
-                    reticulumSessionManager.connectSession(
-                        sessionId = sessionId!!,
-                        configDir = configDir,
-                        host = profile?.reticulumHost ?: "",
-                        port = profile?.reticulumPort ?: 0,
-                        ifacNetname = profile?.reticulumNetworkName,
-                        ifacNetkey = profile?.reticulumPassphrase,
-                        socketDialer = profile?.let { tunnelResolver.socketDialer(it) },
-                    )
-                }
-                syncSessions()
-                selectTabBySessionId(sessionId)
-            } catch (e: Exception) {
-                Log.e(TAG, "addReticulumTab failed", e)
-                // Drop the registered entry so a failed duplicate doesn't sit
-                // in the sessions map as a dead tab (the ERROR status added in
-                // connectSession also stops it counting as active, but the
-                // tab should not be there at all).
-                sessionId?.let { reticulumSessionManager.removeSession(it) }
-                _newTabMessage.value = appContext.getString(
-                    R.string.terminal_new_tab_connection_failed,
-                    e.message ?: e.javaClass.simpleName,
-                )
-            } finally {
-                _newTabLoading.value = false
-            }
-        }
-    }
-
     /** Open a new tab attached to a named remote session (tmux/zellij/screen).
      *  Creates a new SSH connection to the same profile and attaches to the named session. */
     fun openRemoteSession(profileId: String, sessionName: String) {
@@ -3251,7 +2703,7 @@ class TerminalViewModel @Inject constructor(
         val doorId: String,
         val doorHost: String,
         val doorUser: String,
-        /** Path — SSH / Mosh / Eternal Terminal / … */
+        /** Path — SSH / … */
         val pathTransport: String,
         val pathDetail: String,
         /** Room — live multiplexer / tab session name when known. */
@@ -3294,7 +2746,7 @@ class TerminalViewModel @Inject constructor(
     /** Details is available for any SSH-family terminal tab. */
     fun canShowDetails(sessionId: String): Boolean {
         val tab = _tabs.value.find { it.sessionId == sessionId } ?: return false
-        return tab.transportType in setOf("SSH", "MOSH", "ET")
+        return tab.transportType == "SSH"
     }
 
     /**
@@ -3310,7 +2762,7 @@ class TerminalViewModel @Inject constructor(
             return true
         }
         val tab = _tabs.value.find { it.sessionId == sessionId } ?: return false
-        return tab.transportType in setOf("SSH", "MOSH", "ET")
+        return tab.transportType == "SSH"
     }
 
     /** Open the Details (where am I?) dialog for [sessionId]. */
@@ -3373,7 +2825,7 @@ class TerminalViewModel @Inject constructor(
 
     private suspend fun buildWhereabouts(sessionId: String): ConnectionWhereabouts? {
         val tab = _tabs.value.find { it.sessionId == sessionId } ?: return null
-        if (tab.transportType !in setOf("SSH", "MOSH", "ET")) return null
+        if (tab.transportType != "SSH") return null
         val profile = withContext(Dispatchers.IO) {
             connectionRepository.getById(tab.profileId)
         } ?: return null
@@ -3390,10 +2842,6 @@ class TerminalViewModel @Inject constructor(
             append(profile.host)
             append(':')
             append(profile.port)
-            when {
-                profile.useEternalTerminal -> append(" · etPort ").append(profile.etPort)
-                profile.useMosh -> append(" · mosh")
-            }
             if (!profile.remoteCommand.isNullOrBlank()) {
                 append("\nremoteCommand: ").append(profile.remoteCommand)
             }
@@ -3409,10 +2857,6 @@ class TerminalViewModel @Inject constructor(
             appendLine("PATH (transport)")
             appendLine("  $path")
             appendLine("  ${profile.username}@${profile.host}:${profile.port}")
-            when {
-                profile.useEternalTerminal -> appendLine("  etPort ${profile.etPort}")
-                profile.useMosh -> appendLine("  mosh")
-            }
             appendLine()
             appendLine("ROOM (session)")
             appendLine("  live: ${liveRoom ?: "— unknown —"}")
@@ -3438,19 +2882,8 @@ class TerminalViewModel @Inject constructor(
         transportType: String?,
         profile: sh.haven.core.data.db.entities.ConnectionProfile,
     ): String = when (transportType) {
-        "ET" -> "Eternal Terminal"
-        "MOSH" -> "Mosh"
         "GUEST" -> "Linux Guest"
-        "SSH" -> when {
-            profile.useEternalTerminal -> "Eternal Terminal"
-            profile.useMosh -> "Mosh"
-            else -> "SSH"
-        }
-        else -> transportType ?: when {
-            profile.useEternalTerminal -> "Eternal Terminal"
-            profile.useMosh -> "Mosh"
-            else -> "SSH"
-        }
+        else -> transportType ?: "SSH"
     }
 
     /**
@@ -3513,14 +2946,13 @@ class TerminalViewModel @Inject constructor(
     /**
      * Resolve the multiplexer session to pin from a live terminal tab.
      * Prefers an SSH [SessionManager] attach; falls back to profile
-     * remoteCommand / lastSessionName / tab label (Mosh/ET + remoteCommand).
+     * remoteCommand / lastSessionName / tab label.
      */
     private suspend fun resolveSavePin(
         sessionId: String,
     ): Triple<sh.haven.core.data.db.entities.ConnectionProfile, String, SessionManager>? {
         val tab = _tabs.value.find { it.sessionId == sessionId }
         val ssh = sessionManager.getSession(sessionId)
-        // Mosh/ET tabs don't live in SshSessionManager — profileId is only on the tab.
         val profileId = tab?.profileId ?: ssh?.profileId ?: return null
         val source = withContext(Dispatchers.IO) {
             connectionRepository.getById(profileId)
@@ -3536,7 +2968,7 @@ class TerminalViewModel @Inject constructor(
 
         val mgr = resolveManagerForPin(source)
 
-        // remoteCommand pin (incl. Mosh/ET profiles that skip SessionManager)
+        // remoteCommand pin
         SaveConnectionFromSession.sessionNameFromRemoteCommand(source.remoteCommand)?.let { name ->
             return Triple(source, name, mgr)
         }
