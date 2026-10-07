@@ -10,7 +10,7 @@ android {
     compileSdk = 37
 
     defaultConfig {
-        applicationId = "ca.hoeve.moorline"
+        applicationId = "app.moorline"
         minSdk = 26
         targetSdk = 35
         versionCode = 870
