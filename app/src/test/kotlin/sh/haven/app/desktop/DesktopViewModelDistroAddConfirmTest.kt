@@ -27,7 +27,6 @@ import sh.haven.core.et.EtSessionManager
 import sh.haven.core.knock.PortKnocker
 import sh.haven.core.local.LocalSessionManager
 import sh.haven.core.local.ProotManager
-import sh.haven.core.local.SystemVmManager
 import sh.haven.core.local.proot.Arch
 import sh.haven.core.local.proot.Distro
 import sh.haven.core.local.proot.PackageFamily
@@ -93,12 +92,8 @@ class DesktopViewModelDistroAddConfirmTest {
             agentUiCommandBus = commandBus,
             localSessionManager = localSessionManager,
             desktopSessionRegistry = mockk(relaxed = true),
-            presentationManager = mockk(relaxed = true),
-            appWindowLauncher = mockk(relaxed = true),
-            appWindowShortcutManager = mockk(relaxed = true),
             usbDriveVmManager = usbDriveVmManager,
             umlRecoveryManager = mockk<sh.haven.app.usb.UmlRecoveryManager>(relaxed = true),
-            systemVmManager = mockk<SystemVmManager>(relaxed = true),
         )
     }
 

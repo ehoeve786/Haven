@@ -17,7 +17,6 @@ class TransportAvailabilityTest {
         "MOSH" to "Mosh",
         "LOCAL" to "Local Shell (PRoot)",
         "GUEST" to "Linux Guest (UML)",
-        "VNC" to "VNC (Desktop)",
         "RDP" to "RDP (Desktop)",
         "SPICE" to "SPICE (Desktop)",
         "SMB" to "SMB (File Share)",
@@ -44,21 +43,15 @@ class TransportAvailabilityTest {
         assertFalse("SPICE", "SPICE" in offered)
     }
 
-    /**
-     * The gate must remove ONLY those two. Filtering by "is it a desktop
-     * type" would take VNC with it, and VNC's client is Kotlin — it works in
-     * every build, including against a guest desktop the terminal build can
-     * still run over X11Vnc.
-     */
+    /** The gate must remove ONLY those two. */
     @Test
-    fun `nothing else is affected, VNC included`() {
+    fun `nothing else is affected`() {
         val offered = values(rdp = false, spice = false)
 
         assertEquals(
-            listOf("SSH", "MOSH", "LOCAL", "GUEST", "VNC", "SMB", "RCLONE"),
+            listOf("SSH", "MOSH", "LOCAL", "GUEST", "SMB", "RCLONE"),
             offered,
         )
-        assertTrue("VNC must survive", "VNC" in offered)
     }
 
     @Test
@@ -73,7 +66,7 @@ class TransportAvailabilityTest {
     @Test
     fun `order is preserved`() {
         assertEquals(
-            listOf("SSH", "MOSH", "LOCAL", "GUEST", "VNC", "RDP", "SPICE", "SMB", "RCLONE"),
+            listOf("SSH", "MOSH", "LOCAL", "GUEST", "RDP", "SPICE", "SMB", "RCLONE"),
             values(rdp = true, spice = true),
         )
     }

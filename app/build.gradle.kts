@@ -256,7 +256,6 @@ dependencies {
     implementation(project(":core:btserial"))
     implementation(project(":core:bleserial"))
     implementation(project(":core:usbserial"))
-    implementation(project(":core:vnc"))
     implementation(project(":core:rdp"))
     implementation(project(":core:prns"))
     implementation(project(":core:spice"))
@@ -290,7 +289,6 @@ dependencies {
     implementation(project(":feature:settings"))
     implementation(project(":feature:editor"))
     implementation(project(":feature:imagetools"))
-    implementation(project(":feature:vnc"))
     implementation(project(":feature:rdp"))
     // The app manifest declares CloudflareAccessLoginActivity, so app must
     // depend on its module directly — it only arrived transitively before,

@@ -52,8 +52,6 @@ import sh.haven.core.data.preferences.NavBlockMode
 import sh.haven.core.data.preferences.ToolbarLayout
 import sh.haven.core.wayland.WaylandDesktopView
 import sh.haven.feature.rdp.RdpSessionContent
-import sh.haven.feature.vnc.VncSessionContent
-import sh.haven.feature.vnc.charToKeySym
 
 private val TAB_COLORS = listOf(
     Color(0xFF42A5F5), // blue
@@ -156,16 +154,6 @@ fun DesktopScreen(
     var userManageOverride by remember { mutableStateOf<Boolean?>(null) }
     val showManage = userManageOverride ?: tabs.isEmpty()
 
-    // When the Sessions/monitor view is shown, connect a viewer to any
-    // running desktop that doesn't have one — e.g. a desktop started via
-    // the MCP start_desktop tool (backend-only, no UI viewer). Without
-    // this, the monitor view sits empty even though the compositor +
-    // wayvnc are up. addVncSession dedupes, so an already-open viewer is
-    // untouched.
-    LaunchedEffect(showManage) {
-        if (!showManage) desktopViewModel.connectRunningDesktopViewers()
-    }
-
     Column(modifier = Modifier.fillMaxSize()) {
         // Compact action row at the very top — surfaces the Manage
         // toggle without consuming the full TopAppBar height. Stays
@@ -219,43 +207,6 @@ fun DesktopScreen(
             if (tab != null) {
                 Box(modifier = Modifier.weight(1f).fillMaxWidth()) {
                     when (tab) {
-                        is DesktopTab.Vnc -> VncSessionContent(
-                            connected = tab.connected,
-                            frame = tab.frame,
-                            error = tab.error,
-                            toolbarLayout = toolbarLayout,
-                            onTap = { x, y -> desktopViewModel.sendClick(x, y) },
-                            onMiddleClick = { x, y -> desktopViewModel.sendClick(x, y, button = 2) },
-                            onLongPress = { x, y -> desktopViewModel.sendClick(x, y, button = 3) },
-                            onDragStart = { x, y ->
-                                desktopViewModel.sendPointer(x, y)
-                                desktopViewModel.pressButton(1)
-                            },
-                            onDrag = { x, y -> desktopViewModel.sendPointer(x, y) },
-                            onDragEnd = { desktopViewModel.releaseButton(1) },
-                            onScrollUp = { desktopViewModel.scrollUp() },
-                            onScrollDown = { desktopViewModel.scrollDown() },
-                            onPressButton = { btn -> desktopViewModel.pressButton(btn) },
-                            onReleaseButton = { btn -> desktopViewModel.releaseButton(btn) },
-                            onTypeChar = { ch -> desktopViewModel.typeVncKey(charToKeySym(ch)) },
-                            onTypeText = { text -> desktopViewModel.typeVncText(text) },
-                            onKeyDown = { keySym -> desktopViewModel.sendVncKey(keySym, true) },
-                            onKeyUp = { keySym -> desktopViewModel.sendVncKey(keySym, false) },
-                            onDisconnect = { desktopViewModel.closeTab(tab.id) },
-                            onFullscreenChanged = onFullscreenChanged,
-                            cursor = tab.cursor,
-                            pointerPos = tab.pointerPos,
-                            inputMode = inputMode,
-                            onSetInputMode = onSetInputMode,
-                            bandwidthSuggestion = tab.bandwidthSuggestion,
-                            onAcceptBandwidthSuggestion = { desktopViewModel.acceptBandwidthSuggestion(tab.id) },
-                            onDismissBandwidthSuggestion = { desktopViewModel.dismissBandwidthSuggestion(tab.id) },
-                            currentOrientation = desktopOrientation,
-                            onCycleOrientation = { desktopViewModel.cycleDesktopOrientation() },
-                            onRetry = { desktopViewModel.retryTab(tab.id) },
-                            onClose = { desktopViewModel.closeTab(tab.id) },
-                        )
-
                         is DesktopTab.Rdp -> RdpSessionContent(
                             connected = tab.connected,
                             frame = tab.frame,

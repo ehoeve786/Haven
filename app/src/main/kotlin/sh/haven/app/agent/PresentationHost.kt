@@ -93,8 +93,6 @@ import sh.haven.app.R
 import sh.haven.core.data.agent.AgentPresentationManager
 import sh.haven.core.data.agent.PresentedMedia
 import sh.haven.core.data.agent.PresentedMediaKind
-import sh.haven.core.local.DesktopManager
-import sh.haven.feature.vnc.VncSessionContent
 import java.io.File
 import javax.inject.Inject
 
@@ -108,88 +106,23 @@ private const val MAX_PDF_PAGES = 20
 @HiltViewModel
 internal class PresentationHostViewModel @Inject constructor(
     private val manager: AgentPresentationManager,
-    private val desktopManager: DesktopManager,
-    private val connectionStore: AppWindowConnectionStore,
     private val pipController: PipController,
-    private val preferencesRepository: sh.haven.core.data.preferences.UserPreferencesRepository,
 ) : ViewModel() {
     val pending: StateFlow<List<PresentedMedia>> = manager.pending
     val minimizedIds: StateFlow<Set<Long>> = manager.minimizedIds
 
-    /** Background an app window to an edge icon (keeps the cage + VNC alive). */
+    /** Background an item to an edge icon. */
     fun minimize(id: Long) = manager.minimize(id)
 
-    /**
-     * Live-adjust a running app window's cage output scale (the 3-finger pinch),
-     * and persist it to the saved app (matched by command, preserving its other
-     * fields) so the scale sticks for next launch.
-     */
-    fun changeAppWindowScale(sessionId: String, scale: Float) {
-        viewModelScope.launch(Dispatchers.IO) {
-            desktopManager.setAppWindowScale(sessionId, scale)
-            desktopManager.appWindows.value[sessionId]?.command?.let { cmd ->
-                runCatching {
-                    val existing = preferencesRepository.appWindowDefs.first()
-                        .items.firstOrNull { it.command == cmd }
-                    preferencesRepository.upsertAppWindowDef(
-                        label = "",
-                        command = cmd,
-                        createdBy = sh.haven.core.data.preferences.AppWindowOrigin.USER,
-                        fullscreen = existing?.fullscreen ?: true,
-                        resolution = null,
-                        scale = scale,
-                    )
-                }
-            }
-        }
-    }
-
-    /**
-     * Re-mode a running app window's cage to [w]x[h] so it refits the current
-     * screen (fullscreen-enter / rotation). Transient — the saved def stays
-     * "auto" and recomputes the fit each time.
-     */
-    fun changeAppWindowResolution(sessionId: String, w: Int, h: Int) {
-        viewModelScope.launch(Dispatchers.IO) {
-            desktopManager.setAppWindowResolution(sessionId, w, h)
-        }
-    }
-
-    /** Restore a backgrounded app window to the full overlay. */
+    /** Restore a backgrounded item to the full overlay. */
     fun restore(id: Long) = manager.restore(id)
-
-    /**
-     * The live VNC controller for an app window, owned by the store (so it
-     * survives the overlay→PiP→overlay transition). Null if the media lacks
-     * connection details.
-     */
-    fun controllerFor(media: PresentedMedia): AppWindowVncController? {
-        val host = media.host ?: return null
-        val port = media.port ?: return null
-        val sid = media.sessionId ?: return null
-        return connectionStore.controllerFor(sid, host, port)
-    }
 
     /** Tell the PiP layer which presented item (if any) is currently on screen. */
     fun setActivePipMedia(media: PresentedMedia?) = pipController.setActivePipMedia(media)
 
-    /**
-     * Dismiss a presented item. Removes it from the queue immediately (UI
-     * stays responsive); for an APP_WINDOW it also clears the PiP active
-     * window, releases the VNC connection from the store, and stops the
-     * backing cage-kiosk session off-thread. core:data's manager can't do
-     * the last two — it doesn't depend on core:local / core:vnc — so the
-     * teardown lives here.
-     */
+    /** Dismiss a presented item. */
     fun dismiss(media: PresentedMedia) {
         manager.dismiss(media.id)
-        if (media.kind == PresentedMediaKind.APP_WINDOW) {
-            pipController.setActivePipMedia(null)
-            media.sessionId?.let { sid ->
-                connectionStore.release(sid)
-                viewModelScope.launch(Dispatchers.IO) { desktopManager.stopAppWindow(sid) }
-            }
-        }
     }
 }
 
@@ -215,7 +148,6 @@ internal fun PresentationHost(viewModel: PresentationHostViewModel = hiltViewMod
     val pending by viewModel.pending.collectAsStateWithLifecycle()
     val minimized by viewModel.minimizedIds.collectAsStateWithLifecycle()
     // Render the focused item: the oldest pending one that isn't backgrounded.
-    // Minimized app windows stay live (edge icons) but are skipped here.
     val upstream = pending.firstOrNull { it.id !in minimized }
 
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
@@ -230,8 +162,8 @@ internal fun PresentationHost(viewModel: PresentationHostViewModel = hiltViewMod
             runCatching { sheetState.hide() }
             displayed = null
         }
-        // Tell the PiP layer which item is on screen (for the floating view, and
-        // APP_WINDOW auto-enter). Image / web / app-window are PiP-eligible;
+        // Tell the PiP layer which item is on screen (for the floating view).
+        // Image / web are PiP-eligible;
         // AUDIO has no visual surface so it is excluded. Cleared when nothing is
         // shown. NOT cleared on dispose — an overlay→PiP transition disposes this
         // host but the item must stay PiP-active. (#225)
@@ -240,18 +172,7 @@ internal fun PresentationHost(viewModel: PresentationHostViewModel = hiltViewMod
     val current = displayed ?: return
 
     ModalBottomSheet(
-        // Tap-outside / swipe-away: for a running app window this *backgrounds*
-        // it (keeps the cage + VNC alive, docks an edge icon) rather than
-        // tearing it down — only the explicit Dismiss button / edge-icon ✕
-        // kill the cage. Images/audio have nothing to keep alive, so they
-        // dismiss as before.
-        onDismissRequest = {
-            if (current.kind == PresentedMediaKind.APP_WINDOW) {
-                viewModel.minimize(current.id)
-            } else {
-                viewModel.dismiss(current)
-            }
-        },
+        onDismissRequest = { viewModel.dismiss(current) },
         sheetState = sheetState,
     ) {
         Column(
@@ -269,8 +190,6 @@ internal fun PresentationHost(viewModel: PresentationHostViewModel = hiltViewMod
 
             // Header: caption + fullscreen + an explicit ✕. The sheet's drag-handle
             // pill alone reads as "minimize" to users; close must look like close.
-            // (App windows keep their own in-viewer control row, and sheet-dismiss
-            // means minimize for them, so they skip this header's ✕.)
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically,
@@ -288,13 +207,11 @@ internal fun PresentationHost(viewModel: PresentationHostViewModel = hiltViewMod
                         )
                     }
                 }
-                if (current.kind != PresentedMediaKind.APP_WINDOW) {
-                    IconButton(onClick = { viewModel.dismiss(current) }) {
-                        Icon(
-                            Icons.Filled.Close,
-                            contentDescription = stringResource(R.string.app_present_dismiss),
-                        )
-                    }
+                IconButton(onClick = { viewModel.dismiss(current) }) {
+                    Icon(
+                        Icons.Filled.Close,
+                        contentDescription = stringResource(R.string.app_present_dismiss),
+                    )
                 }
             }
             Spacer(Modifier.height(4.dp))
@@ -310,90 +227,37 @@ internal fun PresentationHost(viewModel: PresentationHostViewModel = hiltViewMod
                     fullscreen = fullscreen,
                     onExitFullscreen = { fullscreen = false },
                 )
-                PresentedMediaKind.APP_WINDOW -> {
-                    val controller = viewModel.controllerFor(current)
-                    if (controller != null) {
-                        val context = LocalContext.current
-                        // Resolved at composition: compose-lint forbids
-                        // context.getString for resource values inside callbacks.
-                        val scaleSavedMessage = stringResource(R.string.app_window_scale_saved)
-                        // Host owns the fullscreen state for app windows so it can
-                        // promote the window into a full-window Dialog (the 420dp
-                        // sheet box can't grow). Seeds from the per-app flag; the
-                        // id key resets it per presented window but not when the
-                        // composable merely re-parents sheet↔Dialog.
-                        var appFullscreen by rememberSaveable(current.id) {
-                            mutableStateOf(current.fullscreen)
-                        }
-                        AppWindowContent(
-                            controller = controller,
-                            fullscreen = appFullscreen,
-                            onFullscreenChange = { appFullscreen = it },
-                            // Close (in the viewer's own toolbar) tears the cage
-                            // down; minimize backgrounds it to an edge icon
-                            // (keeps it alive); PiP enters system PiP. All three
-                            // live in the viewer's existing control row — no
-                            // second button row here.
-                            onDismiss = { viewModel.dismiss(current) },
-                            onMinimize = { viewModel.minimize(current.id) },
-                            onPictureInPicture = {
-                                viewModel.setActivePipMedia(current)
-                                (context.findActivity() as? MainActivity)?.enterPipForMedia()
-                            },
-                            currentScale = current.scale,
-                            onChangeScale = { s ->
-                                current.sessionId?.let { viewModel.changeAppWindowScale(it, s) }
-                            },
-                            onSaveDefault = { s ->
-                                current.sessionId?.let { viewModel.changeAppWindowScale(it, s) }
-                                Toast.makeText(context, scaleSavedMessage, Toast.LENGTH_SHORT)
-                                    .show()
-                            },
-                            autoFit = current.resolution == "auto",
-                            onFitToScreen = { w, h ->
-                                current.sessionId?.let { viewModel.changeAppWindowResolution(it, w, h) }
-                            },
-                        )
-                    } else {
-                        Text(stringResource(R.string.app_present_app_missing_details))
-                    }
-                }
             }
 
-            // Image/audio need a Dismiss button; an app window carries its own
-            // control row (close / minimize / PiP / keyboard / fullscreen)
-            // inside the VNC viewer, so it doesn't add a second row here.
-            if (current.kind != PresentedMediaKind.APP_WINDOW) {
-                Spacer(Modifier.height(24.dp))
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(12.dp, Alignment.End),
+            Spacer(Modifier.height(24.dp))
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(12.dp, Alignment.End),
+            ) {
+                // Picture-in-picture floats the item over *other* apps (unlike
+                // minimize, which only docks within Haven). Images and web
+                // pages/PDFs are visual; audio has nothing to float. (#225)
+                if (current.kind == PresentedMediaKind.IMAGE ||
+                    current.kind == PresentedMediaKind.WEB
                 ) {
-                    // Picture-in-picture floats the item over *other* apps (unlike
-                    // minimize, which only docks within Haven). Images and web
-                    // pages/PDFs are visual; audio has nothing to float. (#225)
-                    if (current.kind == PresentedMediaKind.IMAGE ||
-                        current.kind == PresentedMediaKind.WEB
-                    ) {
-                        val context = LocalContext.current
-                        OutlinedButton(onClick = {
-                            // Pin the active PiP item to what's on screen *now* — the
-                            // LaunchedEffect that normally tracks it is fragile across
-                            // dismiss/re-present and PiP enter/exit cycles, so set it
-                            // synchronously here so enterPipForMedia never sees null. (#225)
-                            viewModel.setActivePipMedia(current)
-                            (context.findActivity() as? MainActivity)?.enterPipForMedia()
-                        }) {
-                            Text(stringResource(R.string.app_present_pip))
-                        }
+                    val context = LocalContext.current
+                    OutlinedButton(onClick = {
+                        // Pin the active PiP item to what's on screen *now* — the
+                        // LaunchedEffect that normally tracks it is fragile across
+                        // dismiss/re-present and PiP enter/exit cycles, so set it
+                        // synchronously here so enterPipForMedia never sees null. (#225)
+                        viewModel.setActivePipMedia(current)
+                        (context.findActivity() as? MainActivity)?.enterPipForMedia()
+                    }) {
+                        Text(stringResource(R.string.app_present_pip))
                     }
-                    // Minimize parks it as an edge icon (kept until dismissed) so
-                    // the user can glance back at an image/page while they work.
-                    // Dismiss lives as the header's ✕ (users read the drag pill
-                    // as minimize, so close needs an unambiguous ✕ up top).
-                    OutlinedButton(onClick = { viewModel.minimize(current.id) }) {
-                        Text(stringResource(R.string.app_present_minimize))
-                    }
+                }
+                // Minimize parks it as an edge icon (kept until dismissed) so
+                // the user can glance back at an image/page while they work.
+                // Dismiss lives as the header's ✕ (users read the drag pill
+                // as minimize, so close needs an unambiguous ✕ up top).
+                OutlinedButton(onClick = { viewModel.minimize(current.id) }) {
+                    Text(stringResource(R.string.app_present_minimize))
                 }
             }
             Spacer(Modifier.height(16.dp))
@@ -745,155 +609,4 @@ private tailrec fun Context.findActivity(): Activity? = when (this) {
     is Activity -> this
     is ContextWrapper -> baseContext.findActivity()
     else -> null
-}
-
-/**
- * A live single-app window: embeds the reusable [VncSessionContent] (which
- * already does pinch-zoom / pan / drag / fullscreen) bound to a
- * store-owned [AppWindowVncController] connected to the cage-kiosk wayvnc.
- * The controller lifecycle is the PresentedMedia (via [AppWindowConnectionStore]),
- * not this composable — so it survives an overlay→PiP→overlay round-trip and the
- * sheet↔Dialog re-parent below.
- *
- * Not [fullscreen]: rendered in the fixed-height sheet box. [fullscreen]: the
- * 420dp box can't grow, so the window is promoted into a full-window [Dialog]
- * that escapes the bottom sheet (immersive, edge-to-edge). The in-viewer
- * fullscreen toggle, back-press and swipe all flip [onFullscreenChange].
- * [onDismiss] tears the window down.
- */
-@Composable
-private fun AppWindowContent(
-    controller: AppWindowVncController,
-    fullscreen: Boolean,
-    onFullscreenChange: (Boolean) -> Unit,
-    onDismiss: () -> Unit,
-    onMinimize: () -> Unit,
-    onPictureInPicture: () -> Unit,
-    currentScale: Float,
-    onChangeScale: (Float) -> Unit,
-    /** Persist the current output scale as this app's per-app default. */
-    onSaveDefault: (Float) -> Unit,
-    /** App resolution is "auto" → refit the cage to the screen on enter/rotation. */
-    autoFit: Boolean,
-    onFitToScreen: (Int, Int) -> Unit,
-) {
-    if (fullscreen) {
-        Dialog(
-            onDismissRequest = { onFullscreenChange(false) },
-            properties = DialogProperties(
-                usePlatformDefaultWidth = false,
-                decorFitsSystemWindows = false,
-                dismissOnBackPress = true,
-            ),
-        ) {
-            val dialogView = LocalView.current
-            val density = LocalDensity.current
-            val config = LocalConfiguration.current
-            // Display rounded-corner radius (px); 0 on flat screens.
-            var cornerPx by remember { mutableIntStateOf(0) }
-            LaunchedEffect(dialogView) {
-                // Hide the dialog window's system bars for a true immersive view.
-                val w = (dialogView.parent as? DialogWindowProvider)?.window ?: return@LaunchedEffect
-                WindowCompat.getInsetsController(w, dialogView).apply {
-                    hide(WindowInsetsCompat.Type.systemBars())
-                    systemBarsBehavior = WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
-                }
-                if (android.os.Build.VERSION.SDK_INT >= 31) {
-                    val ins = w.decorView.rootWindowInsets
-                    cornerPx = ins?.let {
-                        intArrayOf(
-                            android.view.RoundedCorner.POSITION_TOP_LEFT,
-                            android.view.RoundedCorner.POSITION_TOP_RIGHT,
-                            android.view.RoundedCorner.POSITION_BOTTOM_LEFT,
-                            android.view.RoundedCorner.POSITION_BOTTOM_RIGHT,
-                        ).maxOf { p -> it.getRoundedCorner(p)?.radius ?: 0 }
-                    } ?: 0
-                }
-            }
-            val portrait = config.screenHeightDp >= config.screenWidthDp
-            val cornerDp = with(density) { cornerPx.toDp() }
-            // Auto: re-mode the cage to fit the corner-safe area (inset on the
-            // SHORT edges) on fullscreen-enter and on every rotation. The
-            // framebuffer then matches the inset box aspect → exact fill, no crop.
-            if (autoFit) {
-                val screenWpx = Math.round(config.screenWidthDp * density.density)
-                val screenHpx = Math.round(config.screenHeightDp * density.density)
-                LaunchedEffect(portrait, screenWpx, screenHpx, cornerPx) {
-                    val safeW = if (portrait) screenWpx else (screenWpx - 2 * cornerPx).coerceAtLeast(1)
-                    val safeH = if (portrait) (screenHpx - 2 * cornerPx).coerceAtLeast(1) else screenHpx
-                    onFitToScreen(safeW, safeH)
-                }
-            }
-            // Inset the SHORT edges (auto) so the cage clears the rounded corners
-            // while filling the long dimension; fixed-resolution windows get a
-            // uniform inset fallback (they aren't re-moded to fit).
-            val insetMod = when {
-                !autoFit -> Modifier.padding(cornerDp)
-                portrait -> Modifier.padding(vertical = cornerDp)
-                else -> Modifier.padding(horizontal = cornerDp)
-            }
-            Box(modifier = Modifier.fillMaxSize().background(Color.Black)) {
-                Box(modifier = Modifier.fillMaxSize().then(insetMod)) {
-                    AppWindowVnc(controller, true, onFullscreenChange, onDismiss, onMinimize, onPictureInPicture, currentScale, onChangeScale, onSaveDefault)
-                }
-            }
-        }
-        // The opaque dialog covers this; a stable-height placeholder keeps the
-        // sheet from animating its height while fullscreen is up.
-        Box(modifier = Modifier.fillMaxWidth().height(420.dp))
-    } else {
-        Box(modifier = Modifier.fillMaxWidth().height(420.dp)) {
-            AppWindowVnc(controller, false, onFullscreenChange, onDismiss, onMinimize, onPictureInPicture, currentScale, onChangeScale, onSaveDefault)
-        }
-    }
-}
-
-/** The shared [VncSessionContent] wiring for an app window, in either container. */
-@Composable
-private fun AppWindowVnc(
-    controller: AppWindowVncController,
-    fullscreenOverride: Boolean,
-    onFullscreenChange: (Boolean) -> Unit,
-    onDismiss: () -> Unit,
-    onMinimize: () -> Unit,
-    onPictureInPicture: () -> Unit,
-    currentScale: Float,
-    onChangeScale: (Float) -> Unit,
-    onSaveDefault: (Float) -> Unit,
-) {
-    VncSessionContent(
-        connected = controller.connected,
-        frame = controller.frame,
-        error = controller.error,
-        onTap = { x, y -> controller.click(x, y, 1) },
-        onLongPress = { x, y -> controller.click(x, y, 3) },
-        onDragStart = { x, y -> controller.dragStart(x, y) },
-        onDrag = { x, y -> controller.drag(x, y) },
-        onDragEnd = { controller.dragEnd() },
-        onScrollUp = { controller.scroll(true) },
-        onScrollDown = { controller.scroll(false) },
-        onPressButton = { btn -> controller.pressButton(btn) },
-        onReleaseButton = { btn -> controller.releaseButton(btn) },
-        onTypeChar = { c -> controller.typeText(c.toString()) },
-        onTypeText = { s -> controller.typeText(s) },
-        onKeyDown = { sym -> controller.key(sym, true) },
-        onKeyUp = { sym -> controller.key(sym, false) },
-        onDisconnect = onDismiss,
-        // The viewer's own toolbar gains a minimize + PiP button for app
-        // windows (null for full desktops, which don't show them).
-        onMinimize = onMinimize,
-        onPictureInPicture = onPictureInPicture,
-        // App windows: cover-fill + ordinary 2-finger pinch-zoom with a
-        // 3-finger cage-output-scale gesture. The desktop viewer instead
-        // exposes a viewport/scroll toggle for its 2-finger drag (#286).
-        twoFingerZoom = true,
-        // Host-controlled fullscreen: the toggle/exit/back routes here so the
-        // host can swap the sheet box ↔ the full-window Dialog above.
-        fullscreenOverride = fullscreenOverride,
-        onFullscreenChanged = onFullscreenChange,
-        // 3-finger fullscreen pinch → live cage output scale.
-        currentScale = currentScale,
-        onChangeScale = onChangeScale,
-        onSaveDefault = onSaveDefault,
-    )
 }

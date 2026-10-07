@@ -21,8 +21,7 @@ internal object TransportAvailability {
      *   shipped. The terminal flavour drops all three and F-Droid builds skip
      *   the fetch, so like RDP/SPICE this is a missing-file gate.
      *
-     * VNC is never filtered: its client is Kotlin and ships in every build.
-     * Nor is anything else — only the transports with native code the
+     * Nothing else is filtered — only the transports with native code the
      * terminal flavour drops.
      */
     fun offered(

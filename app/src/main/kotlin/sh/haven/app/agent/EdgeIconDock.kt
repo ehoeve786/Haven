@@ -44,14 +44,13 @@ import sh.haven.core.data.agent.PresentedMediaKind
 import kotlin.math.roundToInt
 
 /**
- * The in-app dock of backgrounded app windows. Mounted at the top of the tree
+ * The in-app dock of minimized presented items. Mounted at the top of the tree
  * (next to [PresentationHost]) so it floats over whatever screen is active —
  * but, like the other hosts, it renders nothing and intercepts no touches when
  * there's nothing to show.
  *
- * Each backgrounded ([AgentPresentationManager.minimizedIds]) app window gets a
- * small rounded icon showing its live VNC frame (so you can see what each one
- * is doing); tap restores it to the full overlay, the ✕ tears its cage down.
+ * Each minimized ([AgentPresentationManager.minimizedIds]) item gets a small
+ * rounded icon; tap restores it to the full overlay, the ✕ dismisses it.
  * The whole dock is draggable and snaps to the nearest left/right edge so it
  * never sits over the middle of the content.
  *
@@ -64,7 +63,7 @@ internal fun EdgeIconDock(viewModel: PresentationHostViewModel = hiltViewModel()
     val pending by viewModel.pending.collectAsStateWithLifecycle()
     val minimized by viewModel.minimizedIds.collectAsStateWithLifecycle()
 
-    // App windows + minimized images / web / audio all dock as edge icons.
+    // Minimized images / web / audio dock as edge icons.
     val docked = pending.filter { it.id in minimized }
     if (docked.isEmpty()) return
 
@@ -116,7 +115,6 @@ internal fun EdgeIconDock(viewModel: PresentationHostViewModel = hiltViewModel()
             docked.forEach { media ->
                 EdgeIcon(
                     media = media,
-                    controller = viewModel.controllerFor(media),
                     onRestore = { viewModel.restore(media.id) },
                     onClose = { viewModel.dismiss(media) },
                 )
@@ -130,13 +128,11 @@ private val ICON_SIZE = 64.dp
 @Composable
 private fun EdgeIcon(
     media: PresentedMedia,
-    controller: AppWindowVncController?,
     onRestore: () -> Unit,
     onClose: () -> Unit,
 ) {
-    val frame = controller?.frame?.collectAsStateWithLifecycle()?.value
-    // A minimized image shows a thumbnail of its cached file; an app window
-    // shows its live VNC frame; web/audio fall back to a caption letter.
+    // A minimized image shows a thumbnail of its cached file; web/audio fall
+    // back to a caption letter.
     val imageThumb = if (media.kind == PresentedMediaKind.IMAGE && media.filePath != null) {
         produceState<android.graphics.Bitmap?>(initialValue = null, media.filePath) {
             value = withContext(Dispatchers.Default) {
@@ -158,7 +154,7 @@ private fun EdgeIcon(
         color = MaterialTheme.colorScheme.surfaceVariant,
     ) {
         Box(contentAlignment = Alignment.Center) {
-            val thumb = frame?.asImageBitmap() ?: imageThumb?.asImageBitmap()
+            val thumb = imageThumb?.asImageBitmap()
             if (thumb != null) {
                 Image(
                     bitmap = thumb,
@@ -177,7 +173,7 @@ private fun EdgeIcon(
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }
-            // Close affordance — tears the cage down (vs tap = restore).
+            // Close affordance — dismisses (vs tap = restore).
             Box(
                 modifier = Modifier
                     .align(Alignment.TopEnd)
@@ -192,7 +188,7 @@ private fun EdgeIcon(
             ) {
                 Icon(
                     Icons.Filled.Close,
-                    contentDescription = "Close ${media.caption ?: "app window"}",
+                    contentDescription = "Close ${media.caption ?: "item"}",
                     tint = Color.White,
                     modifier = Modifier.size(12.dp),
                 )

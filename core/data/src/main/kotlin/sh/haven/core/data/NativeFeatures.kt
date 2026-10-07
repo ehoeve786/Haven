@@ -59,13 +59,6 @@ class NativeFeatures(private val context: Context) {
      */
     val wayland: Boolean get() = has("liblabwc_android.so")
 
-    /**
-     * VNC has no native library of its own — the client is Kotlin. It is
-     * listed here so callers have one place to ask, and because the *server*
-     * side (a desktop worth connecting to) depends on the compositor.
-     */
-    val vnc: Boolean get() = true
-
     /** True when this build ships any remote-desktop or compositor payload. */
     val anyDesktop: Boolean get() = rdp || spice
 
