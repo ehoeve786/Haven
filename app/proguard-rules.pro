@@ -124,13 +124,6 @@
 }
 -keep class sh.haven.rdp.** { *; }
 
-# Keep the SPICE bindings (UniFFI-generated sh.haven.spice.**) for the same
-# reason as sh.haven.rdp above: JNA loads the generated UniffiLib interface
-# reflectively and casts the proxy to it — R8's rename turned that into a
-# messageless ClassCastException 7ms into every release-build SPICE connect,
-# before a single byte reached the server (#549).
--keep class sh.haven.spice.** { *; }
-
 # Keep the Prns JVM SDK (rs.reticulum.prns.**) — its JNA Library interface's
 # method names ARE the native symbol names (prns_host_*); a rename breaks
 # every call with UnsatisfiedLinkError in release only.

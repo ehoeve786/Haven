@@ -83,7 +83,6 @@ jobs:
             termlib
             mosh-kotlin
             et-kotlin
-            spice-kotlin
             reticulum-kt
             rnsh-kt
             build-proot/proot-termux
@@ -325,10 +324,8 @@ jobs:
           **`haven-<version>-<abi>-terminal-release.apk`** — the same app with the
           desktop and media parts left out, for people who only use Haven for SSH,
           terminals, files and storage. Less than half the size on arm64. It drops
-          RDP and SPICE remote desktop, the native Wayland desktop, and ffmpeg — so
-          no media conversion, and no video previews or streaming in the file
-          browser. VNC is kept, so a Linux desktop running inside Haven's guest
-          still works.
+          the native Wayland desktop and ffmpeg — so no media conversion, and no
+          video previews or streaming in the file browser.
 
           Both are signed with the same key and carry the same version number, so
           you can install either over the other without losing connections, keys or

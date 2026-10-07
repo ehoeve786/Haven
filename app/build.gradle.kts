@@ -191,8 +191,6 @@ androidComponents {
     // that cannot run.
     onVariants(selector().withFlavor("features" to "terminal")) { variant ->
         variant.packaging.jniLibs.excludes.addAll(
-            // Remote desktop transports
-            "**/libspice_transport.so",
             // Native Wayland compositor + GPU renderer
             "**/liblabwc_android.so",
             "**/libvirgl_render_server.so",
@@ -256,7 +254,6 @@ dependencies {
     implementation(project(":core:bleserial"))
     implementation(project(":core:usbserial"))
     implementation(project(":core:prns"))
-    implementation(project(":core:spice"))
     implementation(project(":core:smb"))
     implementation(project(":core:rclone"))
     implementation(project(":core:ffmpeg"))
@@ -287,7 +284,6 @@ dependencies {
     implementation(project(":feature:settings"))
     implementation(project(":feature:editor"))
     implementation(project(":feature:imagetools"))
-    implementation(project(":feature:rdp"))
     // The app manifest declares CloudflareAccessLoginActivity, so app must
     // depend on its module directly — it only arrived transitively before,
     // which AGP 9 lint flags as MissingClass on the compile classpath.

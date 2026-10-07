@@ -1080,18 +1080,6 @@ class ConnectionsViewModel @Inject constructor(
     val navigateToWayland: StateFlow<Boolean> = _navigateToWayland.asStateFlow()
 
 
-    /** Emitted to navigate to the SPICE desktop with connection params (#286). */
-    data class SpiceNavigation(
-        val host: String,
-        val port: Int,
-        val password: String?,
-        val sshForward: Boolean = false,
-        val sshSessionId: String? = null,
-        val profileId: String? = null,
-    )
-    private val _navigateToSpice = MutableStateFlow<SpiceNavigation?>(null)
-    val navigateToSpice: StateFlow<SpiceNavigation?> = _navigateToSpice.asStateFlow()
-
     /** Emitted to navigate to Files tab for an SMB connection. */
     private val _navigateToSmb = MutableStateFlow<String?>(null)
     val navigateToSmb: StateFlow<String?> = _navigateToSmb.asStateFlow()
@@ -1311,25 +1299,12 @@ class ConnectionsViewModel @Inject constructor(
 
     fun onNavigated() {
         _navigateToTerminal.value = null
-        _navigateToSpice.value = null
         _navigateToSmb.value = null
         _navigateToRclone.value = null
         _navigateToEmail.value = null
         _navigateToChat.value = null
         _navigateToConnections.value = false
         _newSessionProfileId.value = null
-    }
-
-    /**
-     * Consume just the desktop (SPICE) navigation events. Collected at the
-     * always-composed nav-host level so a desktop tab is created the instant the
-     * connect emits, independent of which screen is on-screen — fixes Retry /
-     * MCP connect_profile failing to open a tab when the Connections screen
-     * isn't composed (#121). Separate from [onNavigated] so it doesn't clobber a
-     * concurrent terminal/SMB navigation owned by the Connections screen.
-     */
-    fun onDesktopNavigated() {
-        _navigateToSpice.value = null
     }
 
     /** Open a new terminal session on an already-connected profile. */
@@ -1999,7 +1974,8 @@ class ConnectionsViewModel @Inject constructor(
         // Connect only on explicit tap: the device must be plugged in and the
         // USB permission prompt answered (#408).
         profile.isUsbSerial -> false
-        profile.isSpice -> false
+        // Remote-desktop profiles (VNC/RDP/SPICE) were removed; never auto-connect them.
+        profile.isDesktop -> false
         profile.isSmb -> false
         profile.isSaf -> false
         else -> !profile.sshPassword.isNullOrBlank() || keys.isNotEmpty()
@@ -2387,10 +2363,9 @@ class ConnectionsViewModel @Inject constructor(
             connectUsbSerial(profile)
             return
         }
-        if (profile.isSpice) {
-            connectSpice(profile)
-            return
-        }
+        // Remote-desktop profiles (VNC/RDP/SPICE) can no longer be opened; don't
+        // let them fall through to the SSH path.
+        if (profile.isDesktop) return
         if (profile.isSmb) {
             connectSmb(profile, password)
             return
@@ -2437,47 +2412,6 @@ class ConnectionsViewModel @Inject constructor(
             return
         }
         connectSsh(profile, password, keyOnly, rememberPassword, usernameOverride = runtimeUsername, preselectedSessionName = sessionName)
-    }
-
-    private fun connectSpice(profile: ConnectionProfile) {
-        val host = profile.host
-        val port = profile.spicePort ?: profile.port
-        val password = profile.spicePassword
-        viewModelScope.launch {
-            repository.markConnected(profile.id)
-            val sshProfileId = profile.spiceSshProfileId
-            if (profile.spiceSshForward && sshProfileId != null) {
-                val needsPrompt = jumpHostNeedsPasswordPrompt(sshProfileId)
-                if (needsPrompt != null) {
-                    _pendingTunnelDependent.value = profile
-                    _passwordFallback.value = needsPrompt
-                    return@launch
-                }
-                try {
-                    _connectingProfileId.value = profile.id
-                    val (sshSessionId, _) = connectJumpHost(
-                        sshProfileId, "", tunnelOwnerProfileId = profile.id,
-                    )
-                    _navigateToSpice.value = SpiceNavigation(
-                        host, port, password,
-                        sshForward = true,
-                        sshSessionId = sshSessionId,
-                        profileId = profile.id,
-                    )
-                } catch (e: Exception) {
-                    Log.e(TAG, "Failed to connect SSH tunnel host for SPICE", e)
-                    handleTunnelJumpFailure(e, profile, sshProfileId)
-                } finally {
-                    _connectingProfileId.value = null
-                }
-            } else {
-                _navigateToSpice.value = SpiceNavigation(
-                    host, port, password,
-                    sshForward = profile.spiceSshForward,
-                    profileId = profile.id,
-                )
-            }
-        }
     }
 
     private fun connectSmb(profile: ConnectionProfile, password: String) {

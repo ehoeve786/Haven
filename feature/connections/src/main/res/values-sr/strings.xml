@@ -389,7 +389,6 @@
     <string name="rclone_import_menu">Увоз rclone конфигурације…</string>
     <string name="connections_section_vnc">VNC подешавања</string>
     <string name="connections_section_rdp">RDP подешавања</string>
-    <string name="connections_section_spice">SPICE подешавања</string>
     <string name="connections_section_openai">AI крајња тачка</string>
     <string name="connections_field_openai_host">Адреса сервера</string>
     <string name="connections_field_openai_host_hint">IP, име хоста или пун http:// URL</string>
@@ -463,7 +462,6 @@
     <string name="connections_hint_ifac_passphrase">IFAC приступна реченица (није обавезно)</string>
     <string name="connections_helper_vnc_host_via_ssh">Како се приступа VNC серверу са SSH сервера — обично 127.0.0.1 ако се налазе на истој машини (wayvnc итд. се везују само за loopback интерфејс).</string>
     <string name="connections_helper_vnc_auth">Оставите корисничко име празно за класични VncAuth (лозинка од 8 карактера). Попуните корисничко име за VeNCrypt (wayvnc, TigerVNC) — подржава дуже лозинке и TLS шифровање.</string>
-    <string name="connections_helper_spice_auth">SPICE користи један необавезни тикет/лозинку. Оставите празно у случају сервера који не користи тикете.</string>
     <string name="connections_helper_rdp_host_via_ssh">Како се приступа RDP серверу са SSH сервера — обично 127.0.0.1 ако се налазе на истој машини.</string>
     <string name="connections_helper_rdp_nla">Подразумевано је укључено. Искључите ако сервер одбија Tidegate-ов NLA (неке Windows Server 2025 конфигурације — „Require NLA” само за SSL на серверу мора бити искључено да би се успоставила веза).</string>
     <string name="connections_action_manage_tunnels">Управљање тунелима…</string>

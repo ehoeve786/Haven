@@ -553,10 +553,8 @@
     <string name="rclone_import_select_count">%1$d 件のリモートをインポート</string>
     <string name="rclone_import_done">インポート %1$d 件、スキップ %2$d 件、失敗 %3$d 件。</string>
     <string name="rclone_import_menu">rclone 設定をインポート…</string>
-    <string name="connections_section_spice">SPICE 設定</string>
     <string name="connections_section_mcp">AI エージェント (MCP)</string>
     <string name="connections_rclone_configure_first">接続を保存する前に、「設定して確認」をタップしてこのリモートを保存してください。</string>
-    <string name="connections_helper_spice_auth">SPICE は単一の任意のチケット／パスワードを使用します。チケットなしのサーバーの場合は空欄のままにしてください。</string>
     <string name="connections_auth_any_hardware_key">任意のハードウェアキー (FIDO)</string>
     <string name="connections_deeplink_confirm_title">接続しますか？</string>
     <string name="connections_deeplink_confirm_message">リンクが %1$s への接続を要求しています。</string>

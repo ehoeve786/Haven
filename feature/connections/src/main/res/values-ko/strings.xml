@@ -545,10 +545,8 @@
     <string name="rclone_import_select_count">원격 %1$d개 가져오기</string>
     <string name="rclone_import_done">가져옴 %1$d개, 건너뜀 %2$d개, 실패 %3$d개.</string>
     <string name="rclone_import_menu">rclone 구성 가져오기…</string>
-    <string name="connections_section_spice">SPICE 설정</string>
     <string name="connections_section_mcp">AI 에이전트 (MCP)</string>
     <string name="connections_rclone_configure_first">연결을 저장하려면 먼저 “구성 및 확인”을 탭하여 이 원격을 저장하세요.</string>
-    <string name="connections_helper_spice_auth">SPICE는 선택적 티켓/비밀번호 하나를 사용합니다. 티켓이 없는 서버라면 비워 두세요.</string>
     <string name="connections_auth_any_hardware_key">모든 하드웨어 키 (FIDO)</string>
     <string name="connections_deeplink_confirm_title">연결할까요?</string>
     <string name="connections_deeplink_confirm_message">링크가 %1$s에 연결하려고 합니다.</string>

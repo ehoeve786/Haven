@@ -156,9 +156,6 @@ private val PROFILE_COLORS = listOf(
 fun ConnectionsScreen(
     onNavigateToTerminal: (profileId: String) -> Unit = {},
     onNavigateToNewSession: (profileId: String) -> Unit = {},
-    // RDP/SPICE desktop navigation is collected at the nav-host level
-    // (HavenNavHost), not here — so a tab opens regardless of which screen is
-    // composed (fixes Retry / connect_profile reliability, #121).
     onNavigateToSmb: (profileId: String) -> Unit = {},
     onNavigateToRclone: (profileId: String) -> Unit = {},
     onNavigateToEmail: (profileId: String) -> Unit = {},
@@ -1555,6 +1552,8 @@ private fun onTapProfile(
 ) {
     if (profile.isLocal) {
         viewModel.connect(profile, "")
+    } else if (profile.isDesktop) {
+        // VNC/RDP/SPICE were removed; a leftover desktop profile has nothing to open.
     } else if (profileStatus == ProfileStatus.CONNECTED && profile.isEmail) {
         onNavigateToEmail(profile.id)
     } else if (profileStatus == ProfileStatus.CONNECTED && profile.isOpenai) {
@@ -1563,19 +1562,8 @@ private fun onTapProfile(
         onNavigateToRclone(profile.id)
     } else if (profileStatus == ProfileStatus.CONNECTED && profile.isSmb) {
         onNavigateToSmb(profile.id)
-    } else if (profileStatus == ProfileStatus.CONNECTED && profile.isSpice) {
-        // Desktop already open — re-issuing connect navigates to the Desktop
-        // screen and the dedup in addSpiceSession switches to the
-        // existing tab instead of reconnecting. (A SPICE-over-SSH profile
-        // now reports CONNECTED via its tunnel dependent, so without this it
-        // would fall into the generic branch below and open a shell instead.)
-        viewModel.connect(profile, "")
     } else if (profileStatus == ProfileStatus.CONNECTED) {
         viewModel.ensureShellForProfile(profile.id)
-    } else if (profile.isSpice) {
-        // SPICE auth is an optional ticket — connect directly (connectSpice
-        // reads the saved ticket; no prompt needed if the server is unticketed).
-        viewModel.connect(profile, "")
     } else if (profile.isSmb) {
         val savedPassword = profile.smbPassword
         if (savedPassword != null) {

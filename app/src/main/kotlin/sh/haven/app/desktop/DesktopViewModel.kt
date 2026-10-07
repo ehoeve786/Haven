@@ -37,11 +37,9 @@ import sh.haven.core.local.LocalSessionManager
 import sh.haven.core.local.ProotManager
 import sh.haven.core.local.proot.Distro
 import sh.haven.core.mosh.MoshSessionManager
-import sh.haven.core.spice.SpiceSession
 import sh.haven.core.ssh.SshClient
 import sh.haven.core.ssh.SshConnection
 import sh.haven.core.ssh.SshSessionManager
-import sh.haven.core.ui.CursorOverlay
 import sh.haven.core.tunnel.TunnelResolver
 import sh.haven.core.tunnel.TunneledConnection
 import sh.haven.core.tunnel.TunneledSocket
@@ -407,53 +405,12 @@ class DesktopViewModel @Inject constructor(
         viewModelScope.launch {
             agentUiCommandBus.commands.collect { command ->
                 when (command) {
-                    is sh.haven.core.data.agent.AgentUiCommand.OpenRemoteDesktop ->
-                        openRemoteDesktopForProfile(command.profileId)
                     is sh.haven.core.data.agent.AgentUiCommand.OpenWaylandDesktop ->
                         addWaylandTab()
                     is sh.haven.core.data.agent.AgentUiCommand.OpenUsbDrive ->
                         openUsbDrive(command.deviceName)
                     else -> { /* handled by other collectors */ }
                 }
-            }
-        }
-    }
-
-    /**
-     * Resolve [profileId] to a SPICE profile and dispatch to
-     * `addSpiceSession`. Used by the workspace launcher; for
-     * tunneled profiles, picks the first connected SSH session for the
-     * tunnel profile and lets `addSpiceSession` throw
-     * the existing "SSH session not found" error if none is up.
-     */
-    private fun openRemoteDesktopForProfile(profileId: String) {
-        viewModelScope.launch {
-            val profile = connectionRepository.getById(profileId)
-            if (profile == null) {
-                Log.w(TAG, "OpenRemoteDesktop: profile $profileId not found")
-                return@launch
-            }
-            when {
-                profile.isSpice -> {
-                    val sshSessionId =
-                        if (profile.spiceSshForward && profile.spiceSshProfileId != null) {
-                            sshSessionManager.getSessionsForProfile(profile.spiceSshProfileId!!)
-                                .firstOrNull { it.status.name == "CONNECTED" }
-                                ?.sessionId
-                        } else null
-                    addSpiceSession(
-                        host = profile.host,
-                        port = profile.spicePort ?: 5900,
-                        password = profile.spicePassword,
-                        sshForward = profile.spiceSshForward,
-                        sshSessionId = sshSessionId,
-                        profileId = profile.id,
-                    )
-                }
-                else -> Log.w(
-                    TAG,
-                    "OpenRemoteDesktop: ${profile.label} is ${profile.connectionType}, not SPICE",
-                )
             }
         }
     }
@@ -792,7 +749,6 @@ class DesktopViewModel @Inject constructor(
     fun selectTab(index: Int) {
         val tabs = _tabs.value
         if (index in tabs.indices) {
-            pauseAllExcept(index)
             _activeTabIndex.value = index
         }
     }
@@ -808,28 +764,6 @@ class DesktopViewModel @Inject constructor(
         else if (_activeTabIndex.value == toIndex) _activeTabIndex.value = fromIndex
     }
 
-    /**
-     * Reconnect a tab that hit "connection lost" (e.g. no server listening),
-     * from the inline Retry button — so a dead desktop isn't a long-press dead
-     * end (#121, KoriKraut). Profile-backed tabs re-run the full connect via the
-     * AgentUiCommand bus (same path a tap uses), which re-establishes the SSH
-     * tunnel with a fresh session instead of reusing the torn-down one.
-     */
-    fun retryTab(tabId: String) {
-        val tab = _tabs.value.firstOrNull { it.id == tabId } ?: return
-        val profileId = when (tab) {
-            is DesktopTab.Spice -> tab.profileId
-            else -> null
-        }
-        if (profileId != null) {
-            closeTab(tabId)
-            agentUiCommandBus.emit(
-                sh.haven.core.data.agent.AgentUiCommand.ConnectProfile(profileId),
-            )
-            return
-        }
-    }
-
     fun closeTab(tabId: String) {
         val tabs = _tabs.value.toMutableList()
         val index = tabs.indexOfFirst { it.id == tabId }
@@ -839,229 +773,6 @@ class DesktopViewModel @Inject constructor(
         _tabs.value = tabs
         if (_activeTabIndex.value >= tabs.size && tabs.isNotEmpty()) {
             _activeTabIndex.value = tabs.size - 1
-        }
-        pauseAllExcept(_activeTabIndex.value)
-    }
-
-    // --- Tab deduplication ---
-
-    /**
-     * Find an existing tab matching a connection. Matches by profileId first,
-     * then by host:port.
-     * Returns the tab index, or -1 if not found.
-     */
-    private fun findExistingTab(
-        profileId: String?,
-        host: String,
-        port: Int,
-        protocol: String,
-        username: String? = null,
-    ): Int {
-        val tabs = _tabs.value
-        // Match by profileId if available
-        if (profileId != null) {
-            val idx = tabs.indexOfFirst { tab ->
-                when (tab) {
-                    is DesktopTab.Spice -> tab.profileId == profileId
-                    else -> false
-                }
-            }
-            if (idx >= 0) return idx
-        }
-        // Match by host+port (and username for RDP)
-        return tabs.indexOfFirst { tab ->
-            when {
-                protocol == "SPICE" && tab is DesktopTab.Spice && tab.profileId == null ->
-                    tab.label == "$host:$port"
-                else -> false
-            }
-        }
-    }
-
-    // --- SPICE sessions ---
-
-    fun addSpiceSession(
-        host: String,
-        port: Int,
-        password: String?,
-        sshForward: Boolean = false,
-        sshSessionId: String? = null,
-        profileId: String? = null,
-    ) {
-        viewModelScope.launch(Dispatchers.IO) {
-            val existingIdx = findExistingTab(profileId, host, port, "SPICE")
-            if (existingIdx >= 0) {
-                val existing = _tabs.value[existingIdx]
-                if (existing.connected.value) {
-                    pauseAllExcept(existingIdx)
-                    _activeTabIndex.value = existingIdx
-                    return@launch
-                }
-                closeTab(existing.id)
-            }
-
-            val label = resolveLabel(profileId) ?: "$host:$port"
-            val colorTag = resolveColorTag(profileId)
-            val tabId = UUID.randomUUID().toString()
-
-            var tunnelLease: SshSessionManager.TunnelLease? = null
-            try {
-                val actualHost: String
-                val actualPort: Int
-                // SPICE's Rust client does its own TCP dial — no socket/SOCKS
-                // injection like VNC/RDP — so SSH-forward goes via a local
-                // -L forward and we hand it 127.0.0.1:<localPort>.
-                if (sshForward && sshSessionId != null) {
-                    val sshClient = findSshClient(sshSessionId)
-                        ?: throw IllegalStateException("SSH session not found")
-                    val lp = sshClient.setPortForwardingL("127.0.0.1", 0, host, port)
-                    actualHost = "127.0.0.1"
-                    actualPort = lp
-                    Log.d(TAG, "SPICE SSH tunnel: localhost:$lp -> ${LogRedact.host(host, port)}")
-                    if (profileId != null) {
-                        tunnelLease = sshSessionManager.acquireTunnelLease(
-                            sessionId = sshSessionId,
-                            dependentProfileId = profileId,
-                            localForwardPort = lp,
-                        ) { viewModelScope.launch { closeTab(tabId) } }
-                    }
-                } else {
-                    actualHost = host
-                    actualPort = port
-                }
-
-                val connected = MutableStateFlow(false)
-                val frame = MutableStateFlow<Bitmap?>(null)
-                val error = MutableStateFlow<String?>(null)
-                val cursor = MutableStateFlow<CursorOverlay?>(null)
-                val pointerPos = MutableStateFlow(0 to 0)
-
-                val verboseEnabled = preferencesRepository.verboseLoggingEnabled.first()
-                val verboseBuffer = if (verboseEnabled) ConcurrentLinkedQueue<String>() else null
-
-                val session = SpiceSession(
-                    sessionId = "spice-$tabId",
-                    host = actualHost,
-                    port = actualPort,
-                    password = password,
-                    verboseBuffer = verboseBuffer,
-                )
-                session.onFrameUpdate = { bitmap -> frame.value = bitmap }
-                session.onCursorUpdate = { bmp, hx, hy ->
-                    cursor.value = if (bmp == null) null else CursorOverlay(bmp, hx, hy)
-                }
-                session.onCursorPosition = { x, y -> pointerPos.value = x to y }
-                session.onError = { e ->
-                    Log.e(TAG, "SPICE error on tab $tabId", e)
-                    error.value = e.message ?: "SPICE connection to $host:$port failed"
-                    connected.value = false
-                    desktopSessionRegistry.setStatus(profileId, DesktopStatus.ERROR)
-                    if (profileId != null) {
-                        viewModelScope.launch(Dispatchers.IO) {
-                            connectionLogRepository.logEvent(profileId, ConnectionLog.Status.FAILED, details = e.message)
-                        }
-                    }
-                    tunnelLease?.close()
-                    releaseSshTunnelDependent(profileId)
-                }
-                session.onConnected = { _, _ ->
-                    connected.value = true
-                    desktopSessionRegistry.setStatus(profileId, DesktopStatus.CONNECTED)
-                    if (profileId != null) {
-                        viewModelScope.launch(Dispatchers.IO) {
-                            val startLog = session.drainVerboseLog()
-                            connectionLogRepository.logEvent(profileId, ConnectionLog.Status.CONNECTED, verboseLog = startLog)
-                        }
-                    }
-                }
-                session.onDisconnected = {
-                    // Session ended without a surfaced error — mirror the RDP
-                    // path so the tab never claims "connected" past death (#437).
-                    if (_tabs.value.any { it.id == tabId }) {
-                        connected.value = false
-                        desktopSessionRegistry.setStatus(profileId, DesktopStatus.DISCONNECTED)
-                        if (profileId != null) {
-                            viewModelScope.launch(Dispatchers.IO) {
-                                connectionLogRepository.logEvent(
-                                    profileId,
-                                    ConnectionLog.Status.DISCONNECTED,
-                                    details = "Session ended by server",
-                                    verboseLog = session.drainVerboseLog(),
-                                )
-                            }
-                        }
-                    }
-                }
-
-                // Create + show the tab before start() — SPICE's connect()
-                // blocks until established, so the UI sits on "Connecting"
-                // until onConnected flips it (or onError sets the error).
-                val tab = DesktopTab.Spice(
-                    id = tabId,
-                    label = label,
-                    colorTag = colorTag,
-                    session = session,
-                    _connected = connected,
-                    _frame = frame,
-                    _error = error,
-                    _cursor = cursor,
-                    _pointerPos = pointerPos,
-                    tunnelLease = tunnelLease,
-                    profileId = profileId,
-                )
-                val tabs = _tabs.value.toMutableList()
-                tabs.add(tab)
-                _tabs.value = tabs
-                _activeTabIndex.value = tabs.size - 1
-                desktopSessionRegistry.registerFrameHandle(
-                    profileId,
-                    DesktopFrameHandle(
-                        protocol = "SPICE",
-                        frame = { frame.value },
-                        cursor = { cursor.value?.let { CursorSnapshot(it.bitmap, it.hotspotX, it.hotspotY) } },
-                        pointer = { pointerPos.value },
-                    ),
-                )
-                desktopSessionRegistry.registerInputHandle(
-                    profileId,
-                    DesktopInputHandle(
-                        protocol = "SPICE",
-                        mouseMove = { x, y -> tab.remoteDesktop.sendMouseMove(x, y) },
-                        mouseClick = { x, y, button -> tab.remoteDesktop.sendMouseClick(x, y, button) },
-                        mouseWheel = { deltaY -> tab.remoteDesktop.sendMouseWheel(deltaY) },
-                        clipboard = { text -> tab.remoteDesktop.sendClipboardText(text) },
-                    ),
-                )
-                // Let MCP disconnect_profile close this tab even when there's
-                // no tunnel lease to cascade through (direct connections, #437).
-                desktopSessionRegistry.registerCloseHandle(profileId) {
-                    viewModelScope.launch { closeTab(tabId) }
-                }
-
-                // Knock only on the direct path (SSH-forward knocked at SSH connect).
-                if (!sshForward && profileId != null) {
-                    runKnockIfConfigured(profileId, actualHost)
-                }
-
-                desktopSessionRegistry.setStatus(profileId, DesktopStatus.CONNECTING)
-                session.start() // blocks until established; fires onConnected/onError
-            } catch (e: Exception) {
-                // SpiceSession.start() invokes onError (which sets the tab's
-                // error state) before rethrowing, so just clean up here.
-                Log.e(TAG, "SPICE connect failed", e)
-                if (profileId != null) {
-                    connectionLogRepository.logEvent(profileId, ConnectionLog.Status.FAILED, details = e.message)
-                }
-                tunnelLease?.close()
-                releaseSshTunnelDependent(profileId)
-                desktopSessionRegistry.setStatus(profileId, DesktopStatus.ERROR)
-            }
-        }
-    }
-
-    fun sendSpiceKey(scancode: Int, pressed: Boolean) {
-        viewModelScope.launch(Dispatchers.IO) {
-            (activeTab.value as? DesktopTab.Spice)?.session?.sendKey(scancode, pressed)
         }
     }
 
@@ -1089,43 +800,6 @@ class DesktopViewModel @Inject constructor(
             if (_activeTabIndex.value >= tabs.size && tabs.isNotEmpty()) {
                 _activeTabIndex.value = tabs.size - 1
             }
-        }
-    }
-
-    // --- Input forwarding (operates on active tab) ---
-
-    fun sendPointer(x: Int, y: Int) {
-        // Mirror the latest pointer into per-tab state so the UI overlay
-        // (cursor / virtual cursor seed) repaints immediately, without
-        // waiting for the IO dispatch round-trip.
-        when (val tab = activeTab.value) {
-            is DesktopTab.Spice -> tab._pointerPos.value = x to y
-            else -> {}
-        }
-        viewModelScope.launch(Dispatchers.IO) {
-            activeTab.value?.remoteDesktop?.sendMouseMove(x, y)
-        }
-    }
-
-    fun pressButton(button: Int = 1) {
-        viewModelScope.launch(Dispatchers.IO) {
-            activeTab.value?.remoteDesktop?.sendMouseButton(button, pressed = true)
-        }
-    }
-
-    fun releaseButton(button: Int = 1) {
-        viewModelScope.launch(Dispatchers.IO) {
-            activeTab.value?.remoteDesktop?.sendMouseButton(button, pressed = false)
-        }
-    }
-
-    fun sendClick(x: Int, y: Int, button: Int = 1) {
-        when (val tab = activeTab.value) {
-            is DesktopTab.Spice -> tab._pointerPos.value = x to y
-            else -> {}
-        }
-        viewModelScope.launch(Dispatchers.IO) {
-            activeTab.value?.remoteDesktop?.sendMouseClick(x, y, button)
         }
     }
 
@@ -1168,109 +842,14 @@ class DesktopViewModel @Inject constructor(
         }
     }
 
-    fun scrollUp() {
-        viewModelScope.launch(Dispatchers.IO) {
-            activeTab.value?.remoteDesktop?.sendMouseWheel(deltaY = 1)
-        }
-    }
-
-    fun scrollDown() {
-        viewModelScope.launch(Dispatchers.IO) {
-            activeTab.value?.remoteDesktop?.sendMouseWheel(deltaY = -1)
-        }
-    }
-
-    /** Knock against the SPICE host using the profile's saved sequence,
-     *  if any. Failures are logged but not thrown; the real socket open
-     *  surfaces the actual symptom. */
-    private suspend fun runKnockIfConfigured(profileId: String, host: String) {
-        val profile = connectionRepository.getById(profileId) ?: return
-        val seq = KnockSequence.parse(
-            profile.portKnockSequence,
-            delayMs = profile.portKnockDelayMs,
-        ).getOrNull() ?: return
-        val result = portKnocker.knock(host, seq)
-        Log.d(
-            TAG,
-            if (result.ok) "[knock] ${seq.format()} -> ok in ${result.totalDurationMs}ms"
-            else "[knock] ${seq.format()} -> failed after ${result.totalDurationMs}ms: ${result.error?.message}"
-        )
-    }
-
-    private fun findSshClient(sessionId: String): SshConnection? {
-        sshSessionManager.getSession(sessionId)?.let { return it.client }
-        moshSessionManager.sessions.value[sessionId]?.sshClient?.let { return it as? SshClient }
-        etSessionManager.sessions.value[sessionId]?.sshClient?.let { return it as? SshClient }
-        return null
-    }
-
     // --- Lifecycle ---
 
     private fun disconnectTab(tab: DesktopTab) {
         viewModelScope.launch(Dispatchers.IO) {
             when (tab) {
-                is DesktopTab.Spice -> {
-                    if (tab.profileId != null) {
-                        val verboseLog = tab.session.drainVerboseLog()
-                        connectionLogRepository.logEvent(tab.profileId, ConnectionLog.Status.DISCONNECTED, verboseLog = verboseLog)
-                    }
-                    tab.session.close()
-                    tab.tunnelLease?.close()
-                    releaseSshTunnelDependent(tab.profileId)
-                    desktopSessionRegistry.clear(tab.profileId)
-                    desktopSessionRegistry.clearFrameHandle(tab.profileId)
-                    desktopSessionRegistry.clearInputHandle(tab.profileId)
-                    desktopSessionRegistry.clearCloseHandle(tab.profileId)
-                }
                 is DesktopTab.Wayland -> {} // compositor lifecycle managed externally
             }
         }
-    }
-
-    /**
-     * Decrement refcounts on any auto-opened tunnels this profile holds.
-     *
-     * SSH-side: the v5.24.85 wiring in [ConnectionsViewModel.disconnect]
-     * called this for connections-tab disconnects, but the bottom-of-
-     * Desktop-tab "Disconnect" button routes through [closeTab] /
-     * [disconnectTab] instead — without this call the auto-opened SSH
-     * idled on with a green dot in the connections list (#121,
-     * KoriKraut on v5.24.89).
-     *
-     * WireGuard / Tailscale side: a profile that dialled through
-     * [TunnelResolver.dial] holds a slot in [TunnelManager]'s dependent
-     * set. Release here so the underlying tunnel tears down when the
-     * last dependent disconnects (#149).
-     *
-     * No-op when [profileId] is null (older tabs / Wayland) or when the
-     * profile was never registered as a tunnel dependent on either side.
-     */
-    private fun releaseSshTunnelDependent(profileId: String?) {
-        if (profileId == null) return
-        sshSessionManager.releaseTunnelDependent(profileId)
-        viewModelScope.launch { tunnelResolver.release(profileId) }
-    }
-
-
-    private fun pauseAllExcept(activeIndex: Int) {
-        _tabs.value.forEachIndexed { index, tab ->
-            val rd = tab.remoteDesktop ?: return@forEachIndexed
-            if (index == activeIndex) rd.resume() else rd.pause()
-        }
-    }
-
-    private suspend fun resolveLabel(profileId: String?): String? {
-        if (profileId == null) return null
-        return try {
-            connectionRepository.getById(profileId)?.label
-        } catch (_: Exception) { null }
-    }
-
-    private suspend fun resolveColorTag(profileId: String?): Int {
-        if (profileId == null) return 0
-        return try {
-            connectionRepository.getById(profileId)?.colorTag ?: 0
-        } catch (_: Exception) { 0 }
     }
 
     override fun onCleared() {

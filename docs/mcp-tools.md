@@ -41,9 +41,9 @@ Tools are grouped into sections by what they touch, and each tool is collapsed �
 expand one for its description and arguments. The tag after each name is its
 consent level:
 
-- **asks every call** — side-effectful or sensitive; a consent sheet describing the specific action on every call (78 tools).
-- **asks once per session** — reversible actions and screen-reading; prompts the first time each session, then proceeds (60 tools).
-- **no per-call prompt** — read-only queries and tap-equivalent UI actions; still behind the endpoint being enabled and the client paired (91 tools).
+- **asks every call** — side-effectful or sensitive; a consent sheet describing the specific action on every call (77 tools).
+- **asks once per session** — reversible actions and screen-reading; prompts the first time each session, then proceeds (57 tools).
+- **no per-call prompt** — read-only queries and tap-equivalent UI actions; still behind the endpoint being enabled and the client paired (90 tools).
 
 ## Sections
 
@@ -54,7 +54,7 @@ consent level:
 - [**Files, media & clipboard**](#sec-files) — 23 tools
 - [**Cloud storage (rclone)**](#sec-rclone) — 15 tools
 - [**Email**](#sec-email) — 15 tools
-- [**Linux guest (proot) & desktops**](#sec-linux) — 45 tools
+- [**Linux guest (proot) & desktops**](#sec-linux) — 40 tools
 - [**Networking — tunnels & port forwarding**](#sec-networking) — 14 tools
 - [**USB & host-device brokers**](#sec-usb) — 19 tools
 - [**Security — SSH keys, host keys, TOTP & age**](#sec-security) — 17 tools
@@ -213,9 +213,9 @@ Initiate a connection for a saved profile via the same code path a UI tap uses (
 <details markdown="1">
 <summary><code>create_connection</code> · asks every call</summary>
 
-Create a saved connection profile. Supports connectionType=SSH, SMB, SPICE, EMAIL, RETICULUM. SSH-family fields: username (required), password (optional, stored), keyId (optional — references list_ssh_keys), ignoreSavedKeys (force password-only auth, never offer saved keys), useMosh (turn an SSH profile into a Mosh profile), sessionManager (optional: TMUX | ZELLIJ | SCREEN | BYOBU | HERDR | PSMUX — attach through that multiplexer; omit for a plain shell), remoteCommand (run a command via an SSH exec request instead of a login shell — e.g. 'tmux new -A -s work' to attach-or-create that session before shell startup files run) + requestPty (PTY for it, default true), bindAddress (local address the outgoing SSH socket binds to, ssh -b — direct connections only). SMB: smbShare (required), username + password, smbDomain. SPICE: spicePassword (optional ticket — no username/domain), spicePort (default 5900), and spiceSshForward + spiceSshProfileId to tunnel SPICE through a saved SSH profile. EMAIL: emailProvider ("imap" default, or "proton"); username = the email address; password = the account/app-password; for IMAP set emailServer (required) + emailPort (993) + emailSmtpPort (465) + emailTls (true), plus emailSmtpServer when the SMTP host differs (e.g. smtp.gmail.com); for Proton add emailMailboxPassword if two-password mode. EMAIL host is optional (the tunnel-ingress/bastion SPA/knock guards), not the mail server. OPENAI (OpenAI-compatible endpoint, e.g. llama-server or CLIProxyAPI): host = server IP/hostname (a full http:// URL also works), port = TCP port (default 80), optional password arg = the API key (sent as a Bearer token; omit for keyless servers), openaiPathPrefix = optional path inserted before /v1 (e.g. "/api"). Connect verifies via GET /v1/models; chat via the chat screen or openai_chat. BTSERIAL (Bluetooth-serial console, #406): host = the paired device's Bluetooth MAC (from list_bluetooth_devices); no other fields. The device must already be paired in Android Settings. BLESERIAL (Bluetooth-LE-serial console — Nordic UART Service / HM-10): host = the BLE peripheral's MAC; no other fields. It needn't be paired — scan-and-pick in the editor; the GATT service/characteristics are auto-detected (NUS 6E400001…, then HM-10 FFE0/FFE1). USBSERIAL (USB-serial console, #408 — Arduino / Duet3D G-code / ESP32 / USB-TTL): host = the device's vendorId:productId hex, e.g. 1a86:7523, from list_usb_devices; usbBaudRate = baud (default 115200); usbDataBits/usbParity/usbStopBits/usbFlowControl set the rest of the line format (default 8N1, no flow control). Plug the adapter in first; connect_profile pops the Android USB-permission prompt. Chipsets: CDC-ACM, CH34x, FTDI, CP21xx, Prolific. RETICULUM: destinationHash (required, 32 hex chars) is the address; reticulumHost + reticulumPort are only how this phone reaches the mesh, defaulting to 127.0.0.1:37428 which is a Sideband or Columba shared instance on this device — any other host is a TCP gateway. reticulumNetworkName + reticulumPassphrase set IFAC on an authenticated gateway. The new profile id is returned for follow-up calls (set_profile_routing, connect_profile). For rclone / local create the profile in the UI — those need an OAuth flow the agent can't drive.
+Create a saved connection profile. Supports connectionType=SSH, SMB, EMAIL, RETICULUM. SSH-family fields: username (required), password (optional, stored), keyId (optional — references list_ssh_keys), ignoreSavedKeys (force password-only auth, never offer saved keys), useMosh (turn an SSH profile into a Mosh profile), sessionManager (optional: TMUX | ZELLIJ | SCREEN | BYOBU | HERDR | PSMUX — attach through that multiplexer; omit for a plain shell), remoteCommand (run a command via an SSH exec request instead of a login shell — e.g. 'tmux new -A -s work' to attach-or-create that session before shell startup files run) + requestPty (PTY for it, default true), bindAddress (local address the outgoing SSH socket binds to, ssh -b — direct connections only). SMB: smbShare (required), username + password, smbDomain. EMAIL: emailProvider ("imap" default, or "proton"); username = the email address; password = the account/app-password; for IMAP set emailServer (required) + emailPort (993) + emailSmtpPort (465) + emailTls (true), plus emailSmtpServer when the SMTP host differs (e.g. smtp.gmail.com); for Proton add emailMailboxPassword if two-password mode. EMAIL host is optional (the tunnel-ingress/bastion SPA/knock guards), not the mail server. OPENAI (OpenAI-compatible endpoint, e.g. llama-server or CLIProxyAPI): host = server IP/hostname (a full http:// URL also works), port = TCP port (default 80), optional password arg = the API key (sent as a Bearer token; omit for keyless servers), openaiPathPrefix = optional path inserted before /v1 (e.g. "/api"). Connect verifies via GET /v1/models; chat via the chat screen or openai_chat. BTSERIAL (Bluetooth-serial console, #406): host = the paired device's Bluetooth MAC (from list_bluetooth_devices); no other fields. The device must already be paired in Android Settings. BLESERIAL (Bluetooth-LE-serial console — Nordic UART Service / HM-10): host = the BLE peripheral's MAC; no other fields. It needn't be paired — scan-and-pick in the editor; the GATT service/characteristics are auto-detected (NUS 6E400001…, then HM-10 FFE0/FFE1). USBSERIAL (USB-serial console, #408 — Arduino / Duet3D G-code / ESP32 / USB-TTL): host = the device's vendorId:productId hex, e.g. 1a86:7523, from list_usb_devices; usbBaudRate = baud (default 115200); usbDataBits/usbParity/usbStopBits/usbFlowControl set the rest of the line format (default 8N1, no flow control). Plug the adapter in first; connect_profile pops the Android USB-permission prompt. Chipsets: CDC-ACM, CH34x, FTDI, CP21xx, Prolific. RETICULUM: destinationHash (required, 32 hex chars) is the address; reticulumHost + reticulumPort are only how this phone reaches the mesh, defaulting to 127.0.0.1:37428 which is a Sideband or Columba shared instance on this device — any other host is a TCP gateway. reticulumNetworkName + reticulumPassphrase set IFAC on an authenticated gateway. The new profile id is returned for follow-up calls (set_profile_routing, connect_profile). For rclone / local create the profile in the UI — those need an OAuth flow the agent can't drive.
 
-- `connectionType` (string, required) — SSH | SMB | SPICE | EMAIL | BTSERIAL | BLESERIAL | USBSERIAL | RETICULUM | GUEST.
+- `connectionType` (string, required) — SSH | SMB | EMAIL | BTSERIAL | BLESERIAL | USBSERIAL | RETICULUM | GUEST.
 - `host` (string, required) — Target hostname or IP. For EMAIL this is the optional tunnel ingress/bastion (SPA/knock target), NOT the mail server — leave blank for a direct IMAP connection.
 - `label` (string, required) — User-facing label.
 - `authMethods` (string[]) — SSH only (#166): ordered multi-factor auth methods attempted in one connect, for servers requiring a chain like publickey,password. Each element is a token: "PASSWORD", "KEY" (any saved key), "KEY:<keyId>", "KEYBOARD_INTERACTIVE", or "TOTP:<id>" (auto-fill an OATH-TOTP code from list_totp_secrets, #178). Omit for the single-method default derived from keyId/password.
@@ -232,7 +232,7 @@ Create a saved connection profile. Supports connectionType=SSH, SMB, SPICE, EMAI
 - `keyId` (string) — SSH only: id of a saved SSH key (from list_ssh_keys) to authenticate with. Mutually optional with password.
 - `openaiPathPrefix` (string) — OPENAI only: optional path prefix inserted before /v1 (e.g. "/api" for CLIProxyAPI).
 - `password` (string) — Password (stored). Optional for SSH if a key is used; some SMB setups allow guest.
-- `port` (integer) — TCP port. Defaults: SSH 22, SMB 445, SPICE 5900. Type-specific spicePort overrides this.
+- `port` (integer) — TCP port. Defaults: SSH 22, SMB 445.
 - `portKnockDelayMs` (integer) — Inter-knock delay in ms (default 100). Ignored when portKnockSequence is empty.
 - `portKnockSequence` (string) — Optional port-knock sequence fired before the real connect. Format: whitespace/comma-separated 'port[/proto]' tokens — e.g. '7000 8000 9000' (all TCP) or '7000/tcp 8000/udp 9000/tcp'. Empty = disabled.
 - `protocol` (string) — OPENAI only: wire protocol — OPENAI (default, OpenAI-compatible /v1/chat/completions), OLLAMA (native /api), ANTHROPIC (Messages API /v1/messages), or GEMINI (generativelanguage /v1beta/models/{model}:generateContent).
@@ -244,10 +244,6 @@ Create a saved connection profile. Supports connectionType=SSH, SMB, SPICE, EMAI
 - `reticulumPort` (integer) — RETICULUM only: port for reticulumHost. Default 37428, the shared-instance port. A TCP gateway is usually 4242.
 - `smbDomain` (string) — AD/workgroup domain (SMB). Optional.
 - `smbShare` (string) — Share name (SMB). Required when connectionType=SMB.
-- `spicePassword` (string) — SPICE only: ticket/password (stored). Optional — omit for an unticketed server.
-- `spicePort` (integer) — SPICE only: TCP port (default 5900). Overrides the generic `port`.
-- `spiceSshForward` (boolean) — SPICE only: tunnel through a saved SSH profile (set spiceSshProfileId). The SPICE target is reached at 127.0.0.1:<port> from the SSH server. Default false.
-- `spiceSshProfileId` (string) — SPICE only: id of the SSH profile (from list_connections) to tunnel through when spiceSshForward is true.
 - `sshOptions` (string) — SSH only: ssh_config-style option lines ('Key value' or 'Key=value', newline-separated) applied to this profile — e.g. 'ServerAliveInterval 60' or the Haven-internal 'HavenSshEngine sshlib' engine toggle (#58).
 - `tunnelConfigId` (string) — Optional: route the new profile through this tunnel (from list_tunnels). Equivalent to follow-up set_profile_routing.
 - `tunnelOnly` (boolean) — SSH only: tunnel-only mode (#150). When true, the profile brings up the SSH transport and registers port forwards but does not open a terminal. Default false. Pair with auto_reconnect for autossh-style keepalive.
@@ -318,7 +314,7 @@ Run one command on a saved SSH connection over an exec channel (no terminal sess
 <details markdown="1">
 <summary><code>update_connection</code> · asks every call</summary>
 
-Edit fields on an existing connection profile (load → change → save). Pass profileId (required) plus only the fields you want to change — anything omitted is left as-is. Common SSH-family fields: label, host, port, username, password (stored, mapped to the profile's transport), keyId, ignoreSavedKeys (force password-only auth), useMosh, forwardAgent, remoteCommand (SSH exec instead of a login shell; empty string clears) + requestPty, bindAddress (ssh -b; direct connections only, empty string clears). Desktop tunnels: spiceSshForward + spiceSshProfileId, smbSshForward + smbSshProfileId. USB/IP auto-forward: usbForwardVidPid (export a phone-attached USB device to this host on every connect). Passwords are stored encrypted and never echoed back. OPENAI: password maps to the API key (empty string clears). For routing/proxy use set_profile_routing; for port-knock/SPA use set_port_knock/set_spa. Returns the updated profile (secrets redacted).
+Edit fields on an existing connection profile (load → change → save). Pass profileId (required) plus only the fields you want to change — anything omitted is left as-is. Common SSH-family fields: label, host, port, username, password (stored, mapped to the profile's transport), keyId, ignoreSavedKeys (force password-only auth), useMosh, forwardAgent, remoteCommand (SSH exec instead of a login shell; empty string clears) + requestPty, bindAddress (ssh -b; direct connections only, empty string clears). SMB tunnel: smbSshForward + smbSshProfileId. USB/IP auto-forward: usbForwardVidPid (export a phone-attached USB device to this host on every connect). Passwords are stored encrypted and never echoed back. OPENAI: password maps to the API key (empty string clears). For routing/proxy use set_profile_routing; for port-knock/SPA use set_port_knock/set_spa. Returns the updated profile (secrets redacted).
 
 - `profileId` (string, required) — Profile id from list_connections.
 - `bindAddress` (string) — SSH only (#636): local address the outgoing SSH socket binds to (ssh -b). Direct connections only — refused on profiles with a proxy or jump host. Empty string clears.
@@ -330,15 +326,13 @@ Edit fields on an existing connection profile (load → change → save). Pass p
 - `label` (string) — New user-facing label.
 - `moshServerCommand` (string) — Mosh only: override the command Haven runs over SSH to start mosh-server (default 'mosh-server new -s -c 256 …'). It must print a 'MOSH CONNECT <port> <key>' line, which Haven parses to find the session — so a wrapper can point Haven at a different port (e.g. scripts/mosh-fault-rig.py bootstrap, which puts a fault-injecting relay in front). Empty string restores the default.
 - `openaiPathPrefix` (string) — OPENAI only: path prefix inserted before /v1 (e.g. "/api"). Empty string clears.
-- `password` (string) — New password (stored encrypted). Mapped to the profile's transport (SSH/SMB/SPICE). Pass an empty string to clear it.
+- `password` (string) — New password (stored encrypted). Mapped to the profile's transport (SSH/SMB). Pass an empty string to clear it.
 - `port` (integer) — New TCP port.
 - `protocol` (string) — OPENAI only: wire protocol — OPENAI (default), OLLAMA, ANTHROPIC, or GEMINI. Empty string clears (back to OPENAI).
 - `remoteCommand` (string) — SSH only (#436): run this command via an SSH exec request instead of a login shell (e.g. 'tmux new -A -s work'). Empty string clears (back to the normal shell).
 - `requestPty` (boolean) — SSH only (#436): allocate a PTY for remoteCommand (tmux needs one). Ignored when remoteCommand is empty.
 - `smbSshForward` (boolean) — SMB only: tunnel through a saved SSH profile (set smbSshProfileId).
 - `smbSshProfileId` (string) — SMB only: SSH profile id to tunnel through. Empty string clears.
-- `spiceSshForward` (boolean) — SPICE only: tunnel through a saved SSH profile (set spiceSshProfileId).
-- `spiceSshProfileId` (string) — SPICE only: SSH profile id to tunnel through. Empty string clears.
 - `sshOptions` (string) — SSH only: replace the profile's ssh_config-style option lines (e.g. 'HavenSshEngine sshlib' opts this profile into the EXPERIMENTAL sshlib engine for the whole connection — terminal, exec, SFTP and tunnels; it refuses jump/proxy, FIDO2, OpenSSH certs and MFA chains). Empty string clears. Ignored on non-SSH profiles (USB-serial packs its line format here).
 - `usbForwardVidPid` (string) — SSH only: VID:PID of a phone-attached USB device (e.g. '1050:0406' — see list_usb_devices) to auto-export over USB/IP whenever this profile connects. Haven opens the device, starts the usbip server on loopback, adds the remote forward, and runs `usbip attach` on the host, re-attaching after a tunnel drop. Empty string clears (no auto-forward).
 - `useMosh` (boolean) — SSH only: use Mosh on top of the SSH bootstrap.
@@ -1232,7 +1226,7 @@ Send a plain-text email from a connected EMAIL profile. Pass profileId (from lis
 
 <a id="sec-linux"></a>
 
-## Linux guest (proot) & desktops (45)
+## Linux guest (proot) & desktops (40)
 
 The on-device Linux distros, their desktop environments and windows, guest services, the audio bridge, and guest-file access.
 
@@ -1245,17 +1239,6 @@ Capture a screenshot of a running desktop (deId) and return it INLINE as an imag
 - `format` (string) — "jpeg" (default, smaller) or "png" (lossless, larger).
 - `maxWidth` (integer) — Downscale so the image is at most this many pixels wide. Default 1024 (clamped 160–4096).
 - `windowId` (string) — Optional X11 window id from list_desktop_windows. Captures just that window (cropped to its geometry). Omit for the whole screen.
-
-</details>
-
-<details markdown="1">
-<summary><code>capture_desktop_tab</code> · asks once per session</summary>
-
-Capture what a remote-desktop VIEWER tab (RDP, VNC, or SPICE) is actually rendering, INLINE as an image — the framebuffer the user sees, with the server cursor composited on top at the tracked pointer position. This is distinct from capture_desktop, which screenshots an in-guest X11/VNC desktop; this one captures the RDP/VNC/SPICE client viewer (e.g. to verify colours and the cursor against a remote Windows/Linux server). Pass profileId to pick a tab (from list_desktop_sessions); omit it when exactly one desktop tab is open. Returns the image plus { profileId, protocol, width, height, hasCursor, cursorWidth?, cursorHeight?, hotspotX?, hotspotY?, pointerX?, pointerY?, format }.
-
-- `format` (string) — "jpeg" (default, smaller) or "png" (lossless, larger).
-- `maxWidth` (integer) — Downscale so the image is at most this many pixels wide. Default 1280 (clamped 160–4096).
-- `profileId` (string) — Profile id of the desktop tab (from list_desktop_sessions). Omit when exactly one tab is open.
 
 </details>
 
@@ -1420,13 +1403,6 @@ Slim DE-only read of inspect_proot. Filters to DEs that have a package list for 
 </details>
 
 <details markdown="1">
-<summary><code>list_desktop_sessions</code> · no per-call prompt</summary>
-
-List open remote-desktop tabs (VNC/RDP/SPICE) by connection profile, with their live status (connecting, connected, disconnected, error). These are Desktop-screen tabs, not transport sessions — a VNC/RDP/SPICE-over-SSH desktop has its SSH tunnel in list_sessions and its own connect state here. 'disconnected' means the tab is still open but its session ended (server logoff / transport death) — reconnect with connect_profile, which replaces the dead tab. Use after connect_profile to confirm a desktop reached 'connected', and after disconnect_profile to confirm the tab is gone (profile absent from the list).
-
-</details>
-
-<details markdown="1">
 <summary><code>list_desktop_windows</code> · asks once per session</summary>
 
 Enumerate the visible top-level windows on a running desktop (deId), so an agent can target a specific application window (e.g. KiCad's schematic editor vs. PCB editor) before capturing it. Returns { deId, count, windows:[{id,title,x,y,width,height}] }. Works on X11/VNC desktops (via xdotool) and Sway nested-Wayland desktops (via swaymsg get_tree); other nested-Wayland compositors (Hyprland/niri/cage) aren't enumerable yet — use capture_desktop for a whole-output screenshot there. Installs the X11 capture toolset (xdotool + ImageMagick) on first use.
@@ -1521,26 +1497,6 @@ Run a shell command inside the ACTIVE distro's proot guest (the same rootfs the 
 </details>
 
 <details markdown="1">
-<summary><code>scroll_desktop_tab</code> · asks once per session</summary>
-
-Scroll a remote-desktop VIEWER tab (RDP/VNC/SPICE) by injecting mouse-wheel notches into the remote server. deltaY > 0 scrolls down, < 0 scrolls up; magnitude is the number of notches. Pass profileId to pick a tab (from list_desktop_sessions); omit when exactly one is open. Returns { profileId, protocol, deltaY }.
-
-- `deltaY` (integer, required) — Wheel notches: >0 scrolls down, <0 scrolls up.
-- `profileId` (string) — Profile id (from list_desktop_sessions). Omit when exactly one is open.
-
-</details>
-
-<details markdown="1">
-<summary><code>send_desktop_clipboard</code> · asks once per session</summary>
-
-Set the clipboard on a remote-desktop VIEWER tab (RDP/VNC) to the given text, so it can be pasted inside the remote server (Ctrl+V / right-click paste). This is the closest substitute for typing while keyboard injection is unsupported. Pass profileId to pick a tab (from list_desktop_sessions); omit when exactly one is open. Returns { profileId, protocol, chars }.
-
-- `text` (string, required) — Text to place on the remote clipboard.
-- `profileId` (string) — Profile id (from list_desktop_sessions). Omit when exactly one is open.
-
-</details>
-
-<details markdown="1">
 <summary><code>set_active_distro</code> · no per-call prompt</summary>
 
 Switch the active proot distro WITHOUT installing anything — the lightweight counterpart to install_distro (which downloads). The active distro is the rootfs that run_in_proot, install_desktop, start_desktop and the desktop/USB tools all operate on, so this is how you drive cross-distro work over MCP (e.g. run_in_proot inside Void instead of the current active distro). The distro must already be installed — call list_distros for installed ids, or install_distro to add one. Returns the new active distro id, its family, and the desktops installed on it.
@@ -1625,18 +1581,6 @@ Stop a running guest service by id (leaves it registered).
 <summary><code>stop_system_vm</code> · asks every call</summary>
 
 Power off / kill the running system VM (#326) and release its loopback VNC port. Idempotent — a no-op if none is running. Kills the whole qemu process tree inside the proot.
-
-</details>
-
-<details markdown="1">
-<summary><code>tap_desktop_tab</code> · asks every call</summary>
-
-Click a point on a remote-desktop VIEWER tab (RDP/VNC/SPICE) — inject a mouse click into the remote server. Coordinates are in the REMOTE framebuffer's pixel space (the same space capture_desktop_tab reports: 0..width, 0..height), NOT Haven's own UI (that's tap_haven_ui). Pass profileId to pick a tab (from list_desktop_sessions); omit when exactly one desktop tab is open. Buttons follow X11: 1=left (default), 2=middle, 3=right. Keyboard typing is not yet supported (the session abstraction has no key verb). Returns { profileId, protocol, x, y, button }.
-
-- `x` (integer, required) — Remote framebuffer X (0..width from capture_desktop_tab).
-- `y` (integer, required) — Remote framebuffer Y (0..height from capture_desktop_tab).
-- `button` (integer) — X11 button: 1=left (default), 2=middle, 3=right.
-- `profileId` (string) — Profile id of the desktop tab (from list_desktop_sessions). Omit when exactly one is open.
 
 </details>
 

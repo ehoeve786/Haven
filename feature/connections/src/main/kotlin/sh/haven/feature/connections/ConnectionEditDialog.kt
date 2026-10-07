@@ -210,7 +210,6 @@ fun ConnectionEditDialog(
         seed?.isBtSerial == true -> "BTSERIAL"
         seed?.isBleSerial == true -> "BLESERIAL"
         seed?.isUsbSerial == true -> "USBSERIAL"
-        seed?.isSpice == true -> "SPICE"
         seed?.isSmb == true -> "SMB"
         seed?.isRclone == true -> "RCLONE"
         seed?.isEmail == true -> "EMAIL"
@@ -229,7 +228,6 @@ fun ConnectionEditDialog(
         "BLESERIAL" -> "BLESERIAL"
         "USBSERIAL" -> "USBSERIAL"
         "RETICULUM" -> "RETICULUM"
-        "SPICE" -> "SPICE"
         "SMB" -> "SMB"
         "RCLONE" -> "RCLONE"
         "EMAIL" -> "EMAIL"
@@ -260,18 +258,12 @@ fun ConnectionEditDialog(
     var port by rememberSaveable {
         mutableStateOf(
             when {
-                seed?.isSpice == true -> (seed.spicePort ?: 5900).toString()
                 seed?.isSmb == true -> seed.smbPort.toString()
                 else -> seed?.port?.toString() ?: "22"
             }
         )
     }
     var username by rememberSaveable { mutableStateOf(seed?.username ?: "") }
-    var spicePassword by rememberSaveable { mutableStateOf(existing?.spicePassword ?: "") }
-    var spiceSshForward by rememberSaveable {
-        mutableStateOf(existing?.let { strictTunnelInitialEnabled(it.connectionType, "SPICE", it.spiceSshForward, it.spiceSshProfileId) } ?: false)
-    }
-    var spiceSshProfileId by rememberSaveable { mutableStateOf(existing?.spiceSshProfileId) }
     var smbShare by rememberSaveable { mutableStateOf(existing?.smbShare ?: "") }
     var smbPassword by rememberSaveable { mutableStateOf(existing?.smbPassword ?: "") }
     var smbDomain by rememberSaveable { mutableStateOf(existing?.smbDomain ?: "") }
@@ -1069,14 +1061,13 @@ fun ConnectionEditDialog(
                     "BTSERIAL" to "Bluetooth Serial",
                     "BLESERIAL" to "Bluetooth LE Serial",
                     "USBSERIAL" to "USB Serial",
-                    "SPICE" to "SPICE (Desktop)",
                     "SMB" to "SMB (File Share)",
                     "RCLONE" to "Cloud Storage (rclone)",
                     "EMAIL" to "Email (IMAP / Proton)",
                     "OPENAI" to "AI Endpoint (OpenAI-compatible)",
                     "RETICULUM" to "Reticulum",
                 )
-                // #510: the terminal build ships no SPICE client, so
+                // #510: the terminal build ships no rclone or UML guest, so
                 // offering them here would only produce a profile that fails
                 // at connect with "native library failed to load".
                 //
@@ -1090,12 +1081,11 @@ fun ConnectionEditDialog(
                     val native = NativeFeatures(dialogContext)
                     TransportAvailability.offered(
                         allTransportOptions,
-                        spice = native.spice,
                         // Probed, not looked for: libgojni.so is present in
                         // every build, but the terminal flavour's copy is
                         // built without rclone.
                         rclone = sh.haven.rclone.bridge.RcloneBridge.available,
-                        // Same missing-file gate as spice: the terminal
+                        // Missing-file gate: the terminal
                         // flavour drops the UML libraries, F-Droid skips the
                         // fetch.
                         uml = native.uml,
@@ -1132,7 +1122,6 @@ fun ConnectionEditDialog(
                                     transportExpanded = false
                                     // Update port to transport default when switching
                                     val defaultPort = when (value) {
-                                        "SPICE" -> "5900"
                                         "SMB" -> "445"
                                         "OPENAI" -> "80"
                                         "ET" -> "22"
@@ -1157,7 +1146,6 @@ fun ConnectionEditDialog(
                             when (connectionType) {
                                 "LOCAL" -> "Local Shell"
                                 "GUEST" -> "Linux Guest"
-                                "SPICE" -> "My SPICE Desktop"
                                 "SMB" -> "My File Share"
                                 "RCLONE" -> "My Google Drive"
                                 "EMAIL" -> "My Mail"
@@ -1846,55 +1834,6 @@ fun ConnectionEditDialog(
                             }
                         },
                         onCarrierChange = { aiRouteCarrierId = it },
-                    )
-                } else if (connectionType == "SPICE") {
-                    ConnectionSection(stringResource(R.string.connections_section_spice))
-                    // SPICE: tunnel toggle first (changes what Host means), then
-                    // host/port/password. Auth is a single optional ticket — no
-                    // username/domain/colour-depth (the framebuffer is 32bpp).
-                    SshTunnelBlock(
-                        enabled = spiceSshForward,
-                        carrierId = spiceSshProfileId,
-                        sshProfiles = sshProfiles,
-                        onEnabledChange = { newValue ->
-                            spiceSshForward = newValue
-                            if (!newValue) spiceSshProfileId = null
-                            host = tunnelHostOnToggle(newValue, host)
-                        },
-                        onCarrierChange = { spiceSshProfileId = it },
-                    )
-                    Spacer(Modifier.height(4.dp))
-                    OutlinedTextField(
-                        value = host,
-                        onValueChange = { host = it },
-                        label = { Text(stringResource(R.string.common_host)) },
-                        placeholder = { Text(if (spiceSshForward) "127.0.0.1" else "192.168.1.100") },
-                        singleLine = true,
-                        modifier = Modifier.fillMaxWidth(),
-                    )
-                    Spacer(Modifier.height(4.dp))
-                    OutlinedTextField(
-                        value = port,
-                        onValueChange = { port = it.filter { c -> c.isDigit() } },
-                        label = { Text(stringResource(R.string.connections_field_port)) },
-                        placeholder = { Text("5900") },
-                        singleLine = true,
-                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                        modifier = Modifier.width(120.dp),
-                    )
-                    Spacer(Modifier.height(4.dp))
-                    OutlinedTextField(
-                        value = spicePassword,
-                        onValueChange = { spicePassword = it },
-                        label = { Text(stringResource(R.string.connections_field_password_optional)) },
-                        singleLine = true,
-                        modifier = Modifier.fillMaxWidth(),
-                    )
-                    Spacer(Modifier.height(4.dp))
-                    Text(
-                        stringResource(R.string.connections_helper_spice_auth),
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                 } else if (connectionType == "SMB") {
                     ConnectionSection(stringResource(R.string.connections_section_smb))
@@ -3188,11 +3127,11 @@ fun ConnectionEditDialog(
                 // Port knocking. Visible for any profile with a remote
                 // TCP host — skipped for LOCAL (no host), RCLONE (its own
                 // protocol), and RETICULUM (mesh, not TCP).
-                if (connectionType in setOf("SPICE", "SMB", "EMAIL", "OPENAI")) {
+                if (connectionType in setOf("SMB", "EMAIL", "OPENAI")) {
                     ConnectionSection(stringResource(R.string.connections_section_routing))
                     routingBody()
                 }
-                if (connectionType in setOf("SPICE", "SMB", "EMAIL", "OPENAI")) {
+                if (connectionType in setOf("SMB", "EMAIL", "OPENAI")) {
                     ConnectionSection(stringResource(R.string.connections_section_port_knock))
                     portKnockBody()
                     ConnectionSection(stringResource(R.string.connections_section_spa))
@@ -3223,7 +3162,6 @@ fun ConnectionEditDialog(
                 "BLESERIAL" -> bleDevice.isNotBlank() // a scanned device must be picked
                 "USBSERIAL" -> usbDevice.isNotBlank() && (usbBaud.toIntOrNull() ?: 0) > 0
                 "SSH" -> host.isNotBlank()
-                "SPICE" -> host.isNotBlank() && tunnelComplete(spiceSshForward, spiceSshProfileId)
                 "SMB" -> host.isNotBlank() && smbShare.isNotBlank() && tunnelComplete(smbSshForward, smbSshProfileId)
                 // OAuth providers authenticate on connect (no Configure step); every
                 // other provider must have its remote written via Configure first (#295).
@@ -3326,40 +3264,6 @@ fun ConnectionEditDialog(
                             colorTag = colorTag,
                             groupId = groupId,
                             identityId = identityId,
-                        )
-                    } else if (connectionType == "SPICE") {
-                        val spicePortInt = port.toIntOrNull() ?: 5900
-                        (existing ?: ConnectionProfile(
-                            label = label,
-                            host = host,
-                            username = "",
-                        )).copy(
-                            label = label.ifBlank { "SPICE: $host" },
-                            host = host,
-                            port = spicePortInt,
-                            username = "",
-                            connectionType = "SPICE",
-                            spicePort = spicePortInt,
-                            spicePassword = spicePassword.ifBlank { null },
-                            spiceSshForward = spiceSshForward,
-                            spiceSshProfileId = tunnelCarrierForSave(spiceSshForward, spiceSshProfileId),
-                            colorTag = colorTag,
-                            groupId = groupId,
-                            identityId = identityId,
-                            portKnockSequence = portKnockSequence.ifBlank { null },
-                            portKnockDelayMs = portKnockDelayMs.toIntOrNull()
-                                ?.coerceAtLeast(0) ?: KnockSequence.DEFAULT_DELAY_MS,
-                            spaKey = spaKey.ifBlank { null },
-                            spaKeyBase64 = spaKeyBase64,
-                            spaHmacKey = spaHmacKey.ifBlank { null },
-                            spaHmacKeyBase64 = spaHmacKeyBase64,
-                            spaAccessSpec = spaAccessSpec.ifBlank { null },
-                            spaAllowMode = spaAllowMode,
-                            spaExplicitIp = spaExplicitIp.ifBlank { null },
-                            spaPort = spaPort.toIntOrNull()?.takeIf { it in 1..65535 }
-                                ?: SpaConfig.DEFAULT_SPA_PORT,
-                        ).withRoutingSelection(
-                            proxyType, proxyHost, proxyPort, proxyUser, proxyPassword, tunnelConfigId,
                         )
                     } else if (connectionType == "RCLONE") {
                         (existing ?: ConnectionProfile(

@@ -8,7 +8,6 @@ import kotlinx.coroutines.withContext
 import org.json.JSONArray
 import org.json.JSONObject
 import sh.haven.core.data.agent.ConsentLevel
-import sh.haven.core.data.desktop.DesktopInputHandle
 import sh.haven.core.data.desktop.DesktopSessionRegistry
 import sh.haven.core.local.LocalSessionManager
 import sh.haven.core.mcp.McpError
@@ -17,9 +16,8 @@ import sh.haven.core.mcp.McpError
  * The desktop MCP tools (#mcp-backbone Stage 5, Layer E): desktop-environment
  * lifecycle (list/install/uninstall/start/stop DEs on the active distro via
  * [LocalSessionManager]'s ProotManager/DesktopManager), running-session +
- * window listings and screen capture / tab tap-scroll-clipboard over
- * [DesktopSessionRegistry], guest-app launching, and opening a terminal in the
- * desktop. Cross-cutting shared helpers come from [ctx] (profileLabel for
+ * window listings and screen capture, guest-app launching, and opening a
+ * terminal in the desktop. Cross-cutting shared helpers come from [ctx] (profileLabel for
  * consent summaries, ctx.backgroundScope for async DE lifecycle, attachAgentShell
  * for the desktop terminal); the pure helpers (requireIntArg, encodeCapture,
  * desktopByIdOrThrow, desktopToJson) are top-level functions in McpTools.kt.
@@ -34,11 +32,6 @@ internal class DesktopToolProvider(
     private val systemVmManager get() = localSessionManager.systemVmManager
 
     override fun tools(): Map<String, ToolHandler> = linkedMapOf(
-        "list_desktop_sessions" to ToolHandler(
-            description = "List open remote-desktop tabs (VNC/RDP/SPICE) by connection profile, with their live status (connecting, connected, disconnected, error). These are Desktop-screen tabs, not transport sessions — a VNC/RDP/SPICE-over-SSH desktop has its SSH tunnel in list_sessions and its own connect state here. 'disconnected' means the tab is still open but its session ended (server logoff / transport death) — reconnect with connect_profile, which replaces the dead tab. Use after connect_profile to confirm a desktop reached 'connected', and after disconnect_profile to confirm the tab is gone (profile absent from the list).",
-            inputSchema = emptyObjectSchema(),
-        ) { _ -> listDesktopSessions() },
-
         "list_guest_apps" to ToolHandler(
             description = "List the GUI applications installed in the active proot guest, discovered from its `.desktop` files (the same source an xfce4 application menu reads). Use this to find an app to launch with `launch_app_in_desktop` without knowing its exact command. Returns { count, iconsResolved, apps:[{ name, exec, hasIcon, categories }] } sorted by name; `exec` is the runnable guest command (field codes stripped) you pass straight to launch_app_in_desktop's `command`. `hasIcon` indicates whether a decodable icon was resolved (icons themselves stay on-device for the launcher UI). Skips NoDisplay/Terminal/non-application entries.",
             inputSchema = emptyObjectSchema(),
@@ -198,65 +191,6 @@ internal class DesktopToolProvider(
             },
         ) { args -> captureDesktop(args) },
 
-        "capture_desktop_tab" to ToolHandler(
-            description = "Capture what a remote-desktop VIEWER tab (RDP, VNC, or SPICE) is actually rendering, INLINE as an image — the framebuffer the user sees, with the server cursor composited on top at the tracked pointer position. This is distinct from capture_desktop, which screenshots an in-guest X11/VNC desktop; this one captures the RDP/VNC/SPICE client viewer (e.g. to verify colours and the cursor against a remote Windows/Linux server). Pass profileId to pick a tab (from list_desktop_sessions); omit it when exactly one desktop tab is open. Returns the image plus { profileId, protocol, width, height, hasCursor, cursorWidth?, cursorHeight?, hotspotX?, hotspotY?, pointerX?, pointerY?, format }.",
-            inputSchema = objectSchema {
-                string("profileId", "Profile id of the desktop tab (from list_desktop_sessions). Omit when exactly one tab is open.")
-                integer("maxWidth", "Downscale so the image is at most this many pixels wide. Default 1280 (clamped 160–4096).")
-                string("format", "\"jpeg\" (default, smaller) or \"png\" (lossless, larger).")
-            },
-            consentLevel = ConsentLevel.ONCE_PER_SESSION,
-            summarise = { args ->
-                val pid = args.optString("profileId").takeIf { it.isNotBlank() }
-                val who = if (pid != null) "desktop '${ctx.profileLabel(pid)}'" else "the open remote desktop"
-                "Let the agent see what $who is rendering"
-            },
-        ) { args -> captureDesktopTab(args) },
-
-        "tap_desktop_tab" to ToolHandler(
-            description = "Click a point on a remote-desktop VIEWER tab (RDP/VNC/SPICE) — inject a mouse click into the remote server. Coordinates are in the REMOTE framebuffer's pixel space (the same space capture_desktop_tab reports: 0..width, 0..height), NOT Haven's own UI (that's tap_haven_ui). Pass profileId to pick a tab (from list_desktop_sessions); omit when exactly one desktop tab is open. Buttons follow X11: 1=left (default), 2=middle, 3=right. Keyboard typing is not yet supported (the session abstraction has no key verb). Returns { profileId, protocol, x, y, button }.",
-            inputSchema = objectSchema {
-                string("profileId", "Profile id of the desktop tab (from list_desktop_sessions). Omit when exactly one is open.")
-                integer("x", "Remote framebuffer X (0..width from capture_desktop_tab).", required = true)
-                integer("y", "Remote framebuffer Y (0..height from capture_desktop_tab).", required = true)
-                integer("button", "X11 button: 1=left (default), 2=middle, 3=right.")
-            },
-            consentLevel = ConsentLevel.EVERY_CALL,
-            summarise = { args ->
-                val pid = args.optString("profileId").takeIf { it.isNotBlank() }
-                val who = if (pid != null) "desktop '${ctx.profileLabel(pid)}'" else "the open remote desktop"
-                "Click (${args.optInt("x")},${args.optInt("y")}) on $who"
-            },
-        ) { args -> tapDesktopTab(args) },
-
-        "scroll_desktop_tab" to ToolHandler(
-            description = "Scroll a remote-desktop VIEWER tab (RDP/VNC/SPICE) by injecting mouse-wheel notches into the remote server. deltaY > 0 scrolls down, < 0 scrolls up; magnitude is the number of notches. Pass profileId to pick a tab (from list_desktop_sessions); omit when exactly one is open. Returns { profileId, protocol, deltaY }.",
-            inputSchema = objectSchema {
-                string("profileId", "Profile id (from list_desktop_sessions). Omit when exactly one is open.")
-                integer("deltaY", "Wheel notches: >0 scrolls down, <0 scrolls up.", required = true)
-            },
-            consentLevel = ConsentLevel.ONCE_PER_SESSION,
-            summarise = { args ->
-                val pid = args.optString("profileId").takeIf { it.isNotBlank() }
-                val who = if (pid != null) "desktop '${ctx.profileLabel(pid)}'" else "the open remote desktop"
-                "Scroll $who"
-            },
-        ) { args -> scrollDesktopTab(args) },
-
-        "send_desktop_clipboard" to ToolHandler(
-            description = "Set the clipboard on a remote-desktop VIEWER tab (RDP/VNC) to the given text, so it can be pasted inside the remote server (Ctrl+V / right-click paste). This is the closest substitute for typing while keyboard injection is unsupported. Pass profileId to pick a tab (from list_desktop_sessions); omit when exactly one is open. Returns { profileId, protocol, chars }.",
-            inputSchema = objectSchema {
-                string("profileId", "Profile id (from list_desktop_sessions). Omit when exactly one is open.")
-                string("text", "Text to place on the remote clipboard.", required = true)
-            },
-            consentLevel = ConsentLevel.ONCE_PER_SESSION,
-            summarise = { args ->
-                val pid = args.optString("profileId").takeIf { it.isNotBlank() }
-                val who = if (pid != null) "desktop '${ctx.profileLabel(pid)}'" else "the open remote desktop"
-                "Set $who clipboard (${args.optString("text").length} chars)"
-            },
-        ) { args -> sendDesktopClipboard(args) },
-
         "launch_app_in_desktop" to ToolHandler(
             description = "Launch a GUI application into a RUNNING desktop (deId). X11/VNC desktops get DISPLAY/XAUTHORITY; nested-Wayland desktops (Sway/Hyprland/niri/cage) get XDG_RUNTIME_DIR/WAYLAND_DISPLAY. The software-GL fallback (LIBGL_ALWAYS_SOFTWARE=1, GALLIUM_DRIVER=llvmpipe) is exported either way, so GPU-less GL apps like KiCad/eeschema don't crash their canvas. Optionally waits for the app's window to appear and returns its windowId — pass that to capture_desktop to screenshot just that window (window-wait/windowId need enumeration: X11 and Sway; on other nested-Wayland compositors the app still launches but no windowId is returned). The app keeps running after this returns. For looking at saved design FILES prefer view_file (headless, no desktop needed); use this when you need the live interactive app.",
             inputSchema = objectSchema {
@@ -278,21 +212,6 @@ internal class DesktopToolProvider(
             consentLevel = ConsentLevel.NEVER,
         ) { args -> openDesktopTerminal(args) },
     )
-
-    private fun listDesktopSessions(): JSONObject {
-        val statuses = desktopSessionRegistry.statuses.value
-        val arr = JSONArray()
-        for ((profileId, status) in statuses) {
-            arr.put(JSONObject().apply {
-                put("profileId", profileId)
-                put("status", status.name.lowercase())
-            })
-        }
-        return JSONObject().apply {
-            put("count", statuses.size)
-            put("desktops", arr)
-        }
-    }
 
     private suspend fun listGuestApps(): JSONObject {
         if (!prootManager.isRootfsInstalled) {
@@ -714,121 +633,6 @@ internal class DesktopToolProvider(
                 windowTitle?.let { put("windowTitle", it) }
             },
         )
-    }
-
-    private suspend fun captureDesktopTab(args: JSONObject): ToolResult {
-        val explicitPid = args.optString("profileId").takeIf { it.isNotBlank() }
-        val handles = desktopSessionRegistry.frameHandles()
-        val pid = explicitPid ?: when (handles.size) {
-            1 -> handles.keys.first()
-            0 -> throw McpError(-32602, "No remote-desktop tab is open. Use connect_profile, then list_desktop_sessions.")
-            else -> throw McpError(
-                -32602,
-                "Multiple desktop tabs open (${handles.keys.joinToString()}); pass profileId.",
-            )
-        }
-        val handle = desktopSessionRegistry.frameHandle(pid)
-            ?: throw McpError(-32602, "No capturable desktop tab for profile '$pid' (call list_desktop_sessions).")
-        val src = handle.frame()
-            ?: throw McpError(-32603, "Desktop '$pid' has not rendered a frame yet — wait for it to connect.")
-
-        val maxWidth = args.optInt("maxWidth", 1280).coerceIn(160, 4096)
-        val format = if (args.optString("format", "jpeg").lowercase() == "png") "png" else "jpeg"
-
-        val cursor = handle.cursor()
-        val (px, py) = handle.pointer()
-
-        val (b64, w, h) = withContext(Dispatchers.Default) {
-            // Composite the cursor onto a mutable copy so the source frame
-            // (shared with the live viewer) is never mutated.
-            var bmp = src.copy(Bitmap.Config.ARGB_8888, true)
-            if (cursor != null) {
-                android.graphics.Canvas(bmp).drawBitmap(
-                    cursor.bitmap,
-                    (px - cursor.hotspotX).toFloat(),
-                    (py - cursor.hotspotY).toFloat(),
-                    null,
-                )
-            }
-            val fullW = bmp.width
-            val fullH = bmp.height
-            if (maxWidth in 1 until bmp.width) {
-                val nh = (bmp.height.toFloat() * maxWidth / bmp.width).toInt().coerceAtLeast(1)
-                bmp = Bitmap.createScaledBitmap(bmp, maxWidth, nh, true)
-            }
-            val out = java.io.ByteArrayOutputStream()
-            if (format == "jpeg") {
-                bmp.compress(Bitmap.CompressFormat.JPEG, 75, out)
-            } else {
-                bmp.compress(Bitmap.CompressFormat.PNG, 100, out)
-            }
-            Triple(Base64.encodeToString(out.toByteArray(), Base64.NO_WRAP), fullW, fullH)
-        }
-
-        return ToolResult.Image(
-            base64 = b64,
-            mimeType = if (format == "jpeg") "image/jpeg" else "image/png",
-            structured = JSONObject().apply {
-                put("profileId", pid)
-                put("protocol", handle.protocol)
-                put("width", w)
-                put("height", h)
-                put("hasCursor", cursor != null)
-                if (cursor != null) {
-                    put("cursorWidth", cursor.bitmap.width)
-                    put("cursorHeight", cursor.bitmap.height)
-                    put("hotspotX", cursor.hotspotX)
-                    put("hotspotY", cursor.hotspotY)
-                    put("pointerX", px)
-                    put("pointerY", py)
-                }
-                put("format", format)
-            },
-        )
-    }
-
-    private fun resolveDesktopInput(args: JSONObject): Pair<String, DesktopInputHandle> {
-        val explicitPid = args.optString("profileId").takeIf { it.isNotBlank() }
-        val handles = desktopSessionRegistry.inputHandles()
-        val pid = explicitPid ?: when (handles.size) {
-            1 -> handles.keys.first()
-            0 -> throw McpError(-32602, "No remote-desktop tab is open. Use connect_profile, then list_desktop_sessions.")
-            else -> throw McpError(-32602, "Multiple desktop tabs open (${handles.keys.joinToString()}); pass profileId.")
-        }
-        val handle = desktopSessionRegistry.inputHandle(pid)
-            ?: throw McpError(-32602, "No controllable desktop tab for profile '$pid' (call list_desktop_sessions).")
-        return pid to handle
-    }
-
-    private fun tapDesktopTab(args: JSONObject): JSONObject {
-        val (pid, h) = resolveDesktopInput(args)
-        val x = requireIntArg(args, "x")
-        val y = requireIntArg(args, "y")
-        val button = args.optInt("button", 1).coerceIn(1, 7)
-        h.mouseClick(x, y, button)
-        return JSONObject().apply {
-            put("profileId", pid); put("protocol", h.protocol)
-            put("x", x); put("y", y); put("button", button)
-        }
-    }
-
-    private fun scrollDesktopTab(args: JSONObject): JSONObject {
-        val (pid, h) = resolveDesktopInput(args)
-        val deltaY = requireIntArg(args, "deltaY")
-        h.mouseWheel(deltaY)
-        return JSONObject().apply {
-            put("profileId", pid); put("protocol", h.protocol); put("deltaY", deltaY)
-        }
-    }
-
-    private fun sendDesktopClipboard(args: JSONObject): JSONObject {
-        val (pid, h) = resolveDesktopInput(args)
-        if (!args.has("text")) throw McpError(-32602, "text is required")
-        val text = args.optString("text")
-        h.clipboard(text)
-        return JSONObject().apply {
-            put("profileId", pid); put("protocol", h.protocol); put("chars", text.length)
-        }
     }
 
     private suspend fun launchAppInDesktop(args: JSONObject): JSONObject {

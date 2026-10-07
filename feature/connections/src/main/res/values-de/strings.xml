@@ -553,10 +553,8 @@
     <string name="rclone_import_select_count">%1$d Remote(s) importieren</string>
     <string name="rclone_import_done">%1$d importiert, %2$d übersprungen, %3$d fehlgeschlagen.</string>
     <string name="rclone_import_menu">rclone-Konfiguration importieren…</string>
-    <string name="connections_section_spice">SPICE-Einstellungen</string>
     <string name="connections_section_mcp">KI-Agent (MCP)</string>
     <string name="connections_rclone_configure_first">Tippe auf „Konfigurieren &amp; prüfen“, um dieses Remote zu speichern, bevor du die Verbindung speichern kannst.</string>
-    <string name="connections_helper_spice_auth">SPICE verwendet ein einzelnes optionales Ticket/Passwort. Für einen Server ohne Ticket leer lassen.</string>
     <string name="connections_auth_any_hardware_key">Beliebiger Hardware-Schlüssel (FIDO)</string>
     <string name="connections_deeplink_confirm_title">Verbinden?</string>
     <string name="connections_deeplink_confirm_message">Ein Link möchte sich mit %1$s verbinden.</string>

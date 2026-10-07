@@ -36,9 +36,6 @@ class NativeFeatures(private val context: Context) {
     }
 
 
-    /** SPICE client — `libspice_transport.so`. */
-    val spice: Boolean get() = has("libspice_transport.so")
-
     /**
      * Media conversion, preview and streaming. Both binaries are required:
      * the executables are tiny wrappers and the codec code lives in the
@@ -56,9 +53,6 @@ class NativeFeatures(private val context: Context) {
      * to ask the question.
      */
     val wayland: Boolean get() = has("liblabwc_android.so")
-
-    /** True when this build ships any remote-desktop or compositor payload. */
-    val anyDesktop: Boolean get() = spice
 
     /**
      * The UML guest transport. All four pieces are required: the kernel and

@@ -278,26 +278,10 @@ fun HavenNavHost(
         }
     }
 
-    // Desktop (SPICE) navigation is collected HERE, at the always-composed
-    // nav-host level, rather than inside ConnectionsScreen — so a desktop tab is
-    // created the instant the connect emits, no matter which screen is on-screen.
-    // This is what makes the lost-connection Retry button and the MCP
-    // connect_profile tool reliably open the desktop even when the Connections
-    // screen isn't composed (it isn't, from the Desktop tab). (#121)
+    // Created at the always-composed nav-host level so its bus collectors
+    // (e.g. MCP connect_profile) run even when Connections isn't on-screen (#121).
+    @Suppress("UNUSED_VARIABLE")
     val connectionsViewModel: ConnectionsViewModel = hiltViewModel()
-    val navigateToSpiceEvent by connectionsViewModel.navigateToSpice.collectAsState()
-    LaunchedEffect(navigateToSpiceEvent) {
-        navigateToSpiceEvent?.let { nav ->
-            desktopViewModel.addSpiceSession(
-                nav.host, nav.port, nav.password,
-                sshForward = nav.sshForward,
-                sshSessionId = nav.sshSessionId,
-                profileId = nav.profileId,
-            )
-            connectionsViewModel.onDesktopNavigated()
-            requestScreen(Screen.Desktop)
-        }
-    }
 
     // Debug navigation: scroll pager when DebugReceiver (debug builds only) emits a route
     LaunchedEffect(Unit) {
@@ -398,8 +382,6 @@ fun HavenNavHost(
         .collectAsState(initial = sh.haven.core.data.preferences.DesktopKeyPlacement.LEFT)
     val fullscreenButtonCorner by preferencesRepository.fullscreenButtonCorner
         .collectAsState(initial = sh.haven.core.data.preferences.FullscreenButtonCorner.DEFAULT)
-    val rdpChipAnchor by preferencesRepository.rdpChipAnchor
-        .collectAsState(initial = sh.haven.core.data.preferences.RdpChipAnchor.DEFAULT)
     val toolbarMinKeyWidth by preferencesRepository.toolbarMinButtonWidth
         .collectAsState(initial = sh.haven.core.data.preferences.UserPreferencesRepository.DEFAULT_TOOLBAR_MIN_BUTTON_WIDTH)
     val showSearchButton by preferencesRepository.showSearchButton
@@ -602,9 +584,6 @@ fun HavenNavHost(
                             requestScreen(Screen.Terminal)
                         }
                     },
-                    // VNC/RDP navigation is handled by the always-composed
-                    // collector above (HavenNavHost), not via these callbacks —
-                    // see the navigateToSpice LaunchedEffect (#121).
                     onNavigateToSmb = { profileId ->
                         pendingSmbProfileId = profileId
                         coroutineScope.launch {
@@ -759,10 +738,6 @@ fun HavenNavHost(
                         toolbarLayout = toolbarLayout,
                         navBlockMode = navBlockMode,
                         toolbarUniformGrid = toolbarUniformGrid,
-                        rdpChipAnchor = rdpChipAnchor,
-                        onRdpChipAnchorChange = {
-                            coroutineScope.launch { preferencesRepository.setRdpChipAnchor(it) }
-                        },
                         inputMode = desktopInputMode,
                         onSetInputMode = { mode ->
                             coroutineScope.launch { preferencesRepository.setDesktopInputMode(mode) }

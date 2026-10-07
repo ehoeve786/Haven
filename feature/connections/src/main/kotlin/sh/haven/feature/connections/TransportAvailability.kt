@@ -11,26 +11,23 @@ internal object TransportAvailability {
 
     /**
      * @param all every transport the app knows, as (value, label).
-     * @param spice whether `libspice_transport.so` shipped.
-     * @param rclone whether this build's `libgojni.so` carries rclone. Unlike
-     *   SPICE this is not a missing *file* — the terminal flavour
-     *   ships a smaller library built without the rcbridge package, so the
-     *   answer comes from probing it rather than looking for it.
+     * @param rclone whether this build's `libgojni.so` carries rclone. This is
+     *   not a missing *file* — the terminal flavour ships a smaller library
+     *   built without the rcbridge package, so the answer comes from probing
+     *   it rather than looking for it.
      * @param uml whether the UML guest payload (libvmlinux.so + stub + passt)
      *   shipped. The terminal flavour drops all three and F-Droid builds skip
-     *   the fetch, so like SPICE this is a missing-file gate.
+     *   the fetch, so this is a missing-file gate.
      *
      * Nothing else is filtered — only the transports with native code the
      * terminal flavour drops.
      */
     fun offered(
         all: List<Pair<String, String>>,
-        spice: Boolean,
         rclone: Boolean,
         uml: Boolean = true,
     ): List<Pair<String, String>> = all.filter { (value, _) ->
         when (value) {
-            "SPICE" -> spice
             "RCLONE" -> rclone
             "GUEST" -> uml
             else -> true

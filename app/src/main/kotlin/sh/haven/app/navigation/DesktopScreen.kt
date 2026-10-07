@@ -51,7 +51,6 @@ import sh.haven.app.desktop.DesktopViewModel
 import sh.haven.core.data.preferences.NavBlockMode
 import sh.haven.core.data.preferences.ToolbarLayout
 import sh.haven.core.wayland.WaylandDesktopView
-import sh.haven.feature.rdp.RdpSessionContent
 
 private val TAB_COLORS = listOf(
     Color(0xFF42A5F5), // blue
@@ -65,7 +64,7 @@ private val TAB_COLORS = listOf(
 )
 
 /**
- * Multi-session desktop screen with VNC/RDP/Wayland tabs.
+ * Multi-session desktop screen with Wayland tabs.
  * Mirrors the terminal's multi-tab pattern.
  */
 @OptIn(ExperimentalFoundationApi::class)
@@ -73,9 +72,6 @@ private val TAB_COLORS = listOf(
 fun DesktopScreen(
     desktopViewModel: DesktopViewModel,
     toolbarLayout: ToolbarLayout = ToolbarLayout.DEFAULT,
-    rdpChipAnchor: sh.haven.core.data.preferences.RdpChipAnchor =
-        sh.haven.core.data.preferences.RdpChipAnchor.DEFAULT,
-    onRdpChipAnchorChange: (sh.haven.core.data.preferences.RdpChipAnchor) -> Unit = {},
     navBlockMode: NavBlockMode = NavBlockMode.ALIGNED,
     toolbarUniformGrid: Boolean = false,
     inputMode: String = "DIRECT",
@@ -207,47 +203,6 @@ fun DesktopScreen(
             if (tab != null) {
                 Box(modifier = Modifier.weight(1f).fillMaxWidth()) {
                     when (tab) {
-                        // SPICE reuses the RDP content renderer: a bitmap canvas
-                        // + PC set-1 scancode keyboard, which SPICE also uses.
-                        is DesktopTab.Spice -> RdpSessionContent(
-                            connected = tab.connected,
-                            frame = tab.frame,
-                            error = tab.error,
-                            toolbarLayout = toolbarLayout,
-                            chipAnchor = rdpChipAnchor,
-                            onChipAnchorChange = onRdpChipAnchorChange,
-                            onTap = { x, y -> desktopViewModel.sendClick(x, y) },
-                            onDragStart = { x, y ->
-                                desktopViewModel.sendPointer(x, y)
-                                desktopViewModel.pressButton(1)
-                            },
-                            onDrag = { x, y -> desktopViewModel.sendPointer(x, y) },
-                            onDragEnd = { desktopViewModel.releaseButton(1) },
-                            onScrollUp = { desktopViewModel.scrollUp() },
-                            onScrollDown = { desktopViewModel.scrollDown() },
-                            onTypeChar = { ch ->
-                                sh.haven.feature.rdp.typeRdpChar(
-                                    ch = ch,
-                                    sendKey = { sc, pressed -> desktopViewModel.sendSpiceKey(sc, pressed) },
-                                    sendUnicode = { /* SPICE has no unicode-key verb */ },
-                                )
-                            },
-                            onKeyDown = { scancode -> desktopViewModel.sendSpiceKey(scancode, true) },
-                            onKeyUp = { scancode -> desktopViewModel.sendSpiceKey(scancode, false) },
-                            onDisconnect = { desktopViewModel.closeTab(tab.id) },
-                            onFullscreenChanged = onFullscreenChanged,
-                            cursor = tab.cursor,
-                            pointerPos = tab.pointerPos,
-                            inputMode = inputMode,
-                            onSetInputMode = onSetInputMode,
-                            currentOrientation = desktopOrientation,
-                            onCycleOrientation = { desktopViewModel.cycleDesktopOrientation() },
-                            onRetry = { desktopViewModel.retryTab(tab.id) },
-                            // 2-finger pinch = viewport zoom, drag = pan/scroll
-                            // (toolbar toggle), tap = middle click (#286).
-                            onMiddleClick = { x, y -> desktopViewModel.sendClick(x, y, button = 2) },
-                        )
-
                         is DesktopTab.Wayland -> WaylandDesktopView(
                             modifier = Modifier.fillMaxSize(),
                             toolbarLayout = toolbarLayout,

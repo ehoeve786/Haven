@@ -553,10 +553,8 @@
     <string name="rclone_import_select_count">%1$d রিমোট ইমপোর্ট করুন</string>
     <string name="rclone_import_done">%1$d ইমপোর্ট হয়েছে, %2$d বাদ, %3$d ব্যর্থ।</string>
     <string name="rclone_import_menu">rclone কনফিগ ইমপোর্ট করুন…</string>
-    <string name="connections_section_spice">SPICE সেটিংস</string>
     <string name="connections_section_mcp">AI এজেন্ট (MCP)</string>
     <string name="connections_rclone_configure_first">সংযোগ সংরক্ষণের আগে এই রিমোট সংরক্ষণ করতে “কনফিগার ও যাচাই”-এ ট্যাপ করুন।</string>
-    <string name="connections_helper_spice_auth">SPICE একটিমাত্র ঐচ্ছিক টিকিট/পাসওয়ার্ড ব্যবহার করে। টিকিটবিহীন সার্ভারের জন্য ফাঁকা রাখুন।</string>
     <string name="connections_auth_any_hardware_key">যেকোনো হার্ডওয়্যার কী (FIDO)</string>
     <string name="connections_deeplink_confirm_title">সংযোগ করবেন?</string>
     <string name="connections_deeplink_confirm_message">একটি লিংক %1$s-এ সংযোগ করতে চায়।</string>

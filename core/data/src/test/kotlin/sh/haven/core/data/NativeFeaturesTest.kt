@@ -42,10 +42,8 @@ class NativeFeaturesTest {
     fun `an empty native dir reports no desktop or media features`() {
         val f = features()
 
-        assertFalse("spice", f.spice)
         assertFalse("ffmpeg", f.ffmpeg)
         assertFalse("wayland", f.wayland)
-        assertFalse("anyDesktop", f.anyDesktop)
     }
 
     /**
@@ -65,15 +63,10 @@ class NativeFeaturesTest {
 
     @Test
     fun `shipping the libraries reports them`() {
-        ship(
-            "libspice_transport.so",
-            "libffmpeg.so", "libffprobe.so", "libavcodec.so",
-        )
+        ship("libffmpeg.so", "libffprobe.so", "libavcodec.so")
         val f = features()
 
-        assertTrue("spice", f.spice)
         assertTrue("ffmpeg", f.ffmpeg)
-        assertTrue("anyDesktop", f.anyDesktop)
     }
 
     /**
@@ -91,10 +84,10 @@ class NativeFeaturesTest {
     /** A file that is present but not executable is not a usable library. */
     @Test
     fun `a non-executable library does not count`() {
-        ship("libspice_transport.so")
-        File(libDir.root, "libspice_transport.so").setExecutable(false)
+        ship("liblabwc_android.so")
+        File(libDir.root, "liblabwc_android.so").setExecutable(false)
 
-        assertFalse(features().spice)
+        assertFalse(features().wayland)
     }
 
     /**
@@ -110,16 +103,6 @@ class NativeFeaturesTest {
         every { context.applicationInfo } returns ApplicationInfo()
         val f = NativeFeatures(context)
 
-        assertFalse("spice", f.spice)
         assertFalse("ffmpeg", f.ffmpeg)
-        assertFalse("anyDesktop", f.anyDesktop)
-    }
-
-    /** The SPICE transport alone is enough for the desktop UI to be worth showing. */
-    @Test
-    fun `anyDesktop is true with SPICE present`() {
-        ship("libspice_transport.so")
-
-        assertTrue(features().anyDesktop)
     }
 }

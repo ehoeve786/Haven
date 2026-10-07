@@ -57,13 +57,6 @@ includeBuild("mosh-kotlin") {
     }
 }
 
-// Pure-Rust SPICE client + UniFFI Kotlin bindings (#286, submodule GlassOnTin/spice-kotlin).
-includeBuild("spice-kotlin") {
-    dependencySubstitution {
-        substitute(module("sh.haven:spice-transport")).using(project(":"))
-    }
-}
-
 // Prns (Personal Reticulum, Rust engine) JVM SDK — upstream's own Gradle
 // project inside the submodule, consumed unmodified so the submodule tracks
 // pure upstream trunk (Prns#94: app-supplied Pipe transports). The native
@@ -137,7 +130,6 @@ include(":core:btserial")
 include(":core:usbserial")
 include(":core:bleserial")
 include(":core:prns")
-include(":core:spice")
 include(":core:smb")
 include(":core:rclone")
 include(":core:mail")
@@ -152,6 +144,5 @@ include(":core:scan")
 include(":feature:settings")
 include(":feature:editor")
 include(":feature:imagetools")
-include(":feature:rdp")
 
 include(":integration-tests")
