@@ -20,22 +20,22 @@
    "strings": [
     {
      "name": "app_name",
-     "en": "Haven",
+     "en": "Moorline",
      "comment": "",
      "args": [],
      "t": {
-      "ar": "Haven",
-      "bn": "Haven",
-      "de": "Haven",
-      "es": "Haven",
-      "fr": "Haven",
-      "hi": "Haven",
-      "ja": "Haven",
-      "ko": "Haven",
-      "pt": "Haven",
-      "ru": "Haven",
-      "sr": "Haven",
-      "zh": "Haven"
+      "ar": "Moorline",
+      "bn": "Moorline",
+      "de": "Moorline",
+      "es": "Moorline",
+      "fr": "Moorline",
+      "hi": "Moorline",
+      "ja": "Moorline",
+      "ko": "Moorline",
+      "pt": "Moorline",
+      "ru": "Moorline",
+      "sr": "Moorline",
+      "zh": "Moorline"
      }
     },
     {
