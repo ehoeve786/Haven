@@ -53,7 +53,6 @@ class SessionManagerRegistryInputTest {
     private val names = mapOf(
         Transport.SSH to "SSH",
         Transport.LOCAL to "local",
-        Transport.RETICULUM to "Reticulum",
         Transport.BTSERIAL to "Bluetooth-serial",
         Transport.BLESERIAL to "BLE-serial",
         Transport.USBSERIAL to "USB-serial",

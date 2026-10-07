@@ -23,8 +23,6 @@ description: |
   can pass `paths` to limit the init to a subset — typical safe set:
     paths: |
       termlib
-      reticulum-kt
-      rnsh-kt
       build-proot/proot-termux
       rclone-android
   When `paths` is set the init is non-recursive and skips

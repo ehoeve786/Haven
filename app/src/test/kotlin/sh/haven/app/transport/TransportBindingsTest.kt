@@ -28,7 +28,6 @@ class TransportBindingsTest {
     private val nonDesktop: List<TransportSessionManager> = with(TransportSessionManagerModule) {
         listOf(
             ssh(manager()),
-            reticulum(manager()),
             btSerial(manager()),
             bleSerial(manager()),
             usbSerial(manager()),
@@ -72,7 +71,7 @@ class TransportBindingsTest {
         assertEquals(
             setOf(
                 Transport.SSH, Transport.LOCAL, Transport.GUEST,
-                Transport.RETICULUM, Transport.BTSERIAL, Transport.BLESERIAL, Transport.USBSERIAL,
+                Transport.BTSERIAL, Transport.BLESERIAL, Transport.USBSERIAL,
             ),
             writable,
         )

@@ -142,20 +142,12 @@
     <string name="connections_field_vnc_password">VNC password</string>
     <string name="connections_field_vnc_color_depth">VNC-Farbtiefe</string>
     <string name="connections_action_clear_vnc">Gespeicherte VNC-Einstellungen löschen</string>
-    <string name="connections_toggle_local_sideband">Local Sideband</string>
-    <string name="connections_field_gateway_host">Gateway Host</string>
-    <string name="connections_field_network_name">Network Name</string>
-    <string name="connections_helper_network_name">IFAC-Netzwerkname (optional)</string>
-    <string name="connections_action_scan_rnsh">Nach rnsh-Knoten suchen</string>
-    <string name="connections_field_destination_hash">Destination Hash</string>
-    <string name="connections_helper_destination_hash">32-character hex</string>
     <string name="connections_field_color_scheme">Farbschema des Terminals</string>
     <string name="connections_color_scheme_inherit">Standard verwenden (globale Einstellung)</string>
 
     <string name="connections_tunnel_dropdown_label">Tunnel: %1$s</string>
     <string name="connections_session_default_with">Default (%1$s)</string>
     <string name="connections_discovered_count">Discovered (%1$d)</string>
-    <string name="connections_discovered_count_filtered">Gefunden (%1$d von %2$d)</string>
 
     <!-- #135 third pass -->
 
@@ -343,7 +335,6 @@
     <string name="connections_section_terminal">Terminal</string>
     <string name="connections_section_authentication">Authentifizierung</string>
     <string name="connections_section_embedded_vnc">Eingebettetes VNC</string>
-    <string name="connections_section_reticulum">Reticulum</string>
     <string name="connections_section_routing">Routing</string>
     <string name="connections_toggle_mcp_tunnel">Tidegates MCP-Server bereitstellen</string>
     <string name="connections_helper_mcp_tunnel">Stellt Tidegates MCP jeder Sitzung dieser Verbindung bereit — sie erreichen http://127.0.0.1:8730/mcp und überspringen (über Loopback) Kopplung und Zustimmung. Wird beim Verbinden angewendet. Für dauerhaften Zugriff ohne offene Sitzung diese unter Einstellungen → Agent-Endpunkt als Dauerhafte MCP-Verbindung festlegen.</string>
@@ -359,11 +350,7 @@
     <string name="connections_helper_add_ssh_first">Fügen Sie zuerst eine SSH-Verbindung hinzu</string>
     <string name="connections_ai_route_section">KI-Routenträger</string>
     <string name="connections_ai_route_via_ssh">Über SSH</string>
-    <string name="connections_ai_route_via_reticulum">Über Reticulum</string>
-    <string name="connections_field_ai_route_carrier">Trägerverbindung</string>
-    <string name="connections_dropdown_select_carrier">Verbindung wählen</string>
     <string name="connections_helper_ai_route">Routet den Endpunkt über einen Träger: SSH öffnet eine lokale Weiterleitung durch die Träger-Sitzung, Reticulum überbrückt das Mesh. Der Träger muss für Reticulum-Routen verbunden sein.</string>
-    <string name="connections_helper_add_reticulum_first">Zuerst eine Reticulum-Verbindung hinzufügen</string>
     <string name="connections_toggle_rdp_nla">Authentifizierung auf Netzwerkebene (NLA)</string>
     <string name="connections_helper_run_before_session_manager">Wird vor dem Start des Sitzungsmanagers ausgeführt.</string>
     <string name="connections_toggle_tunnel_only">Nur Tunnel (kein Terminal)</string>
@@ -371,8 +358,6 @@
     <string name="connections_toggle_auto_reconnect">Bei Trennung automatisch neu verbinden</string>
     <string name="connections_field_reconnect_max_attempts">Maximale Versuche (0 = unbegrenzt)</string>
     <string name="connections_toggle_reconnect_on_network_change">Bei Netzwerkwechsel neu verbinden</string>
-    <string name="connections_field_passphrase">Passphrase</string>
-    <string name="connections_hint_ifac_passphrase">IFAC-Passphrase (optional)</string>
     <string name="connections_helper_vnc_host_via_ssh">Wo der VNC-Server vom SSH-Server aus erreichbar ist — normalerweise 127.0.0.1, wenn es dieselbe Maschine ist (wayvnc usw. binden nur an Loopback).</string>
     <string name="connections_helper_vnc_auth">Benutzername für klassisches VncAuth (8-Zeichen-Passwort) leer lassen. Benutzername für VeNCrypt (wayvnc, TigerVNC) ausfüllen — unterstützt längere Passwörter und TLS-Verschlüsselung.</string>
     <string name="connections_helper_rdp_host_via_ssh">Wo der RDP-Server vom SSH-Server aus erreichbar ist — normalerweise 127.0.0.1, wenn es dieselbe Maschine ist.</string>
@@ -577,13 +562,4 @@
     <string name="connections_ssh_engine_jsch_desc">Die bewährte Engine. Alle Funktionen.</string>
     <string name="connections_ssh_engine_sshlib_label">sshlib (experimentell)</string>
     <string name="connections_ssh_engine_sshlib_desc">Kotlin-Engine: Terminal, SFTP und Portweiterleitung über eine Verbindung. Benötigt eine direkte Verbindung — kein Jump-Host, Proxy, Hardware-Schlüssel, Zertifikat oder Multi-Faktor-Anmeldung.</string>
-    <string name="connections_identity_label">Identität dieses Geräts</string>
-    <string name="connections_identity_none">Noch keine — beim ersten Verbinden wird eine erstellt</string>
-    <string name="connections_identity_help">Von allen Reticulum-Verbindungen gemeinsam genutzt. Ein Server, der dich freischaltet, geht nach diesem Hash.</string>
-    <string name="connections_identity_import">Identitätsdatei importieren…</string>
-    <string name="connections_identity_imported">Identität importiert: %1$s</string>
-    <string name="connections_identity_imported_restart">Identität importiert: %1$s. Starte Tidegate neu, damit Verbindungen sie verwenden.</string>
-    <string name="connections_identity_not_an_identity">Diese Datei ist keine Reticulum-Identität. Es wurde nichts geändert.</string>
-    <string name="connections_identity_install_failed">Identität konnte nicht installiert werden: %1$s. Die vorherige bleibt bestehen.</string>
-    <string name="connections_identity_unreadable">Diese Datei konnte nicht gelesen werden.</string>
 </resources>

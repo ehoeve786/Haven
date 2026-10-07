@@ -65,26 +65,6 @@ includeBuild("rclone-android") {
     }
 }
 
-// rnsh-kt: Kotlin rnsh client library (submodule).
-includeBuild("rnsh-kt") {
-    dependencySubstitution {
-        substitute(module("tech.torlando:rnsh-core"))
-            .using(project(":rnsh-core"))
-    }
-}
-
-// reticulum-kt upstream (submodule, pinned to 83c92af). See issue #79.
-includeBuild("reticulum-kt") {
-    dependencySubstitution {
-        substitute(module("network.reticulum:rns-core"))
-            .using(project(":rns-core"))
-        substitute(module("network.reticulum:rns-interfaces"))
-            .using(project(":rns-interfaces"))
-        substitute(module("network.reticulum:rns-android"))
-            .using(project(":rns-android"))
-    }
-}
-
 rootProject.name = "Haven"
 
 include(":app")
@@ -109,7 +89,6 @@ include(":feature:mail")
 include(":feature:chat")
 include(":feature:keys")
 include(":feature:tunnel")
-include(":core:reticulum")
 include(":core:btserial")
 include(":core:usbserial")
 include(":core:bleserial")

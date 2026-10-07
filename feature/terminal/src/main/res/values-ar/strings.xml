@@ -67,7 +67,6 @@
     <string name="terminal_new_tab_host_key_changed">تغيّر مفتاح المضيف لـ %s — رُفض الاتصال لأسباب أمنية</string>
     <string name="terminal_new_tab_connection_failed">تعذّر الاتصال: %s</string>
     <string name="terminal_new_tab_shell_failed">تعذّر فتح الصدفة: %s</string>
-    <string name="terminal_new_tab_reticulum_no_session">لا توجد جلسة Reticulum نشطة لاستنساخها</string>
     <string name="terminal_new_tab_connecting">جارٍ الاتصال…</string>
     <!-- Backfilled translations (i18n drift fix) -->
     <string name="terminal_no_contact">لا استجابة من الخادم منذ %1$d ث — تجري إعادة المحاولة</string>

@@ -86,7 +86,7 @@ fun PasswordDialog(
         else PasswordDialogMode.PASSWORD_ONLY,
     assignedKeyLabel: String? = null,
 ) {
-    val needsUsername = profile.username.isBlank() && (profile.isSsh || profile.isReticulum)
+    val needsUsername = profile.username.isBlank() && profile.isSsh
     var username by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var rememberPassword by remember { mutableStateOf(!profile.sshPassword.isNullOrBlank()) }

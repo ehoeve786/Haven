@@ -142,20 +142,12 @@
     <string name="connections_field_vnc_password">كلمة مرور VNC</string>
     <string name="connections_field_vnc_color_depth">عمق ألوان VNC</string>
     <string name="connections_action_clear_vnc">مسح إعدادات VNC المحفوظة</string>
-    <string name="connections_toggle_local_sideband">Sideband محلي</string>
-    <string name="connections_field_gateway_host">مضيف البوابة</string>
-    <string name="connections_field_network_name">اسم الشبكة</string>
-    <string name="connections_helper_network_name">اسم شبكة IFAC (اختياري)</string>
-    <string name="connections_action_scan_rnsh">البحث عن عُقد rnsh</string>
-    <string name="connections_field_destination_hash">بصمة الوجهة</string>
-    <string name="connections_helper_destination_hash">32 خانة ست عشرية</string>
     <string name="connections_field_color_scheme">نظام ألوان الطرفية</string>
     <string name="connections_color_scheme_inherit">استخدام الافتراضي (الإعداد العام)</string>
 
     <string name="connections_tunnel_dropdown_label">النفق: %1$s</string>
     <string name="connections_session_default_with">الافتراضي (%1$s)</string>
     <string name="connections_discovered_count">المكتشَفة (%1$d)</string>
-    <string name="connections_discovered_count_filtered">المكتشَفة (%1$d من %2$d)</string>
 
     <!-- #135 third pass -->
 
@@ -343,7 +335,6 @@
     <string name="connections_section_terminal">الطرفية</string>
     <string name="connections_section_authentication">المصادقة</string>
     <string name="connections_section_embedded_vnc">VNC المضمّن</string>
-    <string name="connections_section_reticulum">Reticulum</string>
     <string name="connections_section_routing">التوجيه</string>
     <string name="connections_toggle_mcp_tunnel">إتاحة خادم MCP الخاص بـ Tidegate</string>
     <string name="connections_helper_mcp_tunnel">يتيح MCP الخاص بـ Tidegate لكل جلسة على هذا الاتصال — تصل إلى http://127.0.0.1:8730/mcp وتتخطى (عبر الاسترجاع) الإقران والموافقة. يُطبَّق عند الاتصال. للوصول الدائم دون جلسة مفتوحة، عيّنه كاتصال MCP دائم التشغيل في الإعدادات → نقطة نهاية الوكيل.</string>
@@ -359,11 +350,7 @@
     <string name="connections_helper_add_ssh_first">أضِف اتصال SSH أولًا</string>
     <string name="connections_ai_route_section">ناقل مسار الذكاء الاصطناعي</string>
     <string name="connections_ai_route_via_ssh">عبر SSH</string>
-    <string name="connections_ai_route_via_reticulum">عبر Reticulum</string>
-    <string name="connections_field_ai_route_carrier">الوصلة الناقلة</string>
-    <string name="connections_dropdown_select_carrier">اختر وصلة</string>
     <string name="connections_helper_ai_route">وجّه نقطة النهاية عبر ناقل: يفتح SSH تحويلاً محلياً من خلال جلسة الناقل، ويجسر Reticulum عبر الشبكة. يجب أن يكون الناقل متصلاً لمسارات Reticulum.</string>
-    <string name="connections_helper_add_reticulum_first">أضف وصلة Reticulum أولاً</string>
     <string name="connections_toggle_rdp_nla">مصادقة على مستوى الشبكة (NLA)</string>
     <string name="connections_helper_run_before_session_manager">يُشغَّل قبل بدء مدير الجلسات.</string>
     <string name="connections_toggle_tunnel_only">نفق فقط (بدون طرفية)</string>
@@ -371,8 +358,6 @@
     <string name="connections_toggle_auto_reconnect">إعادة الاتصال تلقائيًا عند الانقطاع</string>
     <string name="connections_field_reconnect_max_attempts">الحد الأقصى للمحاولات (0 = غير محدود)</string>
     <string name="connections_toggle_reconnect_on_network_change">إعادة الاتصال عند تغيّر الشبكة</string>
-    <string name="connections_field_passphrase">عبارة المرور</string>
-    <string name="connections_hint_ifac_passphrase">عبارة مرور IFAC (اختيارية)</string>
     <string name="connections_helper_vnc_host_via_ssh">أين يمكن الوصول إلى خادم VNC من خادم SSH — عادةً 127.0.0.1 إذا كانا نفس الجهاز (wayvnc وغيره يرتبط بالاسترجاع فقط).</string>
     <string name="connections_helper_vnc_auth">اترك اسم المستخدم فارغًا لـ VncAuth الكلاسيكي (كلمة مرور من 8 أحرف). املأ اسم المستخدم لـ VeNCrypt (wayvnc وTigerVNC) — يدعم كلمات مرور أطول وتشفير TLS.</string>
     <string name="connections_helper_rdp_host_via_ssh">أين يمكن الوصول إلى خادم RDP من خادم SSH — عادةً 127.0.0.1 إذا كانا نفس الجهاز.</string>
@@ -577,13 +562,4 @@
     <string name="connections_ssh_engine_jsch_desc">المحرك المُجرَّب. جميع الميزات.</string>
     <string name="connections_ssh_engine_sshlib_label">sshlib (تجريبي)</string>
     <string name="connections_ssh_engine_sshlib_desc">محرك Kotlin: الطرفية وSFTP وإعادة توجيه المنافذ على اتصال واحد. يتطلب اتصالًا مباشرًا — دون مضيف وسيط أو وكيل أو مفتاح أجهزة أو شهادة أو تسجيل دخول متعدد العوامل.</string>
-    <string name="connections_identity_label">هوية هذا الجهاز</string>
-    <string name="connections_identity_none">لا توجد بعد — سيتم إنشاؤها عند أول اتصال</string>
-    <string name="connections_identity_help">مشتركة بين جميع اتصالات Reticulum. الخادم الذي يسمح لك يعتمد على هذه البصمة.</string>
-    <string name="connections_identity_import">استيراد ملف الهوية…</string>
-    <string name="connections_identity_imported">تم استيراد الهوية: %1$s</string>
-    <string name="connections_identity_imported_restart">تم استيراد الهوية: %1$s. أعد تشغيل Tidegate لكي تستخدمها الاتصالات.</string>
-    <string name="connections_identity_not_an_identity">هذا الملف ليس هوية Reticulum. لم يتم تغيير أي شيء.</string>
-    <string name="connections_identity_install_failed">تعذّر تثبيت الهوية: %1$s. الهوية السابقة ما زالت في مكانها.</string>
-    <string name="connections_identity_unreadable">تعذّرت قراءة هذا الملف.</string>
 </resources>

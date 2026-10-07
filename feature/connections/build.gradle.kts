@@ -37,7 +37,6 @@ dependencies {
     implementation(project(":core:knock"))
     implementation(project(":core:spa"))
     implementation(project(":feature:tunnel"))
-    implementation(project(":core:reticulum"))
     implementation(project(":core:btserial"))
     implementation(project(":core:bleserial"))
     implementation(project(":core:usbserial"))

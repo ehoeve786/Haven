@@ -28,7 +28,7 @@ import java.util.concurrent.atomic.AtomicInteger
  *   serves). Pure read, no consent, matches raw terminal text.
  *
  * - `watch_directory` — a background poller over any [FileBackend] (SSH,
- *   local, SMB, rclone, Reticulum — the same resolution the file browser
+ *   local, SMB, rclone — the same resolution the file browser
  *   uses): list the directory every [interval], diff against the previous
  *   listing, and for new entries record an event and raise a Haven
  *   notification so the agent (and the user) see the change without a

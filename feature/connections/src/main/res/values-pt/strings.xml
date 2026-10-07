@@ -142,20 +142,12 @@
     <string name="connections_field_vnc_password">VNC password</string>
     <string name="connections_field_vnc_color_depth">Profundidade de cor VNC</string>
     <string name="connections_action_clear_vnc">Limpar configurações de VNC salvas</string>
-    <string name="connections_toggle_local_sideband">Local Sideband</string>
-    <string name="connections_field_gateway_host">Gateway Host</string>
-    <string name="connections_field_network_name">Network Name</string>
-    <string name="connections_helper_network_name">Nome da rede IFAC (opcional)</string>
-    <string name="connections_action_scan_rnsh">Procurar nós rnsh</string>
-    <string name="connections_field_destination_hash">Destination Hash</string>
-    <string name="connections_helper_destination_hash">32-character hex</string>
     <string name="connections_field_color_scheme">Esquema de cores do terminal</string>
     <string name="connections_color_scheme_inherit">Usar padrão (configuração global)</string>
 
     <string name="connections_tunnel_dropdown_label">Tunnel: %1$s</string>
     <string name="connections_session_default_with">Default (%1$s)</string>
     <string name="connections_discovered_count">Discovered (%1$d)</string>
-    <string name="connections_discovered_count_filtered">Descobertos (%1$d de %2$d)</string>
 
     <!-- #135 third pass -->
 
@@ -343,7 +335,6 @@
     <string name="connections_section_terminal">Terminal</string>
     <string name="connections_section_authentication">Autenticação</string>
     <string name="connections_section_embedded_vnc">VNC incorporado</string>
-    <string name="connections_section_reticulum">Reticulum</string>
     <string name="connections_section_routing">Roteamento</string>
     <string name="connections_toggle_mcp_tunnel">Expor o servidor MCP do Tidegate</string>
     <string name="connections_helper_mcp_tunnel">Expõe o MCP do Tidegate a todas as sessões desta conexão — elas acessam http://127.0.0.1:8730/mcp e (via loopback) ignoram o emparelhamento e o consentimento. Aplicado ao conectar. Para acesso sempre ativo sem sessão aberta, defina-a como Conexão MCP sempre ativa em Configurações → Endpoint do agente.</string>
@@ -359,11 +350,7 @@
     <string name="connections_helper_add_ssh_first">Adicione primeiro uma conexão SSH</string>
     <string name="connections_ai_route_section">Portador de rota de IA</string>
     <string name="connections_ai_route_via_ssh">Via SSH</string>
-    <string name="connections_ai_route_via_reticulum">Via Reticulum</string>
-    <string name="connections_field_ai_route_carrier">Conexão portadora</string>
-    <string name="connections_dropdown_select_carrier">Selecionar conexão</string>
     <string name="connections_helper_ai_route">Encaminha o ponto de extremidade por um portador: o SSH abre um encaminhamento local pela sessão do portador, o Reticulum faz a ponte pela malha. O portador deve estar conectado para rotas Reticulum.</string>
-    <string name="connections_helper_add_reticulum_first">Adicione primeiro uma conexão Reticulum</string>
     <string name="connections_toggle_rdp_nla">Autenticação em nível de rede (NLA)</string>
     <string name="connections_helper_run_before_session_manager">Executa antes de o gerenciador de sessões iniciar.</string>
     <string name="connections_toggle_tunnel_only">Apenas túnel (sem terminal)</string>
@@ -371,8 +358,6 @@
     <string name="connections_toggle_auto_reconnect">Reconectar automaticamente ao desconectar</string>
     <string name="connections_field_reconnect_max_attempts">Máximo de tentativas (0 = ilimitado)</string>
     <string name="connections_toggle_reconnect_on_network_change">Reconectar ao mudar de rede</string>
-    <string name="connections_field_passphrase">Frase secreta</string>
-    <string name="connections_hint_ifac_passphrase">Frase secreta IFAC (opcional)</string>
     <string name="connections_helper_vnc_host_via_ssh">Onde o servidor VNC é acessível a partir do servidor SSH — normalmente 127.0.0.1 se forem a mesma máquina (wayvnc etc. vinculam apenas ao loopback).</string>
     <string name="connections_helper_vnc_auth">Deixe o usuário em branco para o VncAuth clássico (senha de 8 caracteres). Preencha o usuário para VeNCrypt (wayvnc, TigerVNC) — suporta senhas mais longas e criptografia TLS.</string>
     <string name="connections_helper_rdp_host_via_ssh">Onde o servidor RDP é acessível a partir do servidor SSH — normalmente 127.0.0.1 se forem a mesma máquina.</string>
@@ -577,13 +562,4 @@
     <string name="connections_ssh_engine_jsch_desc">O motor comprovado. Todos os recursos.</string>
     <string name="connections_ssh_engine_sshlib_label">sshlib (experimental)</string>
     <string name="connections_ssh_engine_sshlib_desc">Motor Kotlin: terminal, SFTP e encaminhamento de portas em uma única conexão. Requer conexão direta — sem host de salto, proxy, chave física, certificado ou login multifator.</string>
-    <string name="connections_identity_label">Identidade deste dispositivo</string>
-    <string name="connections_identity_none">Ainda nenhuma — conectar uma vez cria uma</string>
-    <string name="connections_identity_help">Compartilhada por todas as conexões Reticulum. Um servidor que te autoriza se baseia neste hash.</string>
-    <string name="connections_identity_import">Importar arquivo de identidade…</string>
-    <string name="connections_identity_imported">Identidade importada: %1$s</string>
-    <string name="connections_identity_imported_restart">Identidade importada: %1$s. Reinicie o Tidegate para que as conexões a usem.</string>
-    <string name="connections_identity_not_an_identity">Esse arquivo não é uma identidade Reticulum. Nada foi alterado.</string>
-    <string name="connections_identity_install_failed">Não foi possível instalar a identidade: %1$s. A anterior continua no lugar.</string>
-    <string name="connections_identity_unreadable">Não foi possível ler esse arquivo.</string>
 </resources>

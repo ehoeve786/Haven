@@ -142,20 +142,12 @@
     <string name="connections_field_vnc_password">VNC password</string>
     <string name="connections_field_vnc_color_depth">Profondeur de couleur VNC</string>
     <string name="connections_action_clear_vnc">Effacer les paramètres VNC enregistrés</string>
-    <string name="connections_toggle_local_sideband">Local Sideband</string>
-    <string name="connections_field_gateway_host">Gateway Host</string>
-    <string name="connections_field_network_name">Network Name</string>
-    <string name="connections_helper_network_name">Nom du réseau IFAC (facultatif)</string>
-    <string name="connections_action_scan_rnsh">Rechercher des nœuds rnsh</string>
-    <string name="connections_field_destination_hash">Destination Hash</string>
-    <string name="connections_helper_destination_hash">32-character hex</string>
     <string name="connections_field_color_scheme">Palette de couleurs du terminal</string>
     <string name="connections_color_scheme_inherit">Utiliser la valeur par défaut (paramètre global)</string>
 
     <string name="connections_tunnel_dropdown_label">Tunnel: %1$s</string>
     <string name="connections_session_default_with">Default (%1$s)</string>
     <string name="connections_discovered_count">Discovered (%1$d)</string>
-    <string name="connections_discovered_count_filtered">Détectés (%1$d sur %2$d)</string>
 
     <!-- #135 third pass -->
 
@@ -343,7 +335,6 @@
     <string name="connections_section_terminal">Terminal</string>
     <string name="connections_section_authentication">Authentification</string>
     <string name="connections_section_embedded_vnc">VNC intégré</string>
-    <string name="connections_section_reticulum">Reticulum</string>
     <string name="connections_section_routing">Routage</string>
     <string name="connections_toggle_mcp_tunnel">Exposer le serveur MCP de Tidegate</string>
     <string name="connections_helper_mcp_tunnel">Expose le MCP de Tidegate à chaque session de cette connexion — elles atteignent http://127.0.0.1:8730/mcp et (via loopback) ignorent l\'appairage et le consentement. Appliqué à la connexion. Pour un accès permanent sans session ouverte, définissez-la comme Connexion MCP permanente dans Paramètres → Point de terminaison de l\'agent.</string>
@@ -359,11 +350,7 @@
     <string name="connections_helper_add_ssh_first">Ajoutez d\'abord une connexion SSH</string>
     <string name="connections_ai_route_section">Porteur de route IA</string>
     <string name="connections_ai_route_via_ssh">Via SSH</string>
-    <string name="connections_ai_route_via_reticulum">Via Reticulum</string>
-    <string name="connections_field_ai_route_carrier">Connexion porteuse</string>
-    <string name="connections_dropdown_select_carrier">Sélectionner une connexion</string>
     <string name="connections_helper_ai_route">Achemine le point de terminaison via un porteur : SSH ouvre un transfert local par la session du porteur, Reticulum établit un pont sur le maillage. Le porteur doit être connecté pour les routes Reticulum.</string>
-    <string name="connections_helper_add_reticulum_first">Ajoutez d\'abord une connexion Reticulum</string>
     <string name="connections_toggle_rdp_nla">Authentification au niveau réseau (NLA)</string>
     <string name="connections_helper_run_before_session_manager">S\'exécute avant le démarrage du gestionnaire de sessions.</string>
     <string name="connections_toggle_tunnel_only">Tunnel uniquement (sans terminal)</string>
@@ -371,8 +358,6 @@
     <string name="connections_toggle_auto_reconnect">Reconnexion automatique en cas de déconnexion</string>
     <string name="connections_field_reconnect_max_attempts">Tentatives maximales (0 = illimité)</string>
     <string name="connections_toggle_reconnect_on_network_change">Reconnecter lors d\'un changement de réseau</string>
-    <string name="connections_field_passphrase">Phrase secrète</string>
-    <string name="connections_hint_ifac_passphrase">Phrase secrète IFAC (facultative)</string>
     <string name="connections_helper_vnc_host_via_ssh">Où le serveur VNC est accessible depuis le serveur SSH — généralement 127.0.0.1 s\'il s\'agit de la même machine (wayvnc, etc. ne se lient qu\'au loopback).</string>
     <string name="connections_helper_vnc_auth">Laissez le nom d\'utilisateur vide pour le VncAuth classique (mot de passe de 8 caractères). Renseignez le nom d\'utilisateur pour VeNCrypt (wayvnc, TigerVNC) — prend en charge des mots de passe plus longs et le chiffrement TLS.</string>
     <string name="connections_helper_rdp_host_via_ssh">Où le serveur RDP est accessible depuis le serveur SSH — généralement 127.0.0.1 s\'il s\'agit de la même machine.</string>
@@ -577,13 +562,4 @@
     <string name="connections_ssh_engine_jsch_desc">Le moteur éprouvé. Toutes les fonctionnalités.</string>
     <string name="connections_ssh_engine_sshlib_label">sshlib (expérimental)</string>
     <string name="connections_ssh_engine_sshlib_desc">Moteur Kotlin : terminal, SFTP et redirection de ports sur une seule connexion. Nécessite une connexion directe — sans rebond, proxy, clé matérielle, certificat ni authentification multifacteur.</string>
-    <string name="connections_identity_label">Identité de cet appareil</string>
-    <string name="connections_identity_none">Aucune pour le moment — une première connexion en créera une</string>
-    <string name="connections_identity_help">Partagée par toutes les connexions Reticulum. Un serveur qui vous autorise se fonde sur cette empreinte.</string>
-    <string name="connections_identity_import">Importer un fichier d\'identité…</string>
-    <string name="connections_identity_imported">Identité importée : %1$s</string>
-    <string name="connections_identity_imported_restart">Identité importée : %1$s. Redémarrez Tidegate pour que les connexions l\'utilisent.</string>
-    <string name="connections_identity_not_an_identity">Ce fichier n\'est pas une identité Reticulum. Rien n\'a été modifié.</string>
-    <string name="connections_identity_install_failed">Impossible d\'installer l\'identité : %1$s. La précédente est toujours en place.</string>
-    <string name="connections_identity_unreadable">Impossible de lire ce fichier.</string>
 </resources>

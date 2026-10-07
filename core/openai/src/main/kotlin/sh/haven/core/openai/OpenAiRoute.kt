@@ -15,8 +15,8 @@ import javax.net.SocketFactory
  * Two routing layers, mutually exclusive by design:
  *
  *  - **AI route carrier** ([ConnectionProfile.aiRouteType]): the endpoint's
- *    HTTP rides a live carrier — an SSH session's LOCAL forward or a
- *    Reticulum mesh bridge — presented to the client as a loopback bind
+ *    HTTP rides a live carrier — an SSH session's LOCAL forward —
+ *    presented to the client as a loopback bind
  *    (`127.0.0.1:<boundPort>`). The factory is minted per connect and kept
  *    on the session state; a routed dial uses it and never consults the
  *    profile's own tunnel (the carrier itself is the transport — routing
@@ -35,11 +35,11 @@ object AiRoute {
 
     /** True when the stored (type, carrier) pair is a coherent route. */
     fun isRouted(routeType: String?, carrierProfileId: String?): Boolean =
-        (routeType == "SSH" || routeType == "RETICULUM") && carrierProfileId != null
+        routeType == "SSH" && carrierProfileId != null
 
     /** True when [routeType] is a carrier kind a dial can actually use. */
     fun isKnownRouteType(routeType: String?): Boolean =
-        routeType == "SSH" || routeType == "RETICULUM"
+        routeType == "SSH"
 
     /**
      * Pick the [SocketFactory] for a dial. [routeFactory] is the carrier's

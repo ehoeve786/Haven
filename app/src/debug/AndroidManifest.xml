@@ -11,7 +11,6 @@
                 <action android:name="sh.haven.app.DEBUG_CREATE_PROFILE" />
                 <action android:name="sh.haven.app.DEBUG_LIST_PROFILES" />
                 <action android:name="sh.haven.app.DEBUG_NAVIGATE" />
-                <action android:name="sh.haven.app.DEBUG_SCAN_RETICULUM" />
             </intent-filter>
         </receiver>
     </application>

@@ -81,8 +81,6 @@ jobs:
         with:
           paths: |
             termlib
-            reticulum-kt
-            rnsh-kt
             build-proot/proot-termux
             prns
       - uses: ./.github/actions/setup-toolchain

@@ -1,5 +1,5 @@
-// Deliberately dependency-free. LogRedact is needed by leaf modules (serial, SMB,
-// Reticulum) that have no project dependencies at all, and making them pull in
+// Deliberately dependency-free. LogRedact is needed by leaf modules (serial, SMB)
+// that have no project dependencies at all, and making them pull in
 // :core:data — Room, DataStore, Hilt — to redact a hostname would be a poor
 // trade. Keep it that way: nothing in here should ever need a dependency.
 plugins {

@@ -10,13 +10,6 @@
 	path = wayland-android
 	url = https://github.com/GlassOnTin/wayland-android.git
 	branch = main
-[submodule "reticulum-kt"]
-	path = reticulum-kt
-	url = https://github.com/GlassOnTin/reticulum-kt.git
-	branch = main
-[submodule "rnsh-kt"]
-	path = rnsh-kt
-	url = https://github.com/GlassOnTin/rnsh-kt.git
 [submodule "prns"]
 	path = prns
 	url = https://github.com/GlassOnTin/Prns.git

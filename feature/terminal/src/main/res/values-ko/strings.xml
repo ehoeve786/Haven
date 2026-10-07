@@ -48,7 +48,6 @@
     <string name="terminal_new_tab_host_key_changed">%s의 호스트 키가 변경됨 — 보안을 위해 연결이 거부되었습니다</string>
     <string name="terminal_new_tab_connection_failed">연결할 수 없음: %s</string>
     <string name="terminal_new_tab_shell_failed">셸을 열지 못함: %s</string>
-    <string name="terminal_new_tab_reticulum_no_session">복제할 활성 Reticulum 세션이 없습니다</string>
     <string name="terminal_new_tab_connecting">연결 중…</string>
 
     <!-- EmptyTerminalState -->

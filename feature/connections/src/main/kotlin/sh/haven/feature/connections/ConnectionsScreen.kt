@@ -210,7 +210,6 @@ fun ConnectionsScreen(
             .withIndex()
             .associate { (i, id) -> id to PROFILE_COLORS[i % PROFILE_COLORS.size] }
     }
-    val discoveredDestinations by viewModel.discoveredDestinations.collectAsState()
     val discoveredHosts by viewModel.discoveredHosts.collectAsState()
     val localVmStatus by viewModel.localVmStatus.collectAsState()
     val showLinuxVmCard by viewModel.showLinuxVmCard.collectAsState()
@@ -242,7 +241,6 @@ fun ConnectionsScreen(
     val subnetScanning by viewModel.subnetScanning.collectAsState()
     val jumpScanning by viewModel.jumpScanning.collectAsState()
     val jumpScanError by viewModel.jumpScanError.collectAsState()
-    val reticulumScanning by viewModel.reticulumScanning.collectAsState()
     val discoveredSmbHosts by viewModel.discoveredSmbHosts.collectAsState()
     val smbSubnetScanning by viewModel.smbSubnetScanning.collectAsState()
     val desktopSetupState by viewModel.desktopSetupState.collectAsState()
@@ -394,17 +392,6 @@ fun ConnectionsScreen(
 
     // Request POST_NOTIFICATIONS permission on Android 13+ so the foreground
     // service notification is visible and "Disconnect All" action works.
-    val reticulumIdentityHash by viewModel.reticulumIdentityHash.collectAsState()
-
-    // #585: the identity a server whitelists is a private key, so it can only
-    // arrive as a file. Any MIME — Reticulum identity files have no registered
-    // type and pickers hide what they cannot name.
-    val reticulumIdentityPicker = rememberLauncherForActivityResult(
-        ActivityResultContracts.OpenDocument(),
-    ) { uri -> uri?.let { viewModel.importReticulumIdentity(it) } }
-
-    LaunchedEffect(Unit) { viewModel.refreshReticulumIdentity() }
-
     val permissionLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestPermission(),
     ) { /* granted or denied — either way, foreground service still works */ }
@@ -496,14 +483,11 @@ fun ConnectionsScreen(
         )
     }
 
-    // Probe for Sideband and start collecting announces as soon as the
-    // Connections tab is shown. Refreshes every 30s to pick up announces
-    // arriving over slow LoRa links. Stops when the screen is disposed.
+    // Start network discovery while the Connections tab is shown; stop it
+    // when the screen is disposed.
     DisposableEffect(Unit) {
-        viewModel.startPeriodicRefresh()
         viewModel.startNetworkDiscovery()
         onDispose {
-            viewModel.stopPeriodicRefresh()
             viewModel.stopNetworkDiscovery()
         }
     }
@@ -511,7 +495,6 @@ fun ConnectionsScreen(
     if (showAddDialog) {
         ConnectionEditDialog(
             prefill = prefillDraft,
-            discoveredDestinations = discoveredDestinations,
             discoveredHosts = discoveredHosts,
             discoveredSmbHosts = discoveredSmbHosts,
             sshProfiles = connections,
@@ -529,17 +512,11 @@ fun ConnectionsScreen(
             globalSessionManagerLabel = globalSessionManagerLabel,
             subnetScanning = subnetScanning,
             smbSubnetScanning = smbSubnetScanning,
-            reticulumScanning = reticulumScanning,
-            reticulumIdentityHash = reticulumIdentityHash,
-            onImportReticulumIdentity = { reticulumIdentityPicker.launch(arrayOf("*/*")) },
             onScanSubnet = { viewModel.scanSubnet() },
             onScanSubnetSmb = { viewModel.scanSubnetSmb() },
             jumpScanning = jumpScanning,
             jumpScanError = jumpScanError,
             onScanSubnetViaJump = { jumpId -> viewModel.scanSubnetViaJump(jumpId) },
-            onScanReticulum = { host, port, netName, passphrase ->
-                viewModel.scanReticulumDestinations(host, port, netName, passphrase)
-            },
             onTestKnock = { host, sequence, delayMs ->
                 viewModel.testKnock(host, sequence, delayMs)
             },
@@ -653,7 +630,6 @@ fun ConnectionsScreen(
         ConnectionEditDialog(
             existing = profile,
             onRevealSavedSecret = { viewModel.authToRevealPassword(revealTitle, revealSubtitle) },
-            discoveredDestinations = discoveredDestinations,
             discoveredHosts = discoveredHosts,
             discoveredSmbHosts = discoveredSmbHosts,
             sshProfiles = connections,
@@ -673,17 +649,11 @@ fun ConnectionsScreen(
             globalSessionManagerLabel = globalSessionManagerLabel,
             subnetScanning = subnetScanning,
             smbSubnetScanning = smbSubnetScanning,
-            reticulumScanning = reticulumScanning,
-            reticulumIdentityHash = reticulumIdentityHash,
-            onImportReticulumIdentity = { reticulumIdentityPicker.launch(arrayOf("*/*")) },
             onScanSubnet = { viewModel.scanSubnet() },
             onScanSubnetSmb = { viewModel.scanSubnetSmb() },
             jumpScanning = jumpScanning,
             jumpScanError = jumpScanError,
             onScanSubnetViaJump = { jumpId -> viewModel.scanSubnetViaJump(jumpId) },
-            onScanReticulum = { host, port, netName, passphrase ->
-                viewModel.scanReticulumDestinations(host, port, netName, passphrase)
-            },
             onTestKnock = { host, sequence, delayMs ->
                 viewModel.testKnock(host, sequence, delayMs)
             },
@@ -1518,8 +1488,6 @@ private fun onTapProfile(
         } else {
             showPasswordDialog()
         }
-    } else if (profile.isReticulum) {
-        viewModel.connect(profile, "")
     } else if (profile.isEmail) {
         // EMAIL profiles carry their own credentials (stored password / mailbox
         // password / linked TOTP) — connectEmail handles SRP + unlock, so route
@@ -1757,8 +1725,6 @@ private fun ConnectionTreeItem(
                                 else R.string.connections_proot_label,
                             ),
                         )
-                    } else if (profile.isReticulum) {
-                        Text("RNS: ${profile.destinationHash?.take(12) ?: ""}... via ${profile.reticulumHost}:${profile.reticulumPort}")
                     } else if (profile.isRclone) {
                         val providerLabel = when (profile.rcloneProvider) {
                             "drive" -> "Google Drive"

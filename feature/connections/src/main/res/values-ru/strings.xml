@@ -142,20 +142,12 @@
     <string name="connections_field_vnc_password">Пароль VNC</string>
     <string name="connections_field_vnc_color_depth">Глубина цвета VNC</string>
     <string name="connections_action_clear_vnc">Очистить сохранённые настройки VNC</string>
-    <string name="connections_toggle_local_sideband">Локальный Sideband</string>
-    <string name="connections_field_gateway_host">Узел шлюза</string>
-    <string name="connections_field_network_name">Имя сети</string>
-    <string name="connections_helper_network_name">Имя сети IFAC (необязательно)</string>
-    <string name="connections_action_scan_rnsh">Искать узлы rnsh</string>
-    <string name="connections_field_destination_hash">Хеш назначения</string>
-    <string name="connections_helper_destination_hash">32 шестнадцатеричных символа</string>
     <string name="connections_field_color_scheme">Цветовая схема терминала</string>
     <string name="connections_color_scheme_inherit">По умолчанию (общая настройка)</string>
 
     <string name="connections_tunnel_dropdown_label">Туннель: %1$s</string>
     <string name="connections_session_default_with">По умолчанию (%1$s)</string>
     <string name="connections_discovered_count">Найдено (%1$d)</string>
-    <string name="connections_discovered_count_filtered">Найдено (%1$d из %2$d)</string>
 
     <!-- #135 third pass -->
 
@@ -343,7 +335,6 @@
     <string name="connections_section_terminal">Терминал</string>
     <string name="connections_section_authentication">Аутентификация</string>
     <string name="connections_section_embedded_vnc">Встроенный VNC</string>
-    <string name="connections_section_reticulum">Reticulum</string>
     <string name="connections_section_routing">Маршрутизация</string>
     <string name="connections_toggle_mcp_tunnel">Открыть доступ к MCP-серверу Tidegate</string>
     <string name="connections_helper_mcp_tunnel">Открывает MCP Tidegate для каждого сеанса этого подключения — они обращаются к http://127.0.0.1:8730/mcp и (через loopback) пропускают сопряжение и согласие. Применяется при подключении. Для постоянного доступа без открытого сеанса назначьте его как Постоянное MCP-подключение в Настройки → Конечная точка агента.</string>
@@ -359,11 +350,7 @@
     <string name="connections_helper_add_ssh_first">Сначала добавьте SSH-подключение</string>
     <string name="connections_ai_route_section">Носитель маршрута ИИ</string>
     <string name="connections_ai_route_via_ssh">Через SSH</string>
-    <string name="connections_ai_route_via_reticulum">Через Reticulum</string>
-    <string name="connections_field_ai_route_carrier">Соединение-носитель</string>
-    <string name="connections_dropdown_select_carrier">Выберите соединение</string>
     <string name="connections_helper_ai_route">Маршрутизирует конечную точку через носитель: SSH открывает локальную переадресацию через сеанс носителя, Reticulum наводит мост по ячеистой сети. Для маршрутов Reticulum носитель должен быть подключён.</string>
-    <string name="connections_helper_add_reticulum_first">Сначала добавьте соединение Reticulum</string>
     <string name="connections_toggle_rdp_nla">Аутентификация на уровне сети (NLA)</string>
     <string name="connections_helper_run_before_session_manager">Выполняется до запуска менеджера сессий.</string>
     <string name="connections_toggle_tunnel_only">Только туннель (без терминала)</string>
@@ -371,8 +358,6 @@
     <string name="connections_toggle_auto_reconnect">Автоматически переподключаться при разрыве</string>
     <string name="connections_field_reconnect_max_attempts">Макс. попыток (0 = без ограничений)</string>
     <string name="connections_toggle_reconnect_on_network_change">Переподключаться при смене сети</string>
-    <string name="connections_field_passphrase">Парольная фраза</string>
-    <string name="connections_hint_ifac_passphrase">Парольная фраза IFAC (необязательно)</string>
     <string name="connections_helper_vnc_host_via_ssh">Где VNC-сервер доступен с SSH-сервера — обычно 127.0.0.1, если это одна машина (wayvnc и т.п. привязываются только к loopback).</string>
     <string name="connections_helper_vnc_auth">Оставьте имя пользователя пустым для классического VncAuth (8-символьный пароль). Заполните имя пользователя для VeNCrypt (wayvnc, TigerVNC) — поддерживает более длинные пароли и TLS-шифрование.</string>
     <string name="connections_helper_rdp_host_via_ssh">Где RDP-сервер доступен с SSH-сервера — обычно 127.0.0.1, если это одна машина.</string>
@@ -577,13 +562,4 @@
     <string name="connections_ssh_engine_jsch_desc">Проверенный движок. Все функции.</string>
     <string name="connections_ssh_engine_sshlib_label">sshlib (экспериментальный)</string>
     <string name="connections_ssh_engine_sshlib_desc">Движок на Kotlin: терминал, SFTP и проброс портов в одном подключении. Нужно прямое подключение — без jump-хоста, прокси, аппаратного ключа, сертификата и многофакторного входа.</string>
-    <string name="connections_identity_label">Идентичность этого устройства</string>
-    <string name="connections_identity_none">Пока нет — она создастся при первом подключении</string>
-    <string name="connections_identity_help">Общая для всех подключений Reticulum. Сервер, добавляющий вас в белый список, опирается на этот хеш.</string>
-    <string name="connections_identity_import">Импортировать файл идентичности…</string>
-    <string name="connections_identity_imported">Идентичность импортирована: %1$s</string>
-    <string name="connections_identity_imported_restart">Идентичность импортирована: %1$s. Перезапустите Tidegate, чтобы подключения её использовали.</string>
-    <string name="connections_identity_not_an_identity">Этот файл не является идентичностью Reticulum. Ничего не изменено.</string>
-    <string name="connections_identity_install_failed">Не удалось установить идентичность: %1$s. Прежняя осталась на месте.</string>
-    <string name="connections_identity_unreadable">Не удалось прочитать этот файл.</string>
 </resources>

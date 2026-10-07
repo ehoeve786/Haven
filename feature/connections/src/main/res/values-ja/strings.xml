@@ -142,20 +142,12 @@
     <string name="connections_field_vnc_password">VNC のパスワード</string>
     <string name="connections_field_vnc_color_depth">VNC の色深度</string>
     <string name="connections_action_clear_vnc">保存された VNC 設定を消去</string>
-    <string name="connections_toggle_local_sideband">ローカル Sideband</string>
-    <string name="connections_field_gateway_host">ゲートウェイ ホスト</string>
-    <string name="connections_field_network_name">ネットワーク名</string>
-    <string name="connections_helper_network_name">IFAC ネットワーク名 (任意)</string>
-    <string name="connections_action_scan_rnsh">rnsh ノードをスキャン</string>
-    <string name="connections_field_destination_hash">宛先ハッシュ</string>
-    <string name="connections_helper_destination_hash">16 進 32 文字</string>
     <string name="connections_field_color_scheme">ターミナルの配色</string>
     <string name="connections_color_scheme_inherit">既定を使う (全体設定)</string>
 
     <string name="connections_tunnel_dropdown_label">トンネル: %1$s</string>
     <string name="connections_session_default_with">既定 (%1$s)</string>
     <string name="connections_discovered_count">検出済み (%1$d)</string>
-    <string name="connections_discovered_count_filtered">検出済み (%2$d 件中 %1$d 件)</string>
 
     <!-- #135 third pass -->
 
@@ -343,7 +335,6 @@
     <string name="connections_section_terminal">ターミナル</string>
     <string name="connections_section_authentication">認証</string>
     <string name="connections_section_embedded_vnc">埋め込みVNC</string>
-    <string name="connections_section_reticulum">Reticulum</string>
     <string name="connections_section_routing">ルーティング</string>
     <string name="connections_toggle_mcp_tunnel">TidegateのMCPサーバーを公開</string>
     <string name="connections_helper_mcp_tunnel">Tidegate の MCP をこの接続のすべてのセッションに公開します。各セッションは http://127.0.0.1:8730/mcp に接続し、(ループバック経由で) ペアリングと同意をスキップします。接続時に適用されます。セッションを開かずに常時アクセスするには、設定 → エージェントエンドポイント で「常時接続のMCP接続」に設定してください。</string>
@@ -359,11 +350,7 @@
     <string name="connections_helper_add_ssh_first">先にSSH接続を追加してください</string>
     <string name="connections_ai_route_section">AIルート経由接続</string>
     <string name="connections_ai_route_via_ssh">SSH 経由</string>
-    <string name="connections_ai_route_via_reticulum">Reticulum 経由</string>
-    <string name="connections_field_ai_route_carrier">経由接続先</string>
-    <string name="connections_dropdown_select_carrier">接続を選択</string>
     <string name="connections_helper_ai_route">中継接続を経由してエンドポイントへ接続します: SSH は中継セッション経由でローカル転送を開き、Reticulum はメッシュ越しにブリッジします。Reticulum ルートには中継接続先が接続中である必要があります。</string>
-    <string name="connections_helper_add_reticulum_first">先に Reticulum 接続を追加してください</string>
     <string name="connections_toggle_rdp_nla">ネットワークレベル認証 (NLA)</string>
     <string name="connections_helper_run_before_session_manager">セッションマネージャーの起動前に実行されます。</string>
     <string name="connections_toggle_tunnel_only">トンネルのみ（ターミナルなし）</string>
@@ -371,8 +358,6 @@
     <string name="connections_toggle_auto_reconnect">切断時に自動再接続</string>
     <string name="connections_field_reconnect_max_attempts">最大試行回数（0 = 無制限）</string>
     <string name="connections_toggle_reconnect_on_network_change">ネットワーク変更時に再接続</string>
-    <string name="connections_field_passphrase">パスフレーズ</string>
-    <string name="connections_hint_ifac_passphrase">IFACパスフレーズ（任意）</string>
     <string name="connections_helper_vnc_host_via_ssh">SSHサーバーからVNCサーバーに到達できる場所 — 同じマシンの場合は通常127.0.0.1（wayvncなどはループバックのみにバインドします）。</string>
     <string name="connections_helper_vnc_auth">従来のVncAuth（8文字のパスワード）にはユーザー名を空欄のままにします。VeNCrypt（wayvnc、TigerVNC）にはユーザー名を入力します — より長いパスワードとTLS暗号化に対応します。</string>
     <string name="connections_helper_rdp_host_via_ssh">SSHサーバーからRDPサーバーに到達できる場所 — 同じマシンの場合は通常127.0.0.1。</string>
@@ -577,13 +562,4 @@
     <string name="connections_ssh_engine_jsch_desc">実績あるエンジン。全機能対応。</string>
     <string name="connections_ssh_engine_sshlib_label">sshlib（実験的）</string>
     <string name="connections_ssh_engine_sshlib_desc">Kotlin エンジン：1 つの接続でターミナル、SFTP、ポート転送。直接接続が必要 — 踏み台ホスト、プロキシ、ハードウェアキー、証明書、多要素ログインには非対応。</string>
-    <string name="connections_identity_label">この端末のアイデンティティ</string>
-    <string name="connections_identity_none">まだありません — 一度接続すると作成されます</string>
-    <string name="connections_identity_help">すべての Reticulum 接続で共有されます。許可リストに登録するサーバーはこのハッシュを見ます。</string>
-    <string name="connections_identity_import">アイデンティティファイルを読み込む…</string>
-    <string name="connections_identity_imported">アイデンティティを読み込みました: %1$s</string>
-    <string name="connections_identity_imported_restart">アイデンティティを読み込みました: %1$s。接続で使うには Tidegate を再起動してください。</string>
-    <string name="connections_identity_not_an_identity">このファイルは Reticulum のアイデンティティではありません。変更はありません。</string>
-    <string name="connections_identity_install_failed">アイデンティティを設定できませんでした: %1$s。以前のものがそのまま残っています。</string>
-    <string name="connections_identity_unreadable">このファイルを読み込めませんでした。</string>
 </resources>

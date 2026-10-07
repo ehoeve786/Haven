@@ -6,8 +6,7 @@ import java.io.InputStream
 /**
  * Backend-agnostic file operations. Implementations exist for every browser
  * surface Haven exposes: SFTP / SCP over SSH (see [RemoteFileTransport]),
- * the local Android filesystem, SMB shares, rclone-managed cloud remotes,
- * and Reticulum listeners.
+ * the local Android filesystem, SMB shares and rclone-managed cloud remotes.
  *
  * This is the control-plane surface for the file browser (issue #126):
  * listing, structural ops (delete / mkdir / rename), small-file IO

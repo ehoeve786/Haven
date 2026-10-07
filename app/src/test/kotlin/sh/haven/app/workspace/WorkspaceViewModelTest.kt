@@ -206,19 +206,6 @@ class WorkspaceViewModelTest {
         assertEquals("haven", draft.item.sessionName)
     }
 
-    @Test
-    fun captureSkipsReticulumWhenDisconnected() = runTest(testDispatcher) {
-        every { registry.allSessions } returns listOf(
-            session("rns-id", "p-rns", Transport.RETICULUM, SessionStatus.RECONNECTING),
-            session("ssh-id", "p-ssh", Transport.SSH, SessionStatus.CONNECTED),
-        )
-
-        val drafts = vm.captureFromSingletons("ws-1")
-
-        assertEquals(1, drafts.size)
-        assertEquals("p-ssh", drafts.single().item.connectionProfileId)
-    }
-
     private fun session(
         id: String,
         profileId: String,

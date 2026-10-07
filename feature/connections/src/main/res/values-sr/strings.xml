@@ -195,13 +195,6 @@
     <string name="connections_field_vnc_password">VNC лозинка</string>
     <string name="connections_field_vnc_color_depth">VNC дубина боја</string>
     <string name="connections_action_clear_vnc">Обриши сачувана VNC подешавања</string>
-    <string name="connections_toggle_local_sideband">Локални бочни канал</string>
-    <string name="connections_field_gateway_host">Хост мрежног пролаза</string>
-    <string name="connections_field_network_name">Име мреже</string>
-    <string name="connections_helper_network_name">IFAC име мреже (није обавезно)</string>
-    <string name="connections_action_scan_rnsh">Скенирај rnsh чворове</string>
-    <string name="connections_field_destination_hash">Хеш одредишта</string>
-    <string name="connections_helper_destination_hash">Хекс дужине 32 карактера</string>
     <string name="connections_field_color_scheme">Шема боја терминала</string>
     <string name="connections_color_scheme_inherit">Користи подразумевану (глобално подешавање)</string>
     <string name="connections_field_background_opacity">Преиначи непрозирност позадине</string>
@@ -210,7 +203,6 @@
     <string name="connections_tunnel_dropdown_label">Тунел: %1$s</string>
     <string name="connections_session_default_with">Подразумевано (%1$s)</string>
     <string name="connections_discovered_count">Откривено (%1$d)</string>
-    <string name="connections_discovered_count_filtered">Откривено (%1$d од %2$d)</string>
     <string name="connections_pf_dialog_title_edit">Уреди прослеђивање порта</string>
     <string name="connections_pf_dialog_title_new">Ново прослеђивање порта</string>
     <string name="connections_pf_dialog_title_list">Прослеђивања порта за %1$s</string>
@@ -412,7 +404,6 @@
     <string name="connections_section_terminal">Терминал</string>
     <string name="connections_section_authentication">Потврда идентитета</string>
     <string name="connections_section_embedded_vnc">Уграђени VNC</string>
-    <string name="connections_section_reticulum">Reticulum</string>
     <string name="connections_section_routing">Рутирање</string>
     <string name="connections_toggle_mcp_tunnel">Изложи уназад Tidegate-ов MCP овом хосту</string>
     <string name="connections_helper_mcp_tunnel">"Тунелује уназад Tidegate-ов сопствени MCP сервер удаљном хосту, тако да проциси који се извршавају тамо (нпр. Claude Code који ради на серверу) могу да приступе http://127.0.0.1:8730/mcp и (преко loopback интерфејса) прескоче упаривање &amp; пристанак. Примењује се током успостављања везе. За континуирани приступ без отворене сесије, поставите ово као Увек активна MCP веза у Подешавања → Крајња тачка агента.\n"</string>
@@ -432,11 +423,7 @@
     <string name="connections_helper_add_ssh_first">Најпре додајте SSH везу</string>
     <string name="connections_ai_route_section">Носач ИИ руте</string>
     <string name="connections_ai_route_via_ssh">Преко SSH</string>
-    <string name="connections_ai_route_via_reticulum">Преко Reticulum</string>
-    <string name="connections_field_ai_route_carrier">Носећа веза</string>
-    <string name="connections_dropdown_select_carrier">Изабери везу</string>
     <string name="connections_helper_ai_route">Руторира крајњу тачку преко носиоца: SSH отвара локално прослеђивање кроз сесију носиоца, Reticulum прави мост преко мреже. Носилац мора бити повезан за Reticulum руте.</string>
-    <string name="connections_helper_add_reticulum_first">Прво додајте Reticulum везу</string>
     <string name="connections_toggle_rdp_nla">Network Level Authentication (NLA)</string>
     <string name="connections_helper_run_before_session_manager">Извршава се пре него што се покрене менаџер сесије.</string>
     <string name="connections_toggle_tunnel_only">Само-тунел (без терминала)</string>
@@ -444,8 +431,6 @@
     <string name="connections_toggle_auto_reconnect">Ауто-повезивање приликом прекида везе</string>
     <string name="connections_field_reconnect_max_attempts">Максимални бр покушаја (0 = без ограничења)</string>
     <string name="connections_toggle_reconnect_on_network_change">Поновно повезивања приликом промене мреже</string>
-    <string name="connections_field_passphrase">Приступна реченица</string>
-    <string name="connections_hint_ifac_passphrase">IFAC приступна реченица (није обавезно)</string>
     <string name="connections_helper_vnc_host_via_ssh">Како се приступа VNC серверу са SSH сервера — обично 127.0.0.1 ако се налазе на истој машини (wayvnc итд. се везују само за loopback интерфејс).</string>
     <string name="connections_helper_vnc_auth">Оставите корисничко име празно за класични VncAuth (лозинка од 8 карактера). Попуните корисничко име за VeNCrypt (wayvnc, TigerVNC) — подржава дуже лозинке и TLS шифровање.</string>
     <string name="connections_helper_rdp_host_via_ssh">Како се приступа RDP серверу са SSH сервера — обично 127.0.0.1 ако се налазе на истој машини.</string>
@@ -518,13 +503,4 @@
     <string name="connections_deeplink_confirm_message">Линк жели да се повеже на %1$s.</string>
     <string name="connections_deeplink_confirm_session">Линк жели да се повеже на %1$s и да прикачи сесију „%2$s“.</string>
     <string name="connections_deeplink_confirm_connect">Повежи</string>
-    <string name="connections_identity_label">Идентитет овог уређаја</string>
-    <string name="connections_identity_none">Још увек ниједан — креираће се приликом првог повезивања</string>
-    <string name="connections_identity_help">Дели се са сваком Reticulum везом. Сервер који вас одобрава према овом хешу.</string>
-    <string name="connections_identity_import">Увоз фајла идентитета…</string>
-    <string name="connections_identity_imported">Идентитет је увезен: %1$s</string>
-    <string name="connections_identity_imported_restart">Идентитет је увезен: %1$s. Поново покрените Tidegate да би га везе могле да га користе.</string>
-    <string name="connections_identity_not_an_identity">Тај фајл није Reticulum идентитет. Ништа није измењено.</string>
-    <string name="connections_identity_install_failed">Идентитет није могао да се инсталира: %1$s. Претходни је још увек на месту.</string>
-    <string name="connections_identity_unreadable">Тај фајл није могао да се чита.</string>
 </resources>

@@ -208,19 +208,11 @@
     <string name="connections_field_vnc_password">VNC 密码</string>
     <string name="connections_field_vnc_color_depth">VNC 色深</string>
     <string name="connections_action_clear_vnc">清除已保存的 VNC 设置</string>
-    <string name="connections_toggle_local_sideband">本地 Sideband</string>
-    <string name="connections_field_gateway_host">网关主机</string>
-    <string name="connections_field_network_name">网络名称</string>
-    <string name="connections_helper_network_name">IFAC 网络名称（可选）</string>
-    <string name="connections_action_scan_rnsh">扫描 rnsh 节点</string>
-    <string name="connections_field_destination_hash">目标哈希</string>
-    <string name="connections_helper_destination_hash">32 位十六进制</string>
     <string name="connections_field_color_scheme">终端配色方案</string>
     <string name="connections_color_scheme_inherit">使用默认设置（全局）</string>
     <string name="connections_tunnel_dropdown_label">隧道: %1$s</string>
     <string name="connections_session_default_with">默认（%1$s）</string>
     <string name="connections_discovered_count">已发现（%1$d）</string>
-    <string name="connections_discovered_count_filtered">已发现（%1$d / %2$d）</string>
 
     <!-- #135 third pass -->
 
@@ -341,7 +333,6 @@
     <string name="connections_section_terminal">终端</string>
     <string name="connections_section_authentication">身份验证</string>
     <string name="connections_section_embedded_vnc">嵌入式 VNC</string>
-    <string name="connections_section_reticulum">Reticulum</string>
     <string name="connections_section_routing">路由</string>
     <string name="connections_toggle_mcp_tunnel">公开 Tidegate 的 MCP 服务器</string>
     <string name="connections_helper_mcp_tunnel">将 Tidegate 的 MCP 开放给此连接的每个会话——它们可访问 http://127.0.0.1:8730/mcp，并（通过环回）跳过配对与同意。连接时生效。如需在不打开会话的情况下常驻访问，请在 设置 → 代理端点 中将其设为常驻 MCP 连接。</string>
@@ -357,11 +348,7 @@
     <string name="connections_helper_add_ssh_first">请先添加一个 SSH 连接</string>
     <string name="connections_ai_route_section">AI 路由载体</string>
     <string name="connections_ai_route_via_ssh">经 SSH</string>
-    <string name="connections_ai_route_via_reticulum">经 Reticulum</string>
-    <string name="connections_field_ai_route_carrier">载体连接</string>
-    <string name="connections_dropdown_select_carrier">选择连接</string>
     <string name="connections_helper_ai_route">通过载体路由端点：SSH 经载体会话打开本地转发，Reticulum 经网格搭建桥梁。Reticulum 路由要求载体已连接。</string>
-    <string name="connections_helper_add_reticulum_first">请先添加一个 Reticulum 连接</string>
     <string name="connections_toggle_rdp_nla">网络级身份验证 (NLA)</string>
     <string name="connections_helper_run_before_session_manager">在会话管理器启动前运行。</string>
     <string name="connections_toggle_tunnel_only">仅隧道（无终端）</string>
@@ -369,8 +356,6 @@
     <string name="connections_toggle_auto_reconnect">断开时自动重新连接</string>
     <string name="connections_field_reconnect_max_attempts">最大尝试次数（0 = 无限制）</string>
     <string name="connections_toggle_reconnect_on_network_change">网络变化时重新连接</string>
-    <string name="connections_field_passphrase">密码短语</string>
-    <string name="connections_hint_ifac_passphrase">IFAC 密码短语（可选）</string>
     <string name="connections_helper_vnc_host_via_ssh">VNC 服务器从 SSH 服务器可访问的位置 — 如果是同一台机器，通常为 127.0.0.1（wayvnc 等仅绑定回环地址）。</string>
     <string name="connections_helper_vnc_auth">经典 VncAuth（8 字符密码）请将用户名留空。VeNCrypt（wayvnc、TigerVNC）请填写用户名 — 支持更长的密码和 TLS 加密。</string>
     <string name="connections_helper_rdp_host_via_ssh">RDP 服务器从 SSH 服务器可访问的位置 — 如果是同一台机器，通常为 127.0.0.1。</string>
@@ -575,13 +560,4 @@
     <string name="connections_ssh_engine_jsch_desc">成熟稳定的引擎。支持全部功能。</string>
     <string name="connections_ssh_engine_sshlib_label">sshlib（实验性）</string>
     <string name="connections_ssh_engine_sshlib_desc">Kotlin 引擎：在同一连接上提供终端、SFTP 和端口转发。需要直接连接 — 不支持跳板机、代理、硬件密钥、证书或多因素登录。</string>
-    <string name="connections_identity_label">本设备的身份</string>
-    <string name="connections_identity_none">尚未创建 — 首次连接时会自动创建</string>
-    <string name="connections_identity_help">所有 Reticulum 连接共用。将你加入白名单的服务器以此哈希为准。</string>
-    <string name="connections_identity_import">导入身份文件…</string>
-    <string name="connections_identity_imported">已导入身份：%1$s</string>
-    <string name="connections_identity_imported_restart">已导入身份：%1$s。重启 Tidegate 后连接才会使用它。</string>
-    <string name="connections_identity_not_an_identity">该文件不是 Reticulum 身份。未做任何更改。</string>
-    <string name="connections_identity_install_failed">无法安装该身份：%1$s。原有身份仍然保留。</string>
-    <string name="connections_identity_unreadable">无法读取该文件。</string>
 </resources>

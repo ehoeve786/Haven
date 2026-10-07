@@ -41,8 +41,6 @@ import sh.haven.core.local.DesktopManager
 import sh.haven.core.local.LocalSessionManager
 import sh.haven.core.local.ProotManager
 import sh.haven.core.mail.MailSessionManager
-import sh.haven.core.reticulum.ReticulumTransport
-import sh.haven.core.reticulum.ReticulumSessionManager
 import sh.haven.core.smb.SmbSessionManager
 import sh.haven.core.ssh.HostKeyVerifier
 import sh.haven.core.ssh.SessionManagerRegistry
@@ -76,7 +74,6 @@ class ConnectionsViewModelSessionTest {
     private lateinit var repository: ConnectionRepository
     private lateinit var portForwardRepository: PortForwardRepository
     private lateinit var sshSessionManager: SshSessionManager
-    private lateinit var reticulumSessionManager: ReticulumSessionManager
     private lateinit var smbSessionManager: SmbSessionManager
     private lateinit var localSessionManager: LocalSessionManager
     private lateinit var mailSessionManager: MailSessionManager
@@ -102,10 +99,6 @@ class ConnectionsViewModelSessionTest {
         sshSessionManager = mockk(relaxed = true) {
             every { sessions } returns MutableStateFlow(emptyMap())
             every { hasActiveSessions } returns false
-        }
-        reticulumSessionManager = mockk(relaxed = true) {
-            every { sessions } returns MutableStateFlow(emptyMap())
-            every { activeSessions } returns emptyList()
         }
         smbSessionManager = mockk(relaxed = true) {
             every { sessions } returns MutableStateFlow(emptyMap())
@@ -138,7 +131,6 @@ class ConnectionsViewModelSessionTest {
         sessionManagerRegistry = SessionManagerRegistry(
             transports = setOf(
                 disconnectable(Transport.SSH) { sshSessionManager.removeAllSessionsForProfile(it) },
-                disconnectable(Transport.RETICULUM) { reticulumSessionManager.removeAllSessionsForProfile(it) },
                 disconnectable(Transport.SMB) { smbSessionManager.removeAllSessionsForProfile(it) },
                 disconnectable(Transport.LOCAL) { localSessionManager.removeAllSessionsForProfile(it) },
                 disconnectable(Transport.MAIL) { mailSessionManager.removeAllSessionsForProfile(it) },
@@ -179,7 +171,6 @@ class ConnectionsViewModelSessionTest {
             // ordinary session behaviour.
             backgroundDisconnectDetector = mockk(relaxed = true),
             sshSessionAttacher = mockk(relaxed = true),
-            reticulumSessionManager = reticulumSessionManager,
             btSerialSessionManager = mockk(relaxed = true) {
                 // init's link-drop observer collects this StateFlow; a bare relaxed
                 // mock returns a relaxed `collect` (declared Nothing) → KotlinNothingValueException.
@@ -192,10 +183,6 @@ class ConnectionsViewModelSessionTest {
                 every { sessions } returns kotlinx.coroutines.flow.MutableStateFlow(emptyMap())
             },
             usbBroker = mockk(relaxed = true),
-            reticulumTransport = mockk(relaxed = true) {
-                every { discoveredDestinations } returns kotlinx.coroutines.flow.MutableStateFlow(emptyList())
-            },
-            reticulumForwardServer = mockk(relaxed = true),
             smbSessionManager = smbSessionManager,
             rcloneSessionManager = rcloneSessionManager,
             rcloneClient = mockk(relaxed = true),
@@ -268,7 +255,6 @@ class ConnectionsViewModelSessionTest {
         viewModel.disconnect("profile1")
 
         verify { sshSessionManager.removeAllSessionsForProfile("profile1") }
-        verify { reticulumSessionManager.removeAllSessionsForProfile("profile1") }
         verify { smbSessionManager.removeAllSessionsForProfile("profile1") }
         verify { localSessionManager.removeAllSessionsForProfile("profile1") }
         // #363: rclone was missing from the registry, so disconnect left
@@ -289,7 +275,6 @@ class ConnectionsViewModelSessionTest {
         testDispatcher.scheduler.advanceUntilIdle()
 
         verify { sshSessionManager.removeAllSessionsForProfile("profile1") }
-        verify { reticulumSessionManager.removeAllSessionsForProfile("profile1") }
         verify { smbSessionManager.removeAllSessionsForProfile("profile1") }
         verify { localSessionManager.removeAllSessionsForProfile("profile1") }
         verify { rcloneSessionManager.removeAllSessionsForProfile("profile1") }

@@ -143,12 +143,10 @@ class TunnelDraftTest {
     @Test fun aiRouteTypeSaveNoneMeansUnrouted() {
         assertNull(aiRouteTypeForSave("NONE"))
         assertEquals("SSH", aiRouteTypeForSave("SSH"))
-        assertEquals("RETICULUM", aiRouteTypeForSave("RETICULUM"))
     }
 
     @Test fun aiRouteInitialModeReadsCoherentPair() {
         assertEquals("SSH", aiRouteInitialMode("SSH", "carrier"))
-        assertEquals("RETICULUM", aiRouteInitialMode("RETICULUM", "carrier"))
     }
 
     @Test fun aiRouteInitialModeDropsStaleRows() {
@@ -163,7 +161,6 @@ class TunnelDraftTest {
         assertTrue(aiRouteComplete("NONE", null))
         assertTrue(aiRouteComplete("SSH", "carrier"))
         assertFalse(aiRouteComplete("SSH", null))
-        assertFalse(aiRouteComplete("RETICULUM", null))
     }
 
     @Test fun aiRouteCarrierForSaveDropsCarrierOnNone() {
