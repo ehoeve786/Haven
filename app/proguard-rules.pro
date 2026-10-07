@@ -122,7 +122,6 @@
     <fields>;
     <init>(...);
 }
--keep class sh.haven.rdp.** { *; }
 
 # Keep the Prns JVM SDK (rs.reticulum.prns.**) — its JNA Library interface's
 # method names ARE the native symbol names (prns_host_*); a rename breaks

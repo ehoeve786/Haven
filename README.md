@@ -6,7 +6,7 @@
 
 <p align="center">
   Free, open-source remote access &amp; mobile workspace for Android —<br/>
-  SSH · Mosh · VNC · RDP · SFTP · SMB · email · cloud storage, a local Linux shell, mesh networking, and a consent-gated AI-agent endpoint
+  SSH · Mosh · SFTP · SMB · email · cloud storage, a local Linux shell, mesh networking, and a consent-gated AI-agent endpoint
 </p>
 
 <p align="center">
@@ -28,8 +28,6 @@
   &nbsp;
   <img src="fastlane/metadata/android/en-US/images/phoneScreenshots/2_connections.png" width="140" />
   &nbsp;
-  <img src="fastlane/metadata/android/en-US/images/phoneScreenshots/6_vnc_desktop.png" width="140" />
-  &nbsp;
   <img src="fastlane/metadata/android/en-US/images/phoneScreenshots/4_cloud_storage.png" width="140" />
   &nbsp;
   <img src="fastlane/metadata/android/en-US/images/phoneScreenshots/7_keys.png" width="140" />
@@ -40,7 +38,7 @@
 ## At a glance
 
 - **[Terminal](docs/features/terminal.md)** — Mosh / Eternal Terminal / SSH, tmux-aware session restore, configurable keyboard toolbar, OSC 7/8/9/52/133/777 integration.
-- **[Desktops](docs/features/desktops.md)** — VNC (RFB 3.8 / VeNCrypt), RDP (IronRDP + EGFX), a GPU-accelerated native Wayland compositor, and a multi-distro local-desktop manager.
+- **[Desktops](docs/features/desktops.md)** — a GPU-accelerated native Wayland compositor and a multi-distro local-desktop manager.
 - **[Files & cloud](docs/features/files-and-cloud.md)** — unified browser for SFTP/SCP, SMB, and 60+ cloud providers; cross-filesystem copy/move, editor and image tools; plus on-device FFmpeg transcode, HLS streaming, and DLNA.
 - **[Connections](docs/features/connections.md)** — port forwarding (-L/-R/-D/-J), SOCKS/HTTP/Tor proxies, per-app WireGuard & Tailscale tunnels, port knocking and fwknop SPA, and SSH keys (incl. FIDO2/SK).
 - **[Email](docs/features/email.md)** — ProtonMail (bridge protocol) and any IMAP/SMTP mailbox; compose / reply / forward, multi-account, attachments; plus **Mail Rules** inbound automation.
@@ -60,8 +58,6 @@ flow inside Tidegate — no second app, no `curl | ssh` incantation:
 
 - Tap a 4K MKV in Google Drive → FFmpeg transcodes it over HTTP and the result
   lands back in the same Drive folder, never touching local disk.
-- SSH to a box, forward its port, tap the VNC profile that targets `localhost` —
-  the desktop opens in the same app, keyboard and clipboard shared.
 - Cut a log directory from an S3 bucket, switch tabs, paste it onto an SFTP
   server — rclone does the server-side copy when it can, otherwise Tidegate streams
   it through.
@@ -91,7 +87,7 @@ It installs as `app.tidegate`, alongside (not over) upstream Haven. To move your
 Requires [Rust](https://rustup.rs/) with Android targets, `cargo-ndk`, [Go](https://go.dev/dl/) 1.26+, and `gomobile`:
 
 ```bash
-# Rust (for RDP)
+# Rust (native libraries)
 rustup target add aarch64-linux-android x86_64-linux-android
 cargo install cargo-ndk
 
@@ -121,7 +117,6 @@ Output: `app/build/outputs/apk/debug/haven-*-debug.apk`
 | Library | Purpose | License |
 |---------|---------|---------|
 | [rclone](https://rclone.org) | Cloud storage engine (60+ providers) | MIT |
-| [IronRDP](https://github.com/Devolutions/IronRDP) | RDP protocol (Rust/UniFFI) | MIT / Apache-2.0 |
 | [JSch](https://github.com/mwiede/jsch) | SSH/SFTP protocol | BSD |
 | [smbj](https://github.com/hierynomus/smbj) | SMB/CIFS protocol | Apache-2.0 |
 | [ConnectBot termlib](https://github.com/connectbot/connectbot) | Terminal emulator | Apache-2.0 |
