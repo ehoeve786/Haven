@@ -43,8 +43,8 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
-private const val SCRIPT_URL = "https://github.com/ehoeve786/Haven/blob/main/scripts/haven-vm-setup.sh"
-private const val QUICK_SETUP = """curl -sL https://raw.githubusercontent.com/ehoeve786/Haven/main/scripts/haven-vm-setup.sh | bash"""
+private const val SCRIPT_URL = "https://github.com/ehoeve786/Tidegate/blob/main/scripts/haven-vm-setup.sh"
+private const val QUICK_SETUP = """curl -sL https://raw.githubusercontent.com/ehoeve786/Tidegate/main/scripts/haven-vm-setup.sh | bash"""
 
 private const val SSH_SETUP = """sudo su -c "passwd droid"
 sudo apt update && sudo apt install -y openssh-server
