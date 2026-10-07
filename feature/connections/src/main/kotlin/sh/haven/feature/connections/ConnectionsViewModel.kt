@@ -1079,10 +1079,6 @@ class ConnectionsViewModel @Inject constructor(
     private val _navigateToWayland = MutableStateFlow(false)
     val navigateToWayland: StateFlow<Boolean> = _navigateToWayland.asStateFlow()
 
-    /** Emitted to navigate to RDP screen with connection params. */
-    data class RdpNavigation(val host: String, val port: Int, val username: String, val password: String, val domain: String, val sshForward: Boolean = false, val sshSessionId: String? = null, val profileId: String? = null, val useNla: Boolean = true, val colorDepth: Int = 32, val portKnockSequence: String? = null, val portKnockDelayMs: Int = 100)
-    private val _navigateToRdp = MutableStateFlow<RdpNavigation?>(null)
-    val navigateToRdp: StateFlow<RdpNavigation?> = _navigateToRdp.asStateFlow()
 
     /** Emitted to navigate to the SPICE desktop with connection params (#286). */
     data class SpiceNavigation(
@@ -1315,7 +1311,6 @@ class ConnectionsViewModel @Inject constructor(
 
     fun onNavigated() {
         _navigateToTerminal.value = null
-        _navigateToRdp.value = null
         _navigateToSpice.value = null
         _navigateToSmb.value = null
         _navigateToRclone.value = null
@@ -1326,7 +1321,7 @@ class ConnectionsViewModel @Inject constructor(
     }
 
     /**
-     * Consume just the desktop (RDP/SPICE) navigation events. Collected at the
+     * Consume just the desktop (SPICE) navigation events. Collected at the
      * always-composed nav-host level so a desktop tab is created the instant the
      * connect emits, independent of which screen is on-screen — fixes Retry /
      * MCP connect_profile failing to open a tab when the Connections screen
@@ -1334,7 +1329,6 @@ class ConnectionsViewModel @Inject constructor(
      * concurrent terminal/SMB navigation owned by the Connections screen.
      */
     fun onDesktopNavigated() {
-        _navigateToRdp.value = null
         _navigateToSpice.value = null
     }
 
@@ -2005,7 +1999,6 @@ class ConnectionsViewModel @Inject constructor(
         // Connect only on explicit tap: the device must be plugged in and the
         // USB permission prompt answered (#408).
         profile.isUsbSerial -> false
-        profile.isRdp -> false
         profile.isSpice -> false
         profile.isSmb -> false
         profile.isSaf -> false
@@ -2394,10 +2387,6 @@ class ConnectionsViewModel @Inject constructor(
             connectUsbSerial(profile)
             return
         }
-        if (profile.isRdp) {
-            connectRdp(profile, password)
-            return
-        }
         if (profile.isSpice) {
             connectSpice(profile)
             return
@@ -2448,51 +2437,6 @@ class ConnectionsViewModel @Inject constructor(
             return
         }
         connectSsh(profile, password, keyOnly, rememberPassword, usernameOverride = runtimeUsername, preselectedSessionName = sessionName)
-    }
-
-    private fun connectRdp(profile: ConnectionProfile, password: String) {
-        val host = profile.host
-        val port = profile.rdpPort
-        val username = profile.rdpUsername ?: profile.username
-        val rdpPassword = password.ifBlank { profile.rdpPassword ?: "" }
-        val domain = profile.rdpDomain ?: ""
-        viewModelScope.launch {
-            repository.markConnected(profile.id)
-            val sshProfileId = profile.rdpSshProfileId
-            if (profile.rdpSshForward && sshProfileId != null) {
-                val needsPrompt = jumpHostNeedsPasswordPrompt(sshProfileId)
-                if (needsPrompt != null) {
-                    _pendingTunnelDependent.value = profile
-                    _passwordFallback.value = needsPrompt
-                    return@launch
-                }
-                // Auto-connect SSH tunnel host (reuses existing session if available)
-                try {
-                    _connectingProfileId.value = profile.id
-                    // Pass empty password — SSH profile uses its own auth (key or password)
-                    val (sshSessionId, _) = connectJumpHost(
-                        sshProfileId, "", tunnelOwnerProfileId = profile.id,
-                    )
-                    _navigateToRdp.value = RdpNavigation(
-                        host, port, username, rdpPassword, domain,
-                        sshForward = true,
-                        sshSessionId = sshSessionId,
-                        profileId = profile.id,
-                        useNla = profile.rdpUseNla,
-                        colorDepth = profile.rdpColorDepth,
-                        portKnockSequence = profile.portKnockSequence,
-                        portKnockDelayMs = profile.portKnockDelayMs,
-                    )
-                } catch (e: Exception) {
-                    Log.e(TAG, "Failed to connect SSH tunnel host for RDP", e)
-                    handleTunnelJumpFailure(e, profile, sshProfileId)
-                } finally {
-                    _connectingProfileId.value = null
-                }
-            } else {
-                _navigateToRdp.value = RdpNavigation(host, port, username, rdpPassword, domain, profile.rdpSshForward, profileId = profile.id, useNla = profile.rdpUseNla, colorDepth = profile.rdpColorDepth, portKnockSequence = profile.portKnockSequence, portKnockDelayMs = profile.portKnockDelayMs)
-            }
-        }
     }
 
     private fun connectSpice(profile: ConnectionProfile) {

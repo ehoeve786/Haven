@@ -57,13 +57,6 @@ includeBuild("mosh-kotlin") {
     }
 }
 
-// IronRDP + UniFFI Kotlin bindings (submodule).
-includeBuild("rdp-kotlin") {
-    dependencySubstitution {
-        substitute(module("sh.haven:rdp-transport")).using(project(":"))
-    }
-}
-
 // Pure-Rust SPICE client + UniFFI Kotlin bindings (#286, submodule GlassOnTin/spice-kotlin).
 includeBuild("spice-kotlin") {
     dependencySubstitution {
@@ -143,7 +136,6 @@ include(":core:et")
 include(":core:btserial")
 include(":core:usbserial")
 include(":core:bleserial")
-include(":core:rdp")
 include(":core:prns")
 include(":core:spice")
 include(":core:smb")

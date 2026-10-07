@@ -18,12 +18,6 @@ updates:
       # and upstream releases don't track the fork.
       - dependency-name: "org.connectbot:termlib"
 
-  - package-ecosystem: cargo
-    directory: /rdp-kotlin/rust
-    schedule:
-      interval: weekly
-    open-pull-requests-limit: 5
-
   # prns is an upstream-tracking submodule; its crate bumps arrive via
   # upstream trunk, but the detached abi/c workspace lockfile is watched so
   # advisories against its pinned graph surface here too.

@@ -210,7 +210,6 @@ fun ConnectionEditDialog(
         seed?.isBtSerial == true -> "BTSERIAL"
         seed?.isBleSerial == true -> "BLESERIAL"
         seed?.isUsbSerial == true -> "USBSERIAL"
-        seed?.isRdp == true -> "RDP"
         seed?.isSpice == true -> "SPICE"
         seed?.isSmb == true -> "SMB"
         seed?.isRclone == true -> "RCLONE"
@@ -230,7 +229,6 @@ fun ConnectionEditDialog(
         "BLESERIAL" -> "BLESERIAL"
         "USBSERIAL" -> "USBSERIAL"
         "RETICULUM" -> "RETICULUM"
-        "RDP" -> "RDP"
         "SPICE" -> "SPICE"
         "SMB" -> "SMB"
         "RCLONE" -> "RCLONE"
@@ -262,7 +260,6 @@ fun ConnectionEditDialog(
     var port by rememberSaveable {
         mutableStateOf(
             when {
-                seed?.isRdp == true -> seed.rdpPort.toString()
                 seed?.isSpice == true -> (seed.spicePort ?: 5900).toString()
                 seed?.isSmb == true -> seed.smbPort.toString()
                 else -> seed?.port?.toString() ?: "22"
@@ -270,13 +267,6 @@ fun ConnectionEditDialog(
         )
     }
     var username by rememberSaveable { mutableStateOf(seed?.username ?: "") }
-    var rdpUsername by rememberSaveable { mutableStateOf(existing?.rdpUsername ?: "") }
-    var rdpPassword by rememberSaveable { mutableStateOf(existing?.rdpPassword ?: "") }
-    var rdpDomain by rememberSaveable { mutableStateOf(existing?.rdpDomain ?: "") }
-    var rdpSshForward by rememberSaveable { mutableStateOf(existing?.rdpSshForward ?: false) }
-    var rdpSshProfileId by rememberSaveable { mutableStateOf(existing?.rdpSshProfileId) }
-    var rdpUseNla by rememberSaveable { mutableStateOf(existing?.rdpUseNla ?: true) }
-    var rdpColorDepth by rememberSaveable { mutableStateOf(existing?.rdpColorDepth ?: 32) }
     var spicePassword by rememberSaveable { mutableStateOf(existing?.spicePassword ?: "") }
     var spiceSshForward by rememberSaveable {
         mutableStateOf(existing?.let { strictTunnelInitialEnabled(it.connectionType, "SPICE", it.spiceSshForward, it.spiceSshProfileId) } ?: false)
@@ -1079,7 +1069,6 @@ fun ConnectionEditDialog(
                     "BTSERIAL" to "Bluetooth Serial",
                     "BLESERIAL" to "Bluetooth LE Serial",
                     "USBSERIAL" to "USB Serial",
-                    "RDP" to "RDP (Desktop)",
                     "SPICE" to "SPICE (Desktop)",
                     "SMB" to "SMB (File Share)",
                     "RCLONE" to "Cloud Storage (rclone)",
@@ -1087,7 +1076,7 @@ fun ConnectionEditDialog(
                     "OPENAI" to "AI Endpoint (OpenAI-compatible)",
                     "RETICULUM" to "Reticulum",
                 )
-                // #510: the terminal build ships no RDP or SPICE client, so
+                // #510: the terminal build ships no SPICE client, so
                 // offering them here would only produce a profile that fails
                 // at connect with "native library failed to load".
                 //
@@ -1101,13 +1090,12 @@ fun ConnectionEditDialog(
                     val native = NativeFeatures(dialogContext)
                     TransportAvailability.offered(
                         allTransportOptions,
-                        rdp = native.rdp,
                         spice = native.spice,
                         // Probed, not looked for: libgojni.so is present in
                         // every build, but the terminal flavour's copy is
                         // built without rclone.
                         rclone = sh.haven.rclone.bridge.RcloneBridge.available,
-                        // Same missing-file gate as rdp/spice: the terminal
+                        // Same missing-file gate as spice: the terminal
                         // flavour drops the UML libraries, F-Droid skips the
                         // fetch.
                         uml = native.uml,
@@ -1144,14 +1132,13 @@ fun ConnectionEditDialog(
                                     transportExpanded = false
                                     // Update port to transport default when switching
                                     val defaultPort = when (value) {
-                                        "RDP" -> "3389"
                                         "SPICE" -> "5900"
                                         "SMB" -> "445"
                                         "OPENAI" -> "80"
                                         "ET" -> "22"
                                         else -> "22"
                                     }
-                                    if (port == "22" || port == "5900" || port == "3389" || port == "445" || port == "2022") {
+                                    if (port == "22" || port == "5900" || port == "445" || port == "2022") {
                                         port = defaultPort
                                     }
                                 },
@@ -1170,7 +1157,6 @@ fun ConnectionEditDialog(
                             when (connectionType) {
                                 "LOCAL" -> "Local Shell"
                                 "GUEST" -> "Linux Guest"
-                                "RDP" -> "My RDP Desktop"
                                 "SPICE" -> "My SPICE Desktop"
                                 "SMB" -> "My File Share"
                                 "RCLONE" -> "My Google Drive"
@@ -1861,137 +1847,6 @@ fun ConnectionEditDialog(
                         },
                         onCarrierChange = { aiRouteCarrierId = it },
                     )
-                } else if (connectionType == "RDP") {
-                    ConnectionSection(stringResource(R.string.connections_section_rdp))
-                    // RDP: SSH tunnel toggle first (it changes what Host means),
-                    // then host, port, username, domain.
-                    SshTunnelBlock(
-                        enabled = rdpSshForward,
-                        carrierId = rdpSshProfileId,
-                        sshProfiles = sshProfiles,
-                        onEnabledChange = { newValue ->
-                            rdpSshForward = newValue
-                            if (!newValue) rdpSshProfileId = null
-                            host = tunnelHostOnToggle(newValue, host)
-                        },
-                        onCarrierChange = { rdpSshProfileId = it },
-                    )
-                    Spacer(Modifier.height(4.dp))
-                    OutlinedTextField(
-                        value = host,
-                        onValueChange = { host = it },
-                        label = { Text(stringResource(if (rdpSshForward) R.string.connections_field_rdp_host_via_ssh else R.string.common_host)) },
-                        placeholder = { Text(if (rdpSshForward) "127.0.0.1" else "192.168.1.100") },
-                        supportingText = if (rdpSshForward) {
-                            {
-                                Text(
-                                    stringResource(R.string.connections_helper_rdp_host_via_ssh),
-                                    style = MaterialTheme.typography.bodySmall,
-                                )
-                            }
-                        } else null,
-                        singleLine = true,
-                        modifier = Modifier.fillMaxWidth(),
-                    )
-                    Spacer(Modifier.height(4.dp))
-                    Row(
-                        horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    ) {
-                        OutlinedTextField(
-                            value = rdpUsername,
-                            onValueChange = { rdpUsername = it },
-                            label = { Text(stringResource(R.string.connections_field_username)) },
-                            placeholder = { Text("user") },
-                            singleLine = true,
-                            modifier = Modifier.weight(1f),
-                        )
-                        OutlinedTextField(
-                            value = port,
-                            onValueChange = { port = it.filter { c -> c.isDigit() } },
-                            label = { Text(stringResource(R.string.connections_field_port)) },
-                            singleLine = true,
-                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                            modifier = Modifier.width(80.dp),
-                        )
-                    }
-                    Spacer(Modifier.height(4.dp))
-                    sh.haven.core.ui.PasswordField(
-                        value = rdpPassword,
-                        onValueChange = { rdpPassword = it },
-                        label = stringResource(R.string.connections_field_password_optional),
-                        modifier = Modifier.fillMaxWidth(),
-                        onRevealRequest = onRevealSavedSecret,
-                    )
-                    Spacer(Modifier.height(4.dp))
-                    OutlinedTextField(
-                        value = rdpDomain,
-                        onValueChange = { rdpDomain = it },
-                        label = { Text(stringResource(R.string.connections_field_domain_optional)) },
-                        placeholder = { Text("WORKGROUP") },
-                        singleLine = true,
-                        modifier = Modifier.fillMaxWidth(),
-                    )
-                    Spacer(Modifier.height(4.dp))
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        androidx.compose.material3.Checkbox(
-                            checked = rdpUseNla,
-                            onCheckedChange = { rdpUseNla = it },
-                        )
-                        Text(
-                            stringResource(R.string.connections_toggle_rdp_nla),
-                            style = MaterialTheme.typography.bodyMedium,
-                        )
-                    }
-                    Text(
-                        stringResource(R.string.connections_helper_rdp_nla),
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
-                    Spacer(Modifier.height(8.dp))
-                    // Colour-depth picker. Empirical matrix from #109:
-                    //   16-bit: works on everything (slow on Windows)
-                    //   24-bit: works on xrdp, Windows resets connection
-                    //   32-bit: works on Windows, xrdp blank screen
-                    // No single value works smooth everywhere; default
-                    // is the safe-everywhere 16-bit and users pick
-                    // 24/32 if they know their server type.
-                    val rdpDepthOptions = listOf(
-                        16 to stringResource(R.string.connections_rdp_depth_16),
-                        24 to stringResource(R.string.connections_rdp_depth_24),
-                        32 to stringResource(R.string.connections_rdp_depth_32),
-                    )
-                    var rdpDepthExpanded by remember { mutableStateOf(false) }
-                    val selectedRdpDepth = rdpDepthOptions.firstOrNull { it.first == rdpColorDepth }
-                        ?: rdpDepthOptions.first()
-                    ExposedDropdownMenuBox(
-                        expanded = rdpDepthExpanded,
-                        onExpandedChange = { rdpDepthExpanded = it },
-                    ) {
-                        OutlinedTextField(
-                            value = selectedRdpDepth.second,
-                            onValueChange = {},
-                            readOnly = true,
-                            label = { Text(stringResource(R.string.connections_field_colour_depth)) },
-                            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(rdpDepthExpanded) },
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .menuAnchor(MenuAnchorType.PrimaryNotEditable),
-                        )
-                        ExposedDropdownMenu(
-                            expanded = rdpDepthExpanded,
-                            onDismissRequest = { rdpDepthExpanded = false },
-                        ) {
-                            rdpDepthOptions.forEach { (value, label) ->
-                                DropdownMenuItem(
-                                    text = { Text(label) },
-                                    onClick = {
-                                        rdpColorDepth = value
-                                        rdpDepthExpanded = false
-                                    },
-                                )
-                            }
-                        }
-                    }
                 } else if (connectionType == "SPICE") {
                     ConnectionSection(stringResource(R.string.connections_section_spice))
                     // SPICE: tunnel toggle first (changes what Host means), then
@@ -3333,11 +3188,11 @@ fun ConnectionEditDialog(
                 // Port knocking. Visible for any profile with a remote
                 // TCP host — skipped for LOCAL (no host), RCLONE (its own
                 // protocol), and RETICULUM (mesh, not TCP).
-                if (connectionType in setOf("RDP", "SPICE", "SMB", "EMAIL", "OPENAI")) {
+                if (connectionType in setOf("SPICE", "SMB", "EMAIL", "OPENAI")) {
                     ConnectionSection(stringResource(R.string.connections_section_routing))
                     routingBody()
                 }
-                if (connectionType in setOf("RDP", "SPICE", "SMB", "EMAIL", "OPENAI")) {
+                if (connectionType in setOf("SPICE", "SMB", "EMAIL", "OPENAI")) {
                     ConnectionSection(stringResource(R.string.connections_section_port_knock))
                     portKnockBody()
                     ConnectionSection(stringResource(R.string.connections_section_spa))
@@ -3346,7 +3201,7 @@ fun ConnectionEditDialog(
 
                 // Route through — shared picker for SOCKS / HTTP proxy and
                 // WireGuard / Tailscale tunnel. Was SSH-only until #149;
-                // RDP and SMB now also honour profile.tunnelConfigId
+                // SMB now also honours profile.tunnelConfigId
                 // so the picker has to surface for them too. LOCAL has no
                 // network; RCLONE and Reticulum manage their own transport.
                 // Mutually exclusive at the UI layer: picking any tunnel
@@ -3368,7 +3223,6 @@ fun ConnectionEditDialog(
                 "BLESERIAL" -> bleDevice.isNotBlank() // a scanned device must be picked
                 "USBSERIAL" -> usbDevice.isNotBlank() && (usbBaud.toIntOrNull() ?: 0) > 0
                 "SSH" -> host.isNotBlank()
-                "RDP" -> host.isNotBlank() && rdpUsername.isNotBlank() && tunnelComplete(rdpSshForward, rdpSshProfileId)
                 "SPICE" -> host.isNotBlank() && tunnelComplete(spiceSshForward, spiceSshProfileId)
                 "SMB" -> host.isNotBlank() && smbShare.isNotBlank() && tunnelComplete(smbSshForward, smbSshProfileId)
                 // OAuth providers authenticate on connect (no Configure step); every
@@ -3472,44 +3326,6 @@ fun ConnectionEditDialog(
                             colorTag = colorTag,
                             groupId = groupId,
                             identityId = identityId,
-                        )
-                    } else if (connectionType == "RDP") {
-                        val rdpPortInt = port.toIntOrNull() ?: 3389
-                        (existing ?: ConnectionProfile(
-                            label = label,
-                            host = host,
-                            username = rdpUsername,
-                        )).copy(
-                            label = label.ifBlank { "RDP: $rdpUsername@$host" },
-                            host = host,
-                            port = rdpPortInt,
-                            username = rdpUsername,
-                            connectionType = "RDP",
-                            rdpPort = rdpPortInt,
-                            rdpUsername = rdpUsername.ifBlank { null },
-                            rdpPassword = rdpPassword.ifBlank { null },
-                            rdpDomain = rdpDomain.ifBlank { null },
-                            rdpSshForward = rdpSshForward,
-                            rdpSshProfileId = tunnelCarrierForSave(rdpSshForward, rdpSshProfileId),
-                            rdpUseNla = rdpUseNla,
-                            rdpColorDepth = rdpColorDepth,
-                            colorTag = colorTag,
-                            groupId = groupId,
-                            identityId = identityId,
-                            portKnockSequence = portKnockSequence.ifBlank { null },
-                            portKnockDelayMs = portKnockDelayMs.toIntOrNull()
-                                ?.coerceAtLeast(0) ?: KnockSequence.DEFAULT_DELAY_MS,
-                            spaKey = spaKey.ifBlank { null },
-                            spaKeyBase64 = spaKeyBase64,
-                            spaHmacKey = spaHmacKey.ifBlank { null },
-                            spaHmacKeyBase64 = spaHmacKeyBase64,
-                            spaAccessSpec = spaAccessSpec.ifBlank { null },
-                            spaAllowMode = spaAllowMode,
-                            spaExplicitIp = spaExplicitIp.ifBlank { null },
-                            spaPort = spaPort.toIntOrNull()?.takeIf { it in 1..65535 }
-                                ?: SpaConfig.DEFAULT_SPA_PORT,
-                        ).withRoutingSelection(
-                            proxyType, proxyHost, proxyPort, proxyUser, proxyPassword, tunnelConfigId,
                         )
                     } else if (connectionType == "SPICE") {
                         val spicePortInt = port.toIntOrNull() ?: 5900

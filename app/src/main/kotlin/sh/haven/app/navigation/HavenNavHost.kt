@@ -278,27 +278,14 @@ fun HavenNavHost(
         }
     }
 
-    // Desktop (RDP/SPICE) navigation is collected HERE, at the always-composed
+    // Desktop (SPICE) navigation is collected HERE, at the always-composed
     // nav-host level, rather than inside ConnectionsScreen — so a desktop tab is
     // created the instant the connect emits, no matter which screen is on-screen.
     // This is what makes the lost-connection Retry button and the MCP
     // connect_profile tool reliably open the desktop even when the Connections
     // screen isn't composed (it isn't, from the Desktop tab). (#121)
     val connectionsViewModel: ConnectionsViewModel = hiltViewModel()
-    val navigateToRdpEvent by connectionsViewModel.navigateToRdp.collectAsState()
     val navigateToSpiceEvent by connectionsViewModel.navigateToSpice.collectAsState()
-    LaunchedEffect(navigateToRdpEvent) {
-        navigateToRdpEvent?.let { nav ->
-            desktopViewModel.addRdpSession(
-                nav.host, nav.port, nav.username, nav.password, nav.domain,
-                nav.sshForward, nav.sshSessionId, nav.profileId,
-                useNla = nav.useNla,
-                colorDepth = nav.colorDepth,
-            )
-            connectionsViewModel.onDesktopNavigated()
-            requestScreen(Screen.Desktop)
-        }
-    }
     LaunchedEffect(navigateToSpiceEvent) {
         navigateToSpiceEvent?.let { nav ->
             desktopViewModel.addSpiceSession(
@@ -617,7 +604,7 @@ fun HavenNavHost(
                     },
                     // VNC/RDP navigation is handled by the always-composed
                     // collector above (HavenNavHost), not via these callbacks —
-                    // see the navigateToRdp/navigateToSpice LaunchedEffects (#121).
+                    // see the navigateToSpice LaunchedEffect (#121).
                     onNavigateToSmb = { profileId ->
                         pendingSmbProfileId = profileId
                         coroutineScope.launch {

@@ -1563,22 +1563,15 @@ private fun onTapProfile(
         onNavigateToRclone(profile.id)
     } else if (profileStatus == ProfileStatus.CONNECTED && profile.isSmb) {
         onNavigateToSmb(profile.id)
-    } else if (profileStatus == ProfileStatus.CONNECTED && (profile.isRdp || profile.isSpice)) {
+    } else if (profileStatus == ProfileStatus.CONNECTED && profile.isSpice) {
         // Desktop already open — re-issuing connect navigates to the Desktop
-        // screen and the dedup in addRdpSession switches to the
-        // existing tab instead of reconnecting. (An RDP-over-SSH profile
+        // screen and the dedup in addSpiceSession switches to the
+        // existing tab instead of reconnecting. (A SPICE-over-SSH profile
         // now reports CONNECTED via its tunnel dependent, so without this it
         // would fall into the generic branch below and open a shell instead.)
-        viewModel.connect(profile, if (profile.isRdp) profile.rdpPassword.orEmpty() else "")
+        viewModel.connect(profile, "")
     } else if (profileStatus == ProfileStatus.CONNECTED) {
         viewModel.ensureShellForProfile(profile.id)
-    } else if (profile.isRdp) {
-        val savedPassword = profile.rdpPassword
-        if (savedPassword != null) {
-            viewModel.connect(profile, savedPassword)
-        } else {
-            showPasswordDialog()
-        }
     } else if (profile.isSpice) {
         // SPICE auth is an optional ticket — connect directly (connectSpice
         // reads the saved ticket; no prompt needed if the server is unticketed).

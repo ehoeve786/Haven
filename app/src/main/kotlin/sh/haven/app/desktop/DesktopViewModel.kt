@@ -37,7 +37,6 @@ import sh.haven.core.local.LocalSessionManager
 import sh.haven.core.local.ProotManager
 import sh.haven.core.local.proot.Distro
 import sh.haven.core.mosh.MoshSessionManager
-import sh.haven.core.rdp.RdpSession
 import sh.haven.core.spice.SpiceSession
 import sh.haven.core.ssh.SshClient
 import sh.haven.core.ssh.SshConnection
@@ -46,7 +45,6 @@ import sh.haven.core.ui.CursorOverlay
 import sh.haven.core.tunnel.TunnelResolver
 import sh.haven.core.tunnel.TunneledConnection
 import sh.haven.core.tunnel.TunneledSocket
-import sh.haven.feature.rdp.RdpViewModel
 import java.util.UUID
 import java.util.concurrent.ConcurrentLinkedQueue
 import javax.inject.Inject
@@ -422,10 +420,10 @@ class DesktopViewModel @Inject constructor(
     }
 
     /**
-     * Resolve [profileId] to an RDP or SPICE profile and dispatch to the
-     * matching `add*Session`. Used by the workspace launcher; for
+     * Resolve [profileId] to a SPICE profile and dispatch to
+     * `addSpiceSession`. Used by the workspace launcher; for
      * tunneled profiles, picks the first connected SSH session for the
-     * tunnel profile and lets `addRdpSession` / `addSpiceSession` throw
+     * tunnel profile and lets `addSpiceSession` throw
      * the existing "SSH session not found" error if none is up.
      */
     private fun openRemoteDesktopForProfile(profileId: String) {
@@ -436,26 +434,6 @@ class DesktopViewModel @Inject constructor(
                 return@launch
             }
             when {
-                profile.isRdp -> {
-                    val sshSessionId =
-                        if (profile.rdpSshForward && profile.rdpSshProfileId != null) {
-                            sshSessionManager.getSessionsForProfile(profile.rdpSshProfileId!!)
-                                .firstOrNull { it.status.name == "CONNECTED" }
-                                ?.sessionId
-                        } else null
-                    addRdpSession(
-                        host = profile.host,
-                        port = profile.rdpPort,
-                        username = profile.rdpUsername.orEmpty(),
-                        password = profile.rdpPassword.orEmpty(),
-                        domain = profile.rdpDomain.orEmpty(),
-                        sshForward = profile.rdpSshForward,
-                        sshSessionId = sshSessionId,
-                        profileId = profile.id,
-                        useNla = profile.rdpUseNla,
-                        colorDepth = profile.rdpColorDepth,
-                    )
-                }
                 profile.isSpice -> {
                     val sshSessionId =
                         if (profile.spiceSshForward && profile.spiceSshProfileId != null) {
@@ -474,7 +452,7 @@ class DesktopViewModel @Inject constructor(
                 }
                 else -> Log.w(
                     TAG,
-                    "OpenRemoteDesktop: ${profile.label} is ${profile.connectionType}, not RDP/SPICE",
+                    "OpenRemoteDesktop: ${profile.label} is ${profile.connectionType}, not SPICE",
                 )
             }
         }
@@ -840,7 +818,6 @@ class DesktopViewModel @Inject constructor(
     fun retryTab(tabId: String) {
         val tab = _tabs.value.firstOrNull { it.id == tabId } ?: return
         val profileId = when (tab) {
-            is DesktopTab.Rdp -> tab.profileId
             is DesktopTab.Spice -> tab.profileId
             else -> null
         }
@@ -885,7 +862,6 @@ class DesktopViewModel @Inject constructor(
         if (profileId != null) {
             val idx = tabs.indexOfFirst { tab ->
                 when (tab) {
-                    is DesktopTab.Rdp -> tab.profileId == profileId
                     is DesktopTab.Spice -> tab.profileId == profileId
                     else -> false
                 }
@@ -895,261 +871,9 @@ class DesktopViewModel @Inject constructor(
         // Match by host+port (and username for RDP)
         return tabs.indexOfFirst { tab ->
             when {
-                protocol == "RDP" && tab is DesktopTab.Rdp && tab.profileId == null ->
-                    tab.label == "$host:$port"
                 protocol == "SPICE" && tab is DesktopTab.Spice && tab.profileId == null ->
                     tab.label == "$host:$port"
                 else -> false
-            }
-        }
-    }
-
-    // --- RDP sessions ---
-
-    fun addRdpSession(
-        host: String,
-        port: Int,
-        username: String,
-        password: String,
-        domain: String = "",
-        sshForward: Boolean = false,
-        sshSessionId: String? = null,
-        profileId: String? = null,
-        useNla: Boolean = true,
-        colorDepth: Int = 16,
-    ) {
-        viewModelScope.launch(Dispatchers.IO) {
-            // Deduplicate: if a tab for the same connection exists, reuse or replace
-            val existingIdx = findExistingTab(profileId, host, port, "RDP", username)
-            if (existingIdx >= 0) {
-                val existing = _tabs.value[existingIdx]
-                if (existing.connected.value) {
-                    pauseAllExcept(existingIdx)
-                    _activeTabIndex.value = existingIdx
-                    return@launch
-                }
-                closeTab(existing.id)
-            }
-
-            val label = resolveLabel(profileId) ?: "$host:$port"
-            val colorTag = resolveColorTag(profileId)
-            val tabId = UUID.randomUUID().toString()
-
-            // Hoisted out of try so the catch / onError can clean it up
-            // when the dial fails (#121). tunnelLease owns the forward +
-            // dependent release + the parent-gone teardown callback.
-            var tunnelLease: SshSessionManager.TunnelLease? = null
-            try {
-                val actualHost: String
-                val actualPort: Int
-
-                // SOCKS5 endpoint of any WireGuard / Tailscale tunnel the
-                // profile selected (#149 step 4 + 9). Only consulted when
-                // not going through SSH RemoteForward — that already
-                // tunnels the connection via 127.0.0.1:<localPort>.
-                var rdpSocksProxy: sh.haven.rdp.SocksProxyConfig? = null
-
-                if (sshForward && sshSessionId != null) {
-                    val sshClient = findSshClient(sshSessionId)
-                        ?: throw IllegalStateException("SSH session not found")
-                    val lp = sshClient.setPortForwardingL("127.0.0.1", 0, host, port)
-                    actualHost = "127.0.0.1"
-                    actualPort = lp
-                    Log.d(TAG, "RDP SSH tunnel: localhost:$lp -> ${LogRedact.host(host, port)}")
-                    // Tie this tab to the SSH session so it closes if the SSH
-                    // is torn down for any reason (#121).
-                    if (profileId != null) {
-                        tunnelLease = sshSessionManager.acquireTunnelLease(
-                            sessionId = sshSessionId,
-                            dependentProfileId = profileId,
-                            localForwardPort = lp,
-                        ) { viewModelScope.launch { closeTab(tabId) } }
-                    }
-                } else {
-                    actualHost = host
-                    actualPort = port
-                    if (profileId != null) {
-                        val profile = connectionRepository.getById(profileId)
-                        if (profile != null) {
-                            tunnelResolver.socksEndpoint(profile)?.let { addr ->
-                                rdpSocksProxy = sh.haven.rdp.SocksProxyConfig(
-                                    host = addr.hostString,
-                                    port = addr.port.toUShort(),
-                                )
-                                Log.d(TAG, "RDP routed via SOCKS5 ${LogRedact.of(addr.hostString)}:${addr.port} -> ${LogRedact.host(host, port)}")
-                            }
-                        }
-                    }
-                }
-
-                val connected = MutableStateFlow(false)
-                val frame = MutableStateFlow<Bitmap?>(null)
-                val error = MutableStateFlow<String?>(null)
-                val cursor = MutableStateFlow<CursorOverlay?>(null)
-                val pointerPos = MutableStateFlow(0 to 0)
-
-                val verboseEnabled = preferencesRepository.verboseLoggingEnabled.first()
-                val verboseBuffer = if (verboseEnabled) ConcurrentLinkedQueue<String>() else null
-
-                // Was hardcoded to the RdpSession defaults (1920x1080) with no
-                // way to change it, so a server drawing anything else had its
-                // updates discarded (#422 — VirtualBox defaults to 2560x1600
-                // and never announces a resize).
-                val rdpWidth = preferencesRepository.rdpDesktopWidth.first()
-                val rdpHeight = preferencesRepository.rdpDesktopHeight.first()
-
-                val session = RdpSession(
-                    sessionId = "rdp-$tabId",
-                    host = actualHost,
-                    port = actualPort,
-                    width = rdpWidth,
-                    height = rdpHeight,
-                    username = username,
-                    password = password,
-                    domain = domain,
-                    useNla = useNla,
-                    colorDepth = colorDepth,
-                    verboseBuffer = verboseBuffer,
-                    socksProxy = rdpSocksProxy,
-                )
-                session.onFrameUpdate = { bitmap -> frame.value = bitmap }
-                session.onCursorUpdate = { bmp, hx, hy ->
-                    cursor.value = if (bmp == null) null else CursorOverlay(bmp, hx, hy)
-                }
-                session.onCursorPosition = { x, y -> pointerPos.value = x to y }
-                session.onError = { e ->
-                    Log.e(TAG, "RDP error on tab $tabId", e)
-                    error.value = RdpViewModel.describeError(e, host, port)
-                    connected.value = false
-                    desktopSessionRegistry.setStatus(profileId, DesktopStatus.ERROR)
-                    if (profileId != null) {
-                        viewModelScope.launch(Dispatchers.IO) {
-                            connectionLogRepository.logEvent(profileId, ConnectionLog.Status.FAILED, details = e.message)
-                        }
-                    }
-                    // RdpSession.start() reports connect failures via this
-                    // callback rather than throwing, so the catch block never
-                    // runs for them — release the SSH tunnel lease + any WG
-                    // dependent so nothing lingers with a green dot (#121,
-                    // same shape as the VNC path). Idempotent with disconnectTab.
-                    tunnelLease?.close()
-                    releaseSshTunnelDependent(profileId)
-                }
-                session.onConnected = { _, _ ->
-                    // Real handshake complete — only now flip the tab to
-                    // "connected". Before this the UI stays on a Connecting
-                    // state rather than a misleading empty framebuffer.
-                    connected.value = true
-                    desktopSessionRegistry.setStatus(profileId, DesktopStatus.CONNECTED)
-                    if (profileId != null) {
-                        viewModelScope.launch(Dispatchers.IO) {
-                            val startLog = session.drainVerboseLog()
-                            connectionLogRepository.logEvent(profileId, ConnectionLog.Status.CONNECTED, verboseLog = startLog)
-                        }
-                    }
-                }
-                session.onDisconnected = {
-                    // Session ended without a surfaced error (server logoff /
-                    // transport death). Skip if the tab was already closed by
-                    // the user — disconnectTab has cleared the registry and a
-                    // late status write would resurrect a ghost entry (#437).
-                    if (_tabs.value.any { it.id == tabId }) {
-                        connected.value = false
-                        desktopSessionRegistry.setStatus(profileId, DesktopStatus.DISCONNECTED)
-                        if (profileId != null) {
-                            viewModelScope.launch(Dispatchers.IO) {
-                                connectionLogRepository.logEvent(
-                                    profileId,
-                                    ConnectionLog.Status.DISCONNECTED,
-                                    details = "Session ended by server",
-                                    verboseLog = session.drainVerboseLog(),
-                                )
-                            }
-                        }
-                    }
-                }
-
-                // Knock only on the direct path. SSH-forward goes via a
-                // localhost tunnel (knock happened at the SSH connect)
-                // and the SOCKS path runs through a userspace tunnel
-                // that knockd can't observe.
-                if (!sshForward && rdpSocksProxy == null && profileId != null) {
-                    runKnockIfConfigured(profileId, actualHost)
-                }
-
-                desktopSessionRegistry.setStatus(profileId, DesktopStatus.CONNECTING)
-                session.start()
-                // NB: intentionally no `connected.value = true` here — that
-                // happens in session.onConnected once the Rust worker
-                // thread completes the handshake.
-
-                val tab = DesktopTab.Rdp(
-                    id = tabId,
-                    label = label,
-                    colorTag = colorTag,
-                    session = session,
-                    _connected = connected,
-                    _frame = frame,
-                    _error = error,
-                    _cursor = cursor,
-                    _pointerPos = pointerPos,
-                    tunnelLease = tunnelLease,
-                    profileId = profileId,
-                )
-
-                val tabs = _tabs.value.toMutableList()
-                tabs.add(tab)
-                _tabs.value = tabs
-                _activeTabIndex.value = tabs.size - 1
-                // Expose the rendered frame + cursor to MCP capture_desktop_tab.
-                desktopSessionRegistry.registerFrameHandle(
-                    profileId,
-                    DesktopFrameHandle(
-                        protocol = "RDP",
-                        frame = { frame.value },
-                        cursor = { cursor.value?.let { CursorSnapshot(it.bitmap, it.hotspotX, it.hotspotY) } },
-                        pointer = { pointerPos.value },
-                    ),
-                )
-                // Expose mouse/clipboard input to the MCP remote-desktop tools.
-                desktopSessionRegistry.registerInputHandle(
-                    profileId,
-                    DesktopInputHandle(
-                        protocol = "RDP",
-                        mouseMove = { x, y -> tab.remoteDesktop.sendMouseMove(x, y) },
-                        mouseClick = { x, y, button -> tab.remoteDesktop.sendMouseClick(x, y, button) },
-                        mouseWheel = { deltaY -> tab.remoteDesktop.sendMouseWheel(deltaY) },
-                        clipboard = { text -> tab.remoteDesktop.sendClipboardText(text) },
-                    ),
-                )
-                // Let MCP disconnect_profile close this tab even when there's
-                // no tunnel lease to cascade through (direct connections, #437).
-                desktopSessionRegistry.registerCloseHandle(profileId) {
-                    viewModelScope.launch { closeTab(tabId) }
-                }
-            } catch (e: Exception) {
-                Log.e(TAG, "RDP connect failed", e)
-                if (profileId != null) {
-                    connectionLogRepository.logEvent(profileId, ConnectionLog.Status.FAILED, details = e.message)
-                }
-                // Connect-failure cleanup — same reasoning as the VNC
-                // path above (#121): release the lease + WG dependent.
-                tunnelLease?.close()
-                releaseSshTunnelDependent(profileId)
-                desktopSessionRegistry.setStatus(profileId, DesktopStatus.ERROR)
-                // Show error in a temporary tab (no session to close)
-                val errorTab = DesktopTab.Rdp(
-                    id = tabId,
-                    label = label,
-                    colorTag = colorTag,
-                    session = RdpSession("err", host, port, username, password, domain),
-                    _error = MutableStateFlow(RdpViewModel.describeError(e, host, port)),
-                    profileId = profileId,
-                )
-                val tabs = _tabs.value.toMutableList()
-                tabs.add(errorTab)
-                _tabs.value = tabs
-                _activeTabIndex.value = tabs.size - 1
             }
         }
     }
@@ -1375,7 +1099,6 @@ class DesktopViewModel @Inject constructor(
         // (cursor / virtual cursor seed) repaints immediately, without
         // waiting for the IO dispatch round-trip.
         when (val tab = activeTab.value) {
-            is DesktopTab.Rdp -> tab._pointerPos.value = x to y
             is DesktopTab.Spice -> tab._pointerPos.value = x to y
             else -> {}
         }
@@ -1398,26 +1121,11 @@ class DesktopViewModel @Inject constructor(
 
     fun sendClick(x: Int, y: Int, button: Int = 1) {
         when (val tab = activeTab.value) {
-            is DesktopTab.Rdp -> tab._pointerPos.value = x to y
             is DesktopTab.Spice -> tab._pointerPos.value = x to y
             else -> {}
         }
         viewModelScope.launch(Dispatchers.IO) {
             activeTab.value?.remoteDesktop?.sendMouseClick(x, y, button)
-        }
-    }
-
-    fun sendRdpKey(scancode: Int, pressed: Boolean) {
-        viewModelScope.launch(Dispatchers.IO) {
-            (activeTab.value as? DesktopTab.Rdp)?.session?.sendKey(scancode, pressed)
-        }
-    }
-
-    fun typeRdpUnicode(codepoint: Int) {
-        viewModelScope.launch(Dispatchers.IO) {
-            val s = (activeTab.value as? DesktopTab.Rdp)?.session ?: return@launch
-            s.sendUnicodeKey(codepoint, true)
-            s.sendUnicodeKey(codepoint, false)
         }
     }
 
@@ -1472,7 +1180,7 @@ class DesktopViewModel @Inject constructor(
         }
     }
 
-    /** Knock against the RDP/SPICE host using the profile's saved sequence,
+    /** Knock against the SPICE host using the profile's saved sequence,
      *  if any. Failures are logged but not thrown; the real socket open
      *  surfaces the actual symptom. */
     private suspend fun runKnockIfConfigured(profileId: String, host: String) {
@@ -1501,19 +1209,6 @@ class DesktopViewModel @Inject constructor(
     private fun disconnectTab(tab: DesktopTab) {
         viewModelScope.launch(Dispatchers.IO) {
             when (tab) {
-                is DesktopTab.Rdp -> {
-                    if (tab.profileId != null) {
-                        val verboseLog = tab.session.drainVerboseLog()
-                        connectionLogRepository.logEvent(tab.profileId, ConnectionLog.Status.DISCONNECTED, verboseLog = verboseLog)
-                    }
-                    tab.session.close()
-                    tab.tunnelLease?.close()
-                    releaseSshTunnelDependent(tab.profileId)
-                    desktopSessionRegistry.clear(tab.profileId)
-                    desktopSessionRegistry.clearFrameHandle(tab.profileId)
-                    desktopSessionRegistry.clearInputHandle(tab.profileId)
-                    desktopSessionRegistry.clearCloseHandle(tab.profileId)
-                }
                 is DesktopTab.Spice -> {
                     if (tab.profileId != null) {
                         val verboseLog = tab.session.drainVerboseLog()

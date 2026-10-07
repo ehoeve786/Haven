@@ -486,22 +486,6 @@ class SettingsViewModel @Inject constructor(
     val showCopyOutputButton: StateFlow<Boolean> = preferencesRepository.showCopyOutputButton
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), false)
 
-    /** #418 debug: RDP RemoteFX-Progressive upgrade-tile decoding. */
-    val rdpProgressiveUpgrade: StateFlow<Boolean> = preferencesRepository.rdpProgressiveUpgrade
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), false)
-
-    fun setRdpProgressiveUpgrade(enabled: Boolean) {
-        viewModelScope.launch { preferencesRepository.setRdpProgressiveUpgrade(enabled) }
-    }
-
-    /** #425: advertise RDP H.264/AVC420 so KRDP (H.264-only) can render. On by default. */
-    val rdpAvcEnabled: StateFlow<Boolean> = preferencesRepository.rdpAvcEnabled
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), true)
-
-    fun setRdpAvcEnabled(enabled: Boolean) {
-        viewModelScope.launch { preferencesRepository.setRdpAvcEnabled(enabled) }
-    }
-
     val keepScreenOnInTerminal: StateFlow<Boolean> = preferencesRepository.keepScreenOnInTerminal
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), false)
 
@@ -628,15 +612,6 @@ class SettingsViewModel @Inject constructor(
         viewModelScope.launch { preferencesRepository.setDesktopInputMode(mode) }
     }
 
-    /** Desktop size Haven asks RDP servers for (#422). */
-    val rdpDesktopWidth: StateFlow<Int> = preferencesRepository.rdpDesktopWidth
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 1920)
-    val rdpDesktopHeight: StateFlow<Int> = preferencesRepository.rdpDesktopHeight
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 1080)
-
-    fun setRdpDesktopSize(width: Int, height: Int) {
-        viewModelScope.launch { preferencesRepository.setRdpDesktopSize(width, height) }
-    }
 
     val gpuUseVenus: StateFlow<Boolean> = preferencesRepository.gpuUseVenus
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), false)

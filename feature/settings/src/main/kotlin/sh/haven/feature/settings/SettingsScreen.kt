@@ -143,8 +143,6 @@ import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import sh.haven.core.data.preferences.UserPreferencesRepository.Companion.MAX_RDP_DIMENSION
-import sh.haven.core.data.preferences.UserPreferencesRepository.Companion.MIN_RDP_DIMENSION
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
 import kotlin.math.roundToInt
@@ -213,8 +211,6 @@ fun SettingsScreen(
     val connectionLoggingEnabled by viewModel.connectionLoggingEnabled.collectAsState()
     val excludeFromRecents by viewModel.excludeFromRecents.collectAsState()
     val verboseLoggingEnabled by viewModel.verboseLoggingEnabled.collectAsState()
-    val rdpProgressiveUpgrade by viewModel.rdpProgressiveUpgrade.collectAsState()
-    val rdpAvcEnabled by viewModel.rdpAvcEnabled.collectAsState()
     val mcpAgentEndpointEnabled by viewModel.mcpAgentEndpointEnabled.collectAsState()
     val agentAllowFileRead by viewModel.agentAllowFileRead.collectAsState()
     val unseenAgentActivity by viewModel.unseenAgentActivity.collectAsState()
@@ -804,29 +800,6 @@ fun SettingsScreen(
 
         }
         CollapsibleSettingsSection(stringResource(R.string.settings_section_desktop), settingsExpanded[4], { settingsExpanded[4] = !settingsExpanded[4] }) {
-        val rdpW by viewModel.rdpDesktopWidth.collectAsState()
-        val rdpH by viewModel.rdpDesktopHeight.collectAsState()
-        var showRdpSizeDialog by remember { mutableStateOf(false) }
-        // RDP-only: the size a remote desktop session negotiates.
-        if (nativeFeatures.rdp) {
-            SettingsItem(
-                icon = Icons.Filled.DesktopWindows,
-                title = stringResource(R.string.settings_rdp_desktop_size_title),
-                subtitle = stringResource(R.string.settings_rdp_desktop_size_subtitle, rdpW, rdpH),
-                onClick = { showRdpSizeDialog = true },
-            )
-        }
-        if (showRdpSizeDialog) {
-            RdpDesktopSizeDialog(
-                width = rdpW,
-                height = rdpH,
-                onDismiss = { showRdpSizeDialog = false },
-                onApply = { w, h ->
-                    viewModel.setRdpDesktopSize(w, h)
-                    showRdpSizeDialog = false
-                },
-            )
-        }
         SettingsToggleItem(
             icon = Icons.Filled.Mouse,
             title = stringResource(R.string.settings_touchpad_input_title),
@@ -919,26 +892,6 @@ fun SettingsScreen(
             checked = connectionLoggingEnabled,
             onCheckedChange = viewModel::setConnectionLoggingEnabled,
         )
-        // RDP-only decode tuning.
-        if (nativeFeatures.rdp) {
-            SettingsToggleItem(
-                icon = Icons.Filled.BugReport,
-                title = stringResource(R.string.settings_rdp_progressive_upgrade_title),
-                subtitle = stringResource(R.string.settings_rdp_progressive_upgrade_subtitle),
-                checked = rdpProgressiveUpgrade,
-                onCheckedChange = viewModel::setRdpProgressiveUpgrade,
-            )
-        }
-        // RDP-only decode tuning.
-        if (nativeFeatures.rdp) {
-            SettingsToggleItem(
-                icon = Icons.Filled.BugReport,
-                title = stringResource(R.string.settings_rdp_avc_title),
-                subtitle = stringResource(R.string.settings_rdp_avc_subtitle),
-                checked = rdpAvcEnabled,
-                onCheckedChange = viewModel::setRdpAvcEnabled,
-            )
-        }
         if (connectionLoggingEnabled) {
             SettingsItem(
                 icon = Icons.Filled.ListAlt,
@@ -2518,7 +2471,6 @@ private fun AboutDialog(
                 Spacer(modifier = Modifier.height(4.dp))
                 val libraries = listOf(
                     "rclone" to "Cloud storage engine (60+ providers) — MIT",
-                    "IronRDP" to "RDP protocol (Rust/UniFFI) — MIT/Apache-2.0",
                     "JSch" to "SSH/SFTP protocol — BSD",
                     "smbj" to "SMB/CIFS protocol — Apache-2.0",
                     "ConnectBot termlib" to "Terminal emulator — Apache-2.0",
@@ -4281,81 +4233,4 @@ private fun ImeFlagToggle(
             )
         }
     }
-}
-
-/**
- * Pick the desktop size Haven asks RDP servers for (#422).
- *
- * This existed only as a hardcoded 1920x1080 before. A server that draws a
- * different size — VirtualBox defaults to 2560x1600 and never announces a
- * resize — had every update outside that area silently discarded, which looks
- * like a screen that stops refreshing rather than like a size mismatch.
- */
-@Composable
-private fun RdpDesktopSizeDialog(
-    width: Int,
-    height: Int,
-    onDismiss: () -> Unit,
-    onApply: (Int, Int) -> Unit,
-) {
-    var w by remember { mutableStateOf(width.toString()) }
-    var h by remember { mutableStateOf(height.toString()) }
-    val wv = w.toIntOrNull()
-    val hv = h.toIntOrNull()
-    val valid = wv != null && hv != null &&
-        wv in MIN_RDP_DIMENSION..MAX_RDP_DIMENSION &&
-        hv in MIN_RDP_DIMENSION..MAX_RDP_DIMENSION
-
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text(stringResource(R.string.settings_rdp_desktop_size_title)) },
-        text = {
-            Column(Modifier.verticalScroll(rememberScrollState())) {
-                Text(
-                    stringResource(R.string.settings_rdp_desktop_size_hint),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-                Spacer(Modifier.height(12.dp))
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    OutlinedTextField(
-                        value = w,
-                        onValueChange = { w = it.filter(Char::isDigit).take(4) },
-                        label = { Text(stringResource(R.string.settings_rdp_desktop_size_width)) },
-                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                        singleLine = true,
-                        modifier = Modifier.weight(1f),
-                    )
-                    Spacer(Modifier.width(12.dp))
-                    OutlinedTextField(
-                        value = h,
-                        onValueChange = { h = it.filter(Char::isDigit).take(4) },
-                        label = { Text(stringResource(R.string.settings_rdp_desktop_size_height)) },
-                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                        singleLine = true,
-                        modifier = Modifier.weight(1f),
-                    )
-                }
-                Spacer(Modifier.height(12.dp))
-                // The sizes people actually hit, so the common cases are one tap
-                // rather than typing four digits twice on a phone.
-                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    listOf(1920 to 1080, 2560 to 1600, 1280 to 720).forEach { (pw, ph) ->
-                        TextButton(onClick = { w = pw.toString(); h = ph.toString() }) {
-                            Text("$pw×$ph", style = MaterialTheme.typography.labelMedium)
-                        }
-                    }
-                }
-            }
-        },
-        confirmButton = {
-            TextButton(
-                onClick = { if (valid) onApply(wv!!, hv!!) },
-                enabled = valid,
-            ) { Text(stringResource(R.string.common_apply)) }
-        },
-        dismissButton = {
-            TextButton(onClick = onDismiss) { Text(stringResource(R.string.common_cancel)) }
-        },
-    )
 }

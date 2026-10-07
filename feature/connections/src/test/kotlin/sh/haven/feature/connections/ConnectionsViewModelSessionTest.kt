@@ -46,7 +46,6 @@ import sh.haven.core.mosh.MoshSessionManager
 import sh.haven.core.reticulum.ReticulumTransport
 import sh.haven.core.reticulum.ReticulumSessionManager
 import sh.haven.core.smb.SmbSessionManager
-import sh.haven.core.rdp.RdpSessionManager
 import sh.haven.core.ssh.HostKeyVerifier
 import sh.haven.core.ssh.SessionManagerRegistry
 import sh.haven.core.ssh.SshSessionManager
@@ -84,7 +83,6 @@ class ConnectionsViewModelSessionTest {
     private lateinit var etSessionManager: EtSessionManager
     private lateinit var smbSessionManager: SmbSessionManager
     private lateinit var localSessionManager: LocalSessionManager
-    private lateinit var rdpSessionManager: RdpSessionManager
     private lateinit var mailSessionManager: MailSessionManager
     private lateinit var rcloneSessionManager: sh.haven.core.rclone.RcloneSessionManager
     private lateinit var openAiSessionManager: sh.haven.core.openai.OpenAiSessionManager
@@ -134,10 +132,6 @@ class ConnectionsViewModelSessionTest {
             every { prootManager } returns this@ConnectionsViewModelSessionTest.prootManager
             every { desktopManager } returns this@ConnectionsViewModelSessionTest.desktopManager
         }
-        rdpSessionManager = mockk(relaxed = true) {
-            every { sessions } returns MutableStateFlow(emptyMap())
-            every { activeSessions } returns emptyList()
-        }
         mailSessionManager = mockk(relaxed = true) {
             every { sessions } returns MutableStateFlow(emptyMap())
         }
@@ -161,7 +155,6 @@ class ConnectionsViewModelSessionTest {
                 disconnectable(Transport.ET) { etSessionManager.removeAllSessionsForProfile(it) },
                 disconnectable(Transport.SMB) { smbSessionManager.removeAllSessionsForProfile(it) },
                 disconnectable(Transport.LOCAL) { localSessionManager.removeAllSessionsForProfile(it) },
-                disconnectable(Transport.RDP) { rdpSessionManager.removeAllSessionsForProfile(it) },
                 disconnectable(Transport.MAIL) { mailSessionManager.removeAllSessionsForProfile(it) },
                 disconnectable(Transport.RCLONE) { rcloneSessionManager.removeAllSessionsForProfile(it) },
                 // OPENAI was missing from this set, so disconnect left the chat
