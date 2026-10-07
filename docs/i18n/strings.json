@@ -20,22 +20,22 @@
    "strings": [
     {
      "name": "app_name",
-     "en": "Moorline",
+     "en": "Tidegate SSH",
      "comment": "",
      "args": [],
      "t": {
-      "ar": "Moorline",
-      "bn": "Moorline",
-      "de": "Moorline",
-      "es": "Moorline",
-      "fr": "Moorline",
-      "hi": "Moorline",
-      "ja": "Moorline",
-      "ko": "Moorline",
-      "pt": "Moorline",
-      "ru": "Moorline",
-      "sr": "Moorline",
-      "zh": "Moorline"
+      "ar": "Tidegate SSH",
+      "bn": "Tidegate SSH",
+      "de": "Tidegate SSH",
+      "es": "Tidegate SSH",
+      "fr": "Tidegate SSH",
+      "hi": "Tidegate SSH",
+      "ja": "Tidegate SSH",
+      "ko": "Tidegate SSH",
+      "pt": "Tidegate SSH",
+      "ru": "Tidegate SSH",
+      "sr": "Tidegate SSH",
+      "zh": "Tidegate SSH"
      }
     },
     {
