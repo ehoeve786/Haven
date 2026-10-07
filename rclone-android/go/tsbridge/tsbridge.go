@@ -301,7 +301,7 @@ func StartTunnel(authKey, stateDir, hostname, controlURL string) (*TunnelHandle,
 		return nil, errors.New("state directory required")
 	}
 	if hostname == "" {
-		hostname = "haven-android"
+		hostname = "tidegate-android"
 	}
 	srv := &tsnet.Server{
 		AuthKey:    authKey,

@@ -92,7 +92,7 @@ internal class McpOAuth(
             // prompt was declined. Let the user approve in Haven and retry.
             val retry = "/authorize?$query".replace("&", "&amp;").replace("\"", "&quot;").replace("<", "&lt;")
             val html = "<!doctype html><meta name=viewport content=\"width=device-width\">" +
-                "<p>Open Haven on your phone and approve <b>Claude</b>, then " +
+                "<p>Open Tidegate on your phone and approve <b>Claude</b>, then " +
                 "<a href=\"$retry\">try again</a>.</p>"
             return HttpResponse(200, "OK", html.toByteArray(), "text/html; charset=utf-8")
         }
