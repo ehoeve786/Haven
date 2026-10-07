@@ -330,7 +330,6 @@
     <string name="connections_field_proxy_username">プロキシのユーザー名</string>
     <string name="connections_field_proxy_password">プロキシのパスワード</string>
     <string name="connections_helper_proxy_socks4_userid">SOCKS4 はユーザー ID のみを送信します（パスワードなし）。</string>
-    <string name="connections_field_et_port">ETポート</string>
     <string name="connections_field_mosh_server_command">mosh-serverコマンド</string>
     <string name="connections_helper_mosh_server">既定値の場合は空欄のまま。1024未満のポートにはauthbindを使用してください。</string>
     <string name="connections_username_placeholder_ask">接続時に尋ねるには空欄のままにします</string>
@@ -382,7 +381,6 @@
     <string name="connections_helper_add_reticulum_first">先に Reticulum 接続を追加してください</string>
     <string name="connections_toggle_rdp_nla">ネットワークレベル認証 (NLA)</string>
     <string name="connections_helper_mosh_required">リモートホストにmosh-serverが必要です</string>
-    <string name="connections_helper_et_required">リモートホストにetserverが必要です（ポート %1$s）</string>
     <string name="connections_helper_run_before_session_manager">セッションマネージャーの起動前に実行されます。</string>
     <string name="connections_toggle_tunnel_only">トンネルのみ（ターミナルなし）</string>
     <string name="connections_helper_tunnel_only">ポート転送のためだけにSSHを確立します — ターミナルセッションは開かれません。</string>

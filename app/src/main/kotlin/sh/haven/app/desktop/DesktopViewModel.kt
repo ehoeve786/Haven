@@ -29,7 +29,6 @@ import sh.haven.core.data.desktop.DesktopStatus
 import sh.haven.core.data.preferences.UserPreferencesRepository
 import sh.haven.core.data.repository.ConnectionLogRepository
 import sh.haven.core.data.repository.ConnectionRepository
-import sh.haven.core.et.EtSessionManager
 import sh.haven.core.knock.KnockSequence
 import sh.haven.core.knock.PortKnocker
 import sh.haven.core.local.DesktopManager
@@ -60,7 +59,6 @@ private sealed class DesktopStartOutcome {
 class DesktopViewModel @Inject constructor(
     private val sshSessionManager: SshSessionManager,
     private val moshSessionManager: MoshSessionManager,
-    private val etSessionManager: EtSessionManager,
     private val connectionLogRepository: ConnectionLogRepository,
     private val preferencesRepository: UserPreferencesRepository,
     private val connectionRepository: ConnectionRepository,

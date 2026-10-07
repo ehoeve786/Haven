@@ -59,7 +59,6 @@ import sh.haven.core.ssh.SshSessionManager
 import sh.haven.core.ssh.SshVerboseLogger
 import sh.haven.core.data.db.entities.KnownHost
 import sh.haven.core.mosh.MoshSessionManager
-import sh.haven.core.et.EtSessionManager
 import sh.haven.core.fido.FidoAuthenticator
 import sh.haven.core.fido.FidoTouchPrompt
 import sh.haven.core.local.LocalSessionManager
@@ -229,7 +228,6 @@ class ConnectionsViewModel @Inject constructor(
     private val sshSessionAttacher: sh.haven.core.ssh.SshSessionAttacher,
     private val reticulumSessionManager: ReticulumSessionManager,
     private val moshSessionManager: MoshSessionManager,
-    private val etSessionManager: EtSessionManager,
     private val btSerialSessionManager: sh.haven.core.btserial.BtSerialSessionManager,
     private val bleSerialSessionManager: sh.haven.core.bleserial.BleSerialSessionManager,
     private val usbSerialSessionManager: sh.haven.core.usbserial.UsbSerialSessionManager,
@@ -473,7 +471,6 @@ class ConnectionsViewModel @Inject constructor(
                 sshSessionManager.sessions,
                 reticulumSessionManager.sessions,
                 moshSessionManager.sessions,
-                etSessionManager.sessions,
                 localSessionManager.sessions,
                 umlGuestManager.sessions,
             ) { flows -> flows }
@@ -618,15 +615,14 @@ class ConnectionsViewModel @Inject constructor(
             map.toMap()
         }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyMap())
 
-    /** Derive profile-level statuses for the connections list UI (merges SSH + Reticulum + Mosh + ET). */
+    /** Derive profile-level statuses for the connections list UI (merges SSH + Reticulum + Mosh). */
     val profileStatuses: StateFlow<Map<String, ProfileStatus>> =
         combine(
             combine(
                 sshSessionManager.sessions,
                 reticulumSessionManager.sessions,
                 moshSessionManager.sessions,
-                etSessionManager.sessions,
-            ) { ssh, rns, mosh, et -> arrayOf(ssh, rns, mosh, et) },
+            ) { ssh, rns, mosh -> arrayOf(ssh, rns, mosh) },
             combine(
                 smbSessionManager.sessions,
                 localSessionManager.sessions,
@@ -643,8 +639,6 @@ class ConnectionsViewModel @Inject constructor(
             @Suppress("UNCHECKED_CAST")
             val moshMap = base[2] as Map<String, MoshSessionManager.SessionState>
             @Suppress("UNCHECKED_CAST")
-            val etMap = base[3] as Map<String, EtSessionManager.SessionState>
-            @Suppress("UNCHECKED_CAST")
             val smbMap = extra[0] as Map<String, SmbSessionManager.SessionState>
             @Suppress("UNCHECKED_CAST")
             val localMap = extra[1] as Map<String, LocalSessionManager.SessionState>
@@ -656,7 +650,7 @@ class ConnectionsViewModel @Inject constructor(
             val openaiMap = openaiMap0 as Map<String, sh.haven.core.openai.OpenAiSessionManager.SessionState>
             val result = mutableMapOf<String, ProfileStatus>()
 
-            // Track which profiles have transport-specific sessions (Mosh/ET/RNS/Local).
+            // Track which profiles have transport-specific sessions (Mosh/RNS/Local).
             // Their status takes precedence over the SSH infrastructure session
             // (which stays CONNECTED for SFTP even after the transport disconnects).
             val transportProfiles = mutableSetOf<String>()
@@ -693,18 +687,6 @@ class ConnectionsViewModel @Inject constructor(
                     MoshSessionManager.SessionState.Status.CONNECTED in statuses -> ProfileStatus.CONNECTED
                     MoshSessionManager.SessionState.Status.CONNECTING in statuses -> ProfileStatus.CONNECTING
                     MoshSessionManager.SessionState.Status.ERROR in statuses -> ProfileStatus.ERROR
-                    else -> ProfileStatus.DISCONNECTED
-                }
-            }
-
-            // ET statuses (override SSH for this profile)
-            etMap.values.groupBy { it.profileId }.forEach { (profileId, states) ->
-                transportProfiles.add(profileId)
-                val statuses = states.map { it.status }
-                result[profileId] = when {
-                    EtSessionManager.SessionState.Status.CONNECTED in statuses -> ProfileStatus.CONNECTED
-                    EtSessionManager.SessionState.Status.CONNECTING in statuses -> ProfileStatus.CONNECTING
-                    EtSessionManager.SessionState.Status.ERROR in statuses -> ProfileStatus.ERROR
                     else -> ProfileStatus.DISCONNECTED
                 }
             }
@@ -1291,11 +1273,6 @@ class ConnectionsViewModel @Inject constructor(
     private var moshPendingClient: SshClient? = null
     private var moshPendingHost: String? = null
     private var moshPendingVerboseLogger: SshVerboseLogger? = null
-
-    /** SSH client + host kept alive during ET session picker. */
-    private var etPendingClient: SshClient? = null
-    private var etPendingProfile: ConnectionProfile? = null
-    private var etPendingVerboseLogger: SshVerboseLogger? = null
 
     fun onNavigated() {
         _navigateToTerminal.value = null
@@ -2394,10 +2371,6 @@ class ConnectionsViewModel @Inject constructor(
         val runtimeUsername = usernameOverride?.takeIf { it.isNotBlank() }
         if (profile.username.isBlank() && runtimeUsername == null) {
             _passwordFallback.value = profile
-            return
-        }
-        if (profile.isEternalTerminal) {
-            connectEternalTerminal(profile, password, keyOnly, usernameOverride = runtimeUsername, startupCommand = startupCommand)
             return
         }
         if (profile.isMosh) {
@@ -3995,146 +3968,6 @@ class ConnectionsViewModel @Inject constructor(
 
     // internal for unit test (#559: a declined key unlock must not surface
     // as an auth failure and pop the password fallback).
-    internal fun connectEternalTerminal(
-        profile: ConnectionProfile,
-        password: String,
-        keyOnly: Boolean,
-        usernameOverride: String? = null,
-        startupCommand: String? = null,
-    ) {
-        val effectiveUsername = usernameOverride?.takeIf { it.isNotBlank() } ?: profile.username
-        viewModelScope.launch {
-            _connectingProfileId.value = profile.id
-            _error.value = null
-
-            val sessionId = etSessionManager.registerSession(
-                profileId = profile.id,
-                label = profile.label,
-            )
-
-            val verboseEnabled = preferencesRepository.verboseLoggingEnabled.first()
-            val verboseLogger = if (verboseEnabled) SshVerboseLogger() else null
-
-            var isFidoAuth = false
-            try {
-                // Phase 1: SSH bootstrap — connect, verify host key
-                val client = withContext(Dispatchers.IO) {
-                    val authMethod = resolveAuthMethods(profile, password)
-                    isFidoAuth = authMethod is ConnectionConfig.AuthMethod.FidoKey
-                    val config = moshEtBootstrapConfig(
-                        profile, authMethod, agentIdentitiesFor(profile),
-                        username = effectiveUsername,
-                        reconnectPolicy = profile.reconnectPolicy,
-                    )
-                    bootstrapMoshEtSsh(profile, password, config, verboseLogger, interactive = true)
-                }
-
-                // Phase 2: Resolve session manager, check for existing sessions
-                val smgr = resolveSessionManager(profile)
-
-                val effectiveStartupCommand = startupCommand ?: profile.remoteCommand?.takeIf { it.isNotBlank() }
-                if (effectiveStartupCommand != null) {
-                    if (profile.requestPty) {
-                        finishEtConnect(
-                            sessionId = sessionId,
-                            profile = profile,
-                            client = client,
-                            manager = smgr,
-                            chosenSessionName = null,
-                            verboseLogger = verboseLogger,
-                            startupCommand = effectiveStartupCommand,
-                        )
-                    } else {
-                        userMessageBus.emit(
-                            sh.haven.core.data.message.UserMessage(
-                                "remoteCommand ignored on Eternal Terminal",
-                                sh.haven.core.data.message.UserMessage.Severity.WARNING
-                            )
-                        )
-                        finishEtConnect(
-                            sessionId = sessionId,
-                            profile = profile,
-                            client = client,
-                            manager = smgr,
-                            chosenSessionName = null,
-                            verboseLogger = verboseLogger,
-                            startupCommand = null,
-                        )
-                    }
-                    return@launch
-                }
-
-                val existingSessions = withContext(Dispatchers.IO) {
-                    listExistingMultiplexerSessions(smgr) { client.execCommand(it) }
-                }
-                // The session this profile was last on is still running: go
-                // straight back to it. The ET transport is new but the shell
-                // inside the multiplexer is exactly where the user left it —
-                // that, not transport resumption, is what survives an app
-                // restart (#371).
-                val autoAttach = autoAttachSessionName(profile, existingSessions)
-                if (autoAttach == null && existingSessions.isNotEmpty()) {
-                    etPendingClient = client
-                    etPendingProfile = profile
-                    etPendingVerboseLogger = verboseLogger
-                    _sessionSelection.value = SessionSelection(
-                        sessionId = sessionId,
-                        profileId = profile.id,
-                        managerLabel = smgr.label,
-                        sessionNames = existingSessions,
-                        manager = smgr,
-                        transportType = "ET",
-                        suggestedNewName = generateUniqueSessionName(profile.label, existingSessions),
-                    )
-                    _connectingProfileId.value = null
-                    return@launch // UI will call onSessionSelected() to continue
-                }
-
-                // Re-attach to the remembered session, or (nothing remembered
-                // and nothing running) start a fresh one.
-                finishEtConnect(sessionId, profile, client, smgr, autoAttach, verboseLogger = verboseLogger)
-            } catch (e: Exception) {
-                Log.e(TAG, "connectEternalTerminal failed for ${LogRedact.of(profile.label)}: ${e.message}", e)
-                connectionLogRepository.logEvent(profile.id, ConnectionLog.Status.FAILED, details = e.message, verboseLog = verboseLogger?.drain())
-                etPendingClient?.disconnect()
-                etPendingClient = null
-                etPendingProfile = null
-                etPendingVerboseLogger = null
-                etSessionManager.updateStatus(sessionId, EtSessionManager.SessionState.Status.ERROR)
-                etSessionManager.removeSession(sessionId)
-                val msg = e.message ?: ""
-                val isAuthMessage =
-                    msg.contains("Auth fail", ignoreCase = true) ||
-                        msg.contains("Auth cancel", ignoreCase = true) ||
-                        msg.contains("authentication", ignoreCase = true) ||
-                        msg.contains("publickey", ignoreCase = true)
-                val isAuthError = keyOnly && isAuthMessage
-                if (e is KeyUnlockDeclinedException) {
-                    // Same rule as connectSsh (#559), and first for the same
-                    // reason: the message contains "authentication", which the
-                    // classifier below reads as an auth failure and answers
-                    // with the password fallback. A declined key unlock is
-                    // reported, not answered with another way in.
-                    _error.value = msg.ifBlank { "Key unlock was declined" }
-                } else if (isFidoAuth && (isAuthError || (keyOnly && msg.isBlank()))) {
-                    val fidoDetail = fidoAuthenticator.lastAssertionError
-                    _error.value = if (fidoDetail != null) "Security key: $fidoDetail"
-                    else msg.ifBlank { "Security key authentication failed" }
-                } else if (isAuthError || (keyOnly && msg.isBlank())) {
-                    _passwordFallback.value = profile
-                } else if (!keyOnly && isAuthMessage) {
-                    _error.value = "Authentication failed — check username and password"
-                } else {
-                    _error.value = msg.ifBlank { "Eternal Terminal connection failed" }
-                }
-            } finally {
-                _connectingProfileId.value = null
-            }
-        }
-    }
-
-    // internal for unit test (#559: a declined key unlock must not surface
-    // as an auth failure and pop the password fallback).
     internal fun connectMosh(
         profile: ConnectionProfile,
         password: String,
@@ -4403,44 +4236,6 @@ class ConnectionsViewModel @Inject constructor(
             return
         }
 
-        if (sel?.transportType == "ET") {
-            // ET path: finish ET connection with chosen session name
-            val client = etPendingClient
-            val profile = etPendingProfile
-            val pendingLogger = etPendingVerboseLogger
-            etPendingClient = null
-            etPendingProfile = null
-            etPendingVerboseLogger = null
-            if (client == null || profile == null) {
-                _error.value = "ET SSH connection lost"
-                etSessionManager.removeSession(sessionId)
-                return
-            }
-            val profileId = sel.profileId
-            // Same fix as Mosh above: generate a unique session name when the
-            // user picks "Create new session" so each click really creates a
-            // new session rather than re-attaching to one named after the
-            // connection. (#113)
-            val effectiveName = sessionName ?: generateUniqueSessionName(
-                etSessionManager.sessions.value[sessionId]?.label ?: sessionId.take(8),
-                sel.sessionNames,
-            )
-            viewModelScope.launch {
-                _connectingProfileId.value = profileId
-                try {
-                    finishEtConnect(sessionId, profile, client, sel.manager, effectiveName, verboseLogger = pendingLogger)
-                } catch (e: Exception) {
-                    client.disconnect()
-                    etSessionManager.updateStatus(sessionId, EtSessionManager.SessionState.Status.ERROR)
-                    _error.value = e.message ?: "Eternal Terminal connection failed"
-                    etSessionManager.removeSession(sessionId)
-                } finally {
-                    _connectingProfileId.value = null
-                }
-            }
-            return
-        }
-
         // SSH path
         val profileId = sel?.profileId ?: sshSessionManager.getSession(sessionId)?.profileId ?: return
         viewModelScope.launch {
@@ -4470,7 +4265,6 @@ class ConnectionsViewModel @Inject constructor(
         val killCmd = sel.manager.killCommand?.invoke(sessionName) ?: return
         val client = when (sel.transportType) {
             "MOSH" -> moshPendingClient
-            "ET" -> etPendingClient
             else -> sshSessionManager.getSession(sel.sessionId)?.client
         }
         if (client == null) return
@@ -4511,7 +4305,6 @@ class ConnectionsViewModel @Inject constructor(
         val renameCmd = sel.manager.renameCommand?.invoke(oldName, newName) ?: return
         val client = when (sel.transportType) {
             "MOSH" -> moshPendingClient
-            "ET" -> etPendingClient
             else -> sshSessionManager.getSession(sel.sessionId)?.client
         }
         if (client == null) return
@@ -4987,92 +4780,6 @@ class ConnectionsViewModel @Inject constructor(
         }
     }
 
-    /**
-     * Finish ET connection: exec etterminal on SSH, parse IDPASSKEY,
-     * connect to etserver, set session manager initial command.
-     */
-    private suspend fun finishEtConnect(
-        sessionId: String,
-        profile: ConnectionProfile,
-        client: SshClient,
-        manager: SessionManager,
-        chosenSessionName: String?,
-        silent: Boolean = false,
-        verboseLogger: SshVerboseLogger? = null,
-        startupCommand: String? = null,
-    ) {
-        val etPort = profile.etPort
-        val (etClientId, etPasskey) = withContext(Dispatchers.IO) {
-            val chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"
-            fun randomAlphaNum(len: Int) = String(CharArray(len) { chars.random() })
-            val proposedId = "XXX" + randomAlphaNum(13)
-            val proposedKey = randomAlphaNum(32)
-            val term = "xterm-256color"
-
-            val etCmd = "echo '${proposedId}/${proposedKey}_${term}' | etterminal"
-            Log.d(TAG, "ET bootstrap: running etterminal via SSH")
-            val result = client.execCommand(etCmd)
-            val output = result.stdout + "\n" + result.stderr
-
-            val marker = "IDPASSKEY:"
-            val markerPos = output.indexOf(marker)
-            if (markerPos < 0) {
-                client.disconnect()
-                throw Exception(
-                    "etterminal not found or failed on remote host. " +
-                        "Install with: apt install et\n" +
-                        "Output: ${output.take(200)}"
-                )
-            }
-            val idPasskey = output.substring(markerPos + marker.length).trim().take(49)
-            val parts = idPasskey.split("/", limit = 2)
-            if (parts.size != 2 || parts[0].length != 16 || parts[1].length != 32) {
-                client.disconnect()
-                throw Exception("Unexpected etterminal output: $idPasskey")
-            }
-            Pair(parts[0], parts[1])
-        }
-
-        val serverHost = profile.host
-        Log.d(TAG, "ET bootstrap: got clientId=${etClientId.take(6)}... connecting to $serverHost:$etPort")
-
-        // Build session manager command with chosen or default session name
-        val smCmd = manager.command
-        var effectiveSessionName: String? = null
-        if (startupCommand != null) {
-            etSessionManager.setInitialCommand(sessionId, startupCommand)
-        } else if (smCmd != null) {
-            val rawName = chosenSessionName
-                ?: etSessionManager.sessions.value[sessionId]?.label
-                ?: sessionId.take(8)
-            val sanitized = sanitizeSessionName(rawName)
-            effectiveSessionName = sanitized
-            etSessionManager.setInitialCommand(sessionId, smCmd(sanitized))
-        }
-
-        val etTransportLogBuffer = if (verboseLogger != null) java.util.concurrent.ConcurrentLinkedQueue<String>() else null
-        withContext(Dispatchers.IO) {
-            etSessionManager.connectSession(
-                sessionId = sessionId,
-                serverHost = serverHost,
-                etPort = etPort,
-                clientId = etClientId,
-                passkey = etPasskey,
-                sshClient = client,
-                verboseBuffer = etTransportLogBuffer,
-            )
-        }
-
-        repository.markConnected(profile.id)
-        if (effectiveSessionName != null) {
-            repository.save(profile.copy(lastSessionName = effectiveSessionName))
-        }
-        connectionLogRepository.logEvent(profile.id, ConnectionLog.Status.CONNECTED, verboseLog = verboseLogger?.drain())
-        startForegroundServiceIfNeeded()
-        if (!silent) {
-            _navigateToTerminal.value = profile.id
-        }
-    }
 
     /**
      * Resolve the auth method for a connection profile.
@@ -5687,14 +5394,11 @@ class ConnectionsViewModel @Inject constructor(
     )
 
     fun disconnect(profileId: String) {
-        // Drain transport logs before disconnecting (Mosh/ET capture logs in-session)
+        // Drain transport logs before disconnecting (Mosh captures logs in-session)
         val moshLog = moshSessionManager.getSessionsForProfile(profileId)
             .mapNotNull { it.moshSession?.drainTransportLog() }
             .joinToString("\n").ifEmpty { null }
-        val etLog = etSessionManager.getSessionsForProfile(profileId)
-            .mapNotNull { it.etSession?.drainTransportLog() }
-            .joinToString("\n").ifEmpty { null }
-        val transportLog = listOfNotNull(moshLog, etLog).joinToString("\n").ifEmpty { null }
+        val transportLog = moshLog
 
         viewModelScope.launch { connectionLogRepository.logEvent(profileId, ConnectionLog.Status.DISCONNECTED, verboseLog = transportLog) }
         // Tear down any USB/IP auto-forward this profile holds before the SSH
@@ -5972,7 +5676,6 @@ class ConnectionsViewModel @Inject constructor(
         when {
             profile.isLocal -> connectLocalSilent(profile)
             profile.isReticulum -> connectReticulumSilent(profile)
-            profile.isEternalTerminal -> connectEtSilent(profile)
             profile.isMosh -> connectMoshSilent(profile)
             else -> connectSshSilent(profile)
         }
@@ -6165,63 +5868,6 @@ class ConnectionsViewModel @Inject constructor(
             connectionLogRepository.logEvent(profile.id, ConnectionLog.Status.FAILED, details = e.message, verboseLog = verboseLogger?.drain())
             moshSessionManager.updateStatus(sessionId, MoshSessionManager.SessionState.Status.ERROR)
             moshSessionManager.removeSession(sessionId)
-            throw e
-        }
-    }
-
-    private suspend fun connectEtSilent(profile: ConnectionProfile) {
-        val password = profile.sshPassword ?: ""
-        val sessionId = etSessionManager.registerSession(profileId = profile.id, label = profile.label)
-        val verboseEnabled = preferencesRepository.verboseLoggingEnabled.first()
-        val verboseLogger = if (verboseEnabled) SshVerboseLogger() else null
-
-        try {
-            val client = withContext(Dispatchers.IO) {
-                val authMethod = resolveAuthMethods(profile, password)
-                val config = moshEtBootstrapConfig(profile, authMethod, agentIdentitiesFor(profile))
-                bootstrapMoshEtSsh(profile, password, config, verboseLogger, interactive = false)
-            }
-
-            val smgr = resolveSessionManager(profile)
-            val effectiveStartupCommand = profile.remoteCommand?.takeIf { it.isNotBlank() }
-            if (effectiveStartupCommand != null) {
-                if (profile.requestPty) {
-                    finishEtConnect(
-                        sessionId = sessionId,
-                        profile = profile,
-                        client = client,
-                        manager = smgr,
-                        chosenSessionName = profile.lastSessionName,
-                        silent = true,
-                        verboseLogger = verboseLogger,
-                        startupCommand = effectiveStartupCommand,
-                    )
-                } else {
-                    userMessageBus.emit(
-                        sh.haven.core.data.message.UserMessage(
-                            "remoteCommand ignored on Eternal Terminal",
-                            sh.haven.core.data.message.UserMessage.Severity.WARNING
-                        )
-                    )
-                    finishEtConnect(
-                        sessionId = sessionId,
-                        profile = profile,
-                        client = client,
-                        manager = smgr,
-                        chosenSessionName = profile.lastSessionName,
-                        silent = true,
-                        verboseLogger = verboseLogger,
-                        startupCommand = null,
-                    )
-                }
-            } else {
-                finishEtConnect(sessionId, profile, client, smgr, profile.lastSessionName, silent = true, verboseLogger = verboseLogger)
-            }
-        } catch (e: Exception) {
-            Log.e(TAG, "connectEtSilent failed for ${LogRedact.of(profile.label)}: ${e.message}", e)
-            connectionLogRepository.logEvent(profile.id, ConnectionLog.Status.FAILED, details = e.message, verboseLog = verboseLogger?.drain())
-            etSessionManager.updateStatus(sessionId, EtSessionManager.SessionState.Status.ERROR)
-            etSessionManager.removeSession(sessionId)
             throw e
         }
     }

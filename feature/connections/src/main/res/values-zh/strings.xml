@@ -192,7 +192,6 @@
     <string name="connections_field_proxy_username">代理用户名</string>
     <string name="connections_field_proxy_password">代理密码</string>
     <string name="connections_helper_proxy_socks4_userid">SOCKS4 仅发送用户 ID（无密码）。</string>
-    <string name="connections_field_et_port">ET 端口</string>
     <string name="connections_field_mosh_server_command">mosh-server 命令</string>
     <string name="connections_helper_mosh_server">留空使用默认值。低于 1024 的端口请使用 authbind。</string>
     <string name="connections_username_placeholder_ask">留空以在连接时询问</string>
@@ -380,7 +379,6 @@
     <string name="connections_helper_add_reticulum_first">请先添加一个 Reticulum 连接</string>
     <string name="connections_toggle_rdp_nla">网络级身份验证 (NLA)</string>
     <string name="connections_helper_mosh_required">需要远程主机上的 mosh-server</string>
-    <string name="connections_helper_et_required">需要远程主机上的 etserver（端口 %1$s）</string>
     <string name="connections_helper_run_before_session_manager">在会话管理器启动前运行。</string>
     <string name="connections_toggle_tunnel_only">仅隧道（无终端）</string>
     <string name="connections_helper_tunnel_only">仅为端口转发建立 SSH — 不会打开终端会话。</string>

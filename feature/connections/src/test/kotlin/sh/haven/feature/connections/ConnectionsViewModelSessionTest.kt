@@ -36,7 +36,6 @@ import sh.haven.core.data.repository.KeyMaterial
 import sh.haven.core.data.repository.KeyUnlockDeclinedException
 import sh.haven.core.data.repository.SshKeyRepository
 import sh.haven.core.ssh.ConnectionConfig
-import sh.haven.core.et.EtSessionManager
 import sh.haven.core.fido.FidoAuthenticator
 import sh.haven.core.local.DesktopManager
 import sh.haven.core.local.LocalSessionManager
@@ -80,7 +79,6 @@ class ConnectionsViewModelSessionTest {
     private lateinit var sshSessionManager: SshSessionManager
     private lateinit var reticulumSessionManager: ReticulumSessionManager
     private lateinit var moshSessionManager: MoshSessionManager
-    private lateinit var etSessionManager: EtSessionManager
     private lateinit var smbSessionManager: SmbSessionManager
     private lateinit var localSessionManager: LocalSessionManager
     private lateinit var mailSessionManager: MailSessionManager
@@ -112,10 +110,6 @@ class ConnectionsViewModelSessionTest {
             every { activeSessions } returns emptyList()
         }
         moshSessionManager = mockk(relaxed = true) {
-            every { sessions } returns MutableStateFlow(emptyMap())
-            every { activeSessions } returns emptyList()
-        }
-        etSessionManager = mockk(relaxed = true) {
             every { sessions } returns MutableStateFlow(emptyMap())
             every { activeSessions } returns emptyList()
         }
@@ -152,7 +146,6 @@ class ConnectionsViewModelSessionTest {
                 disconnectable(Transport.SSH) { sshSessionManager.removeAllSessionsForProfile(it) },
                 disconnectable(Transport.RETICULUM) { reticulumSessionManager.removeAllSessionsForProfile(it) },
                 disconnectable(Transport.MOSH) { moshSessionManager.removeAllSessionsForProfile(it) },
-                disconnectable(Transport.ET) { etSessionManager.removeAllSessionsForProfile(it) },
                 disconnectable(Transport.SMB) { smbSessionManager.removeAllSessionsForProfile(it) },
                 disconnectable(Transport.LOCAL) { localSessionManager.removeAllSessionsForProfile(it) },
                 disconnectable(Transport.MAIL) { mailSessionManager.removeAllSessionsForProfile(it) },
@@ -195,7 +188,6 @@ class ConnectionsViewModelSessionTest {
             sshSessionAttacher = mockk(relaxed = true),
             reticulumSessionManager = reticulumSessionManager,
             moshSessionManager = moshSessionManager,
-            etSessionManager = etSessionManager,
             btSerialSessionManager = mockk(relaxed = true) {
                 // init's link-drop observer collects this StateFlow; a bare relaxed
                 // mock returns a relaxed `collect` (declared Nothing) → KotlinNothingValueException.
@@ -286,7 +278,6 @@ class ConnectionsViewModelSessionTest {
         verify { sshSessionManager.removeAllSessionsForProfile("profile1") }
         verify { reticulumSessionManager.removeAllSessionsForProfile("profile1") }
         verify { moshSessionManager.removeAllSessionsForProfile("profile1") }
-        verify { etSessionManager.removeAllSessionsForProfile("profile1") }
         verify { smbSessionManager.removeAllSessionsForProfile("profile1") }
         verify { localSessionManager.removeAllSessionsForProfile("profile1") }
         // #363: rclone was missing from the registry, so disconnect left
@@ -309,7 +300,6 @@ class ConnectionsViewModelSessionTest {
         verify { sshSessionManager.removeAllSessionsForProfile("profile1") }
         verify { reticulumSessionManager.removeAllSessionsForProfile("profile1") }
         verify { moshSessionManager.removeAllSessionsForProfile("profile1") }
-        verify { etSessionManager.removeAllSessionsForProfile("profile1") }
         verify { smbSessionManager.removeAllSessionsForProfile("profile1") }
         verify { localSessionManager.removeAllSessionsForProfile("profile1") }
         verify { rcloneSessionManager.removeAllSessionsForProfile("profile1") }
@@ -612,7 +602,7 @@ class ConnectionsViewModelSessionTest {
     }
 
     // The same property for the sibling connect paths. connectSsh got the
-    // declined branch first; Mosh, Eternal Terminal and the jump-host
+    // declined branch first; Mosh and the jump-host
     // failure handler each have their own copy of the "authentication"
     // classifier, and each of these fails with the password prompt raised
     // if its declined branch is removed.
@@ -633,25 +623,6 @@ class ConnectionsViewModelSessionTest {
 
         viewModel.connectMosh(
             keyProfile("k-bio").copy(useMosh = true),
-            password = "",
-            keyOnly = true,
-        )
-        awaitError()
-
-        assertTrue(
-            "error was: ${viewModel.error.value}",
-            viewModel.error.value.orEmpty().contains("declined"),
-        )
-        assertNull(viewModel.passwordFallback.value)
-    }
-
-    @Test
-    fun `a declined key unlock on the Eternal Terminal path does NOT offer the password fallback`() = runTest {
-        coEvery { sshKeyRepository.fetchKeyMaterial("k-bio") } returns
-            KeyMaterial.Declined("Authentication was declined for key \"work laptop\".")
-
-        viewModel.connectEternalTerminal(
-            keyProfile("k-bio").copy(useEternalTerminal = true),
             password = "",
             keyOnly = true,
         )

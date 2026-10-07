@@ -249,7 +249,6 @@ dependencies {
     implementation("network.reticulum:rns-core:0.1.0-SNAPSHOT")
     implementation("network.reticulum:rns-interfaces:0.1.0-SNAPSHOT")
     implementation(project(":core:mosh"))
-    implementation(project(":core:et"))
     implementation(project(":core:btserial"))
     implementation(project(":core:bleserial"))
     implementation(project(":core:usbserial"))

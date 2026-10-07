@@ -203,7 +203,7 @@ fun ConnectionEditDialog(
     // connection, an optional deep-link [prefill] (#305). [existing] alone
     // drives edit-mode (title, save semantics); [seed] only drives initials.
     val seed = existing ?: prefill
-    // Transport dropdown maps to: connectionType + useMosh + useEternalTerminal
+    // Transport dropdown maps to: connectionType + useMosh
     val initialTransport = when {
         seed?.isLocal == true -> "LOCAL"
         seed?.isGuest == true -> "GUEST"
@@ -214,7 +214,6 @@ fun ConnectionEditDialog(
         seed?.isRclone == true -> "RCLONE"
         seed?.isEmail == true -> "EMAIL"
         seed?.isOpenai == true -> "OPENAI"
-        seed?.isEternalTerminal == true -> "ET"
         seed?.isMosh == true -> "MOSH"
         seed?.isReticulum == true -> "RETICULUM"
         else -> "SSH"
@@ -370,7 +369,6 @@ fun ConnectionEditDialog(
     var addressFamily by rememberSaveable { mutableStateOf(existing?.addressFamily ?: "AUTO") }
     var bindAddress by rememberSaveable { mutableStateOf(existing?.bindAddress ?: "") }
     var selectedSessionManager by rememberSaveable { mutableStateOf(seed?.sessionManager) }
-    var etPort by rememberSaveable { mutableStateOf(existing?.etPort?.toString() ?: "2022") }
     var localSideband by rememberSaveable {
         mutableStateOf(
             existing != null &&
@@ -1055,7 +1053,6 @@ fun ConnectionEditDialog(
                 val allTransportOptions = listOf(
                     "SSH" to "SSH",
                     "MOSH" to "Mosh",
-                    "ET" to "Eternal Terminal",
                     "LOCAL" to "Local Shell (PRoot)",
                     "GUEST" to "Linux Guest (UML)",
                     "BTSERIAL" to "Bluetooth Serial",
@@ -1124,7 +1121,6 @@ fun ConnectionEditDialog(
                                     val defaultPort = when (value) {
                                         "SMB" -> "445"
                                         "OPENAI" -> "80"
-                                        "ET" -> "22"
                                         else -> "22"
                                     }
                                     if (port == "22" || port == "5900" || port == "445" || port == "2022") {
@@ -2358,19 +2354,6 @@ fun ConnectionEditDialog(
                         }
                     }
 
-                    // ET port (shown only for Eternal Terminal)
-                    if (selectedTransport == "ET") {
-                        Spacer(Modifier.height(4.dp))
-                        OutlinedTextField(
-                            value = etPort,
-                            onValueChange = { etPort = it.filter { c -> c.isDigit() } },
-                            label = { Text(stringResource(R.string.connections_field_et_port)) },
-                            singleLine = true,
-                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                            modifier = Modifier.width(120.dp),
-                        )
-                    }
-
                     // Transport helper text
                     if (selectedTransport == "MOSH") {
                         Spacer(Modifier.height(4.dp))
@@ -2392,18 +2375,6 @@ fun ConnectionEditDialog(
                             modifier = Modifier.fillMaxWidth(),
                         )
                     }
-                    if (selectedTransport == "ET") {
-                        Spacer(Modifier.height(4.dp))
-                        Text(
-                            stringResource(
-                                R.string.connections_helper_et_required,
-                                etPort.ifBlank { "2022" },
-                            ),
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        )
-                    }
-
                     // SSH options
                     Spacer(Modifier.height(4.dp))
                     OutlinedTextField(
@@ -2448,28 +2419,25 @@ fun ConnectionEditDialog(
 
                     // Remote command runs as an SSH exec request, before any
                     // interactive shell startup file can take control. Mosh
-                    // forwards it to mosh-server with `--`; ET has no matching
-                    // bootstrap contract, so it intentionally does not expose it.
-                    if (selectedTransport != "ET") {
-                        Spacer(Modifier.height(4.dp))
-                        OutlinedTextField(
-                            value = remoteCommand,
-                            onValueChange = { remoteCommand = it },
-                            label = { Text(stringResource(R.string.connections_field_remote_command)) },
-                            placeholder = { Text("tmux new -A -s work") },
-                            supportingText = { Text(stringResource(R.string.connections_helper_remote_command)) },
-                            singleLine = false,
-                            minLines = 1,
-                            maxLines = 3,
-                            modifier = Modifier.fillMaxWidth(),
+                    // forwards it to mosh-server with `--`.
+                    Spacer(Modifier.height(4.dp))
+                    OutlinedTextField(
+                        value = remoteCommand,
+                        onValueChange = { remoteCommand = it },
+                        label = { Text(stringResource(R.string.connections_field_remote_command)) },
+                        placeholder = { Text("tmux new -A -s work") },
+                        supportingText = { Text(stringResource(R.string.connections_helper_remote_command)) },
+                        singleLine = false,
+                        minLines = 1,
+                        maxLines = 3,
+                        modifier = Modifier.fillMaxWidth(),
+                    )
+                    if (remoteCommand.isNotBlank()) {
+                        BooleanToggleRow(
+                            label = stringResource(R.string.connections_toggle_request_pty),
+                            checked = requestPty,
+                            onCheckedChange = { requestPty = it },
                         )
-                        if (remoteCommand.isNotBlank()) {
-                            BooleanToggleRow(
-                                label = stringResource(R.string.connections_toggle_request_pty),
-                                checked = requestPty,
-                                onCheckedChange = { requestPty = it },
-                            )
-                        }
                     }
 
                     // USB/IP device forwarding (SSH) — export a phone-attached USB
@@ -3174,7 +3142,6 @@ fun ConnectionEditDialog(
             }
             TextButton(
                 onClick = {
-                    val etPortInt = etPort.toIntOrNull() ?: 2022
                     val profile = if (connectionType == "LOCAL") {
                         (existing ?: ConnectionProfile(
                             label = label,
@@ -3491,8 +3458,6 @@ fun ConnectionEditDialog(
                             mcpEnabled = mcpEnabled,
                             sessionManager = selectedSessionManager,
                             useMosh = selectedTransport == "MOSH",
-                            useEternalTerminal = selectedTransport == "ET",
-                            etPort = etPortInt,
                             fileTransport = fileTransport,
                             colorTag = colorTag,
                             groupId = groupId,

@@ -7,7 +7,6 @@ import dagger.hilt.components.SingletonComponent
 import dagger.multibindings.IntoSet
 import sh.haven.core.bleserial.BleSerialSessionManager
 import sh.haven.core.btserial.BtSerialSessionManager
-import sh.haven.core.et.EtSessionManager
 import sh.haven.core.local.LocalSessionManager
 import sh.haven.core.mail.MailSessionManager
 import sh.haven.core.openai.OpenAiSessionManager
@@ -80,19 +79,6 @@ object TransportSessionManagerModule {
         override val sessions
             get() = m.sessions.value.values.map {
                 UnifiedSession(it.sessionId, it.profileId, it.label, mapStatus(it.status.name), Transport.MOSH)
-            }
-    }
-
-    @Provides @IntoSet
-    fun et(m: EtSessionManager): TransportSessionManager = object : TransportSessionManager {
-        override val transport = Transport.ET
-        override val inputName = "ET"
-        override fun removeAllSessionsForProfile(profileId: String) = m.removeAllSessionsForProfile(profileId)
-        override fun sendInput(sessionId: String, text: String) = m.sendInput(sessionId, text)
-        override val activeSessionCount get() = m.activeSessions.size
-        override val sessions
-            get() = m.sessions.value.values.map {
-                UnifiedSession(it.sessionId, it.profileId, it.label, mapStatus(it.status.name), Transport.ET)
             }
     }
 

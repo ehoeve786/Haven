@@ -5,7 +5,6 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import dagger.multibindings.IntoSet
-import sh.haven.core.et.EtSessionManager
 import sh.haven.core.local.LocalSessionManager
 import sh.haven.core.mosh.MoshSessionManager
 import sh.haven.core.reticulum.ReticulumSessionManager
@@ -42,12 +41,6 @@ object ForegroundSessionParticipantModule {
 
     @Provides @IntoSet
     fun mosh(m: MoshSessionManager): ForegroundSessionParticipant = object : ForegroundSessionParticipant {
-        override val activeSessions get() = m.activeSessions.map { SessionInfo(it.profileId, it.label) }
-        override fun disconnectAll() = m.disconnectAll()
-    }
-
-    @Provides @IntoSet
-    fun et(m: EtSessionManager): ForegroundSessionParticipant = object : ForegroundSessionParticipant {
         override val activeSessions get() = m.activeSessions.map { SessionInfo(it.profileId, it.label) }
         override fun disconnectAll() = m.disconnectAll()
     }

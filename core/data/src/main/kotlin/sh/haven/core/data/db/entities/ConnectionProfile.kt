@@ -517,7 +517,6 @@ data class ConnectionProfile(
     val isSsh: Boolean get() = connectionType == "SSH"
     val isReticulum: Boolean get() = connectionType == "RETICULUM"
     val isMosh: Boolean get() = isSsh && useMosh
-    val isEternalTerminal: Boolean get() = isSsh && useEternalTerminal
     val isVnc: Boolean get() = connectionType == "VNC"
     val isRdp: Boolean get() = connectionType == "RDP"
     val isSpice: Boolean get() = connectionType == "SPICE"

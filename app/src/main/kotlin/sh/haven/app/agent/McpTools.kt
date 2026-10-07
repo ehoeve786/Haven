@@ -453,7 +453,7 @@ internal class McpTools(
         ) { args -> readExitedSession(args) },
 
         "list_sessions" to ToolHandler(
-            description = "List currently registered sessions across all transports (ssh, mosh, et, reticulum, smb, local, mail, openai, and Bluetooth/BLE/USB serial) with sessionId, profileId, label, status (connecting, connected, reconnecting, disconnected, error), transport, and isAgentRepl — a screen heuristic (Claude Code TUI chrome in the bottom lines) marking which terminal session is an agent REPL, so a conversation peer can be picked without guessing; null when the session has no attached terminal tab. SSH sessions additionally include sessionManager, chosenSessionName (the stable tmux/zellij identity that survives reconnects), channel state, jump-session linkage, and active port forwards.",
+            description = "List currently registered sessions across all transports (ssh, mosh, reticulum, smb, local, mail, openai, and Bluetooth/BLE/USB serial) with sessionId, profileId, label, status (connecting, connected, reconnecting, disconnected, error), transport, and isAgentRepl — a screen heuristic (Claude Code TUI chrome in the bottom lines) marking which terminal session is an agent REPL, so a conversation peer can be picked without guessing; null when the session has no attached terminal tab. SSH sessions additionally include sessionManager, chosenSessionName (the stable tmux/zellij identity that survives reconnects), channel state, jump-session linkage, and active port forwards.",
             inputSchema = emptyObjectSchema(),
         ) { _ -> listSessions() },
 
@@ -732,7 +732,7 @@ internal class McpTools(
         // --- Write tools (require consent) ------------------------------
 
         "disconnect_profile" to ToolHandler(
-            description = "Disconnect every live session for a profile across all transports (SSH, Mosh, Eternal Terminal, SMB, Reticulum, local, Bluetooth/BLE/USB serial). Use list_connections to find profileIds.",
+            description = "Disconnect every live session for a profile across all transports (SSH, Mosh, SMB, Reticulum, local, Bluetooth/BLE/USB serial). Use list_connections to find profileIds.",
             inputSchema = objectSchema {
                 string("profileId", "ID of the connection profile to disconnect.", required = true)
             },
@@ -2145,7 +2145,6 @@ internal class McpTools(
             put("smb")
             put("reticulum")
             put("mosh")
-            put("eternal_terminal")
             put("proot")
             // The desktop and media capabilities are reported from what the
             // build actually shipped, not asserted. The terminal flavour
@@ -2262,7 +2261,6 @@ internal class McpTools(
             put("remoteCommand", p.remoteCommand)
             put("requestPty", p.requestPty)
         }
-        if (p.useEternalTerminal) put("useEternalTerminal", true)
         if (!p.usbForwardVidPid.isNullOrBlank()) put("usbForwardVidPid", p.usbForwardVidPid)
         if (!p.moshServerCommand.isNullOrBlank()) put("moshServerCommand", p.moshServerCommand)
         // sshOptions was settable but never readable, so an agent could opt a

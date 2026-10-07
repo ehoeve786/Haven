@@ -168,7 +168,6 @@
     <string name="connections_field_proxy_username">Корисничко име за посредника</string>
     <string name="connections_field_proxy_password">Лозинка за посредника</string>
     <string name="connections_helper_proxy_socks4_userid">SOCKS4 шаље само userid (без лозинке).</string>
-    <string name="connections_field_et_port">ET порт</string>
     <string name="connections_field_mosh_server_command">mosh-server команда</string>
     <string name="connections_helper_mosh_server">Оставите празно за подразумевану вредност. За портове испод 1024 се користи authbind.</string>
     <string name="connections_username_placeholder_ask">Оставите празно да се пита у време повезивања</string>
@@ -451,7 +450,6 @@
     <string name="connections_helper_add_reticulum_first">Прво додајте Reticulum везу</string>
     <string name="connections_toggle_rdp_nla">Network Level Authentication (NLA)</string>
     <string name="connections_helper_mosh_required">На удаљеном хосту је потребан mosh-server</string>
-    <string name="connections_helper_et_required">На удаљеном хосту је потребан etserver (порт %1$s)</string>
     <string name="connections_helper_run_before_session_manager">Извршава се пре него што се покрене менаџер сесије.</string>
     <string name="connections_toggle_tunnel_only">Само-тунел (без терминала)</string>
     <string name="connections_helper_tunnel_only">SSH се подиже само за прослеђивања портова — не отвара се ниједна сесија терминала.</string>

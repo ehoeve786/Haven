@@ -131,8 +131,6 @@ object SaveConnectionFromSession {
             jumpProfileId = source.jumpProfileId,
             sshOptions = source.sshOptions,
             useMosh = source.useMosh,
-            useEternalTerminal = source.useEternalTerminal,
-            etPort = source.etPort,
             proxyType = source.proxyType,
             proxyHost = source.proxyHost,
             proxyPort = source.proxyPort,

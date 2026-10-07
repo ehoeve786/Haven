@@ -43,7 +43,6 @@ import sh.haven.core.data.db.entities.ConnectionProfile
 import sh.haven.core.data.preferences.UserPreferencesRepository
 import sh.haven.core.data.repository.ConnectionLogRepository
 import sh.haven.core.data.repository.ConnectionRepository
-import sh.haven.core.et.EtSessionManager
 import sh.haven.core.mosh.MoshSessionManager
 import sh.haven.core.rclone.RcloneClient
 import sh.haven.core.rclone.RcloneSessionManager
@@ -213,7 +212,6 @@ data class TransferProgress(
 class SftpViewModel @Inject constructor(
     private val sessionManager: SshSessionManager,
     private val moshSessionManager: MoshSessionManager,
-    private val etSessionManager: EtSessionManager,
     private val smbSessionManager: SmbSessionManager,
     private val rcloneSessionManager: RcloneSessionManager,
     private val reticulumSessionManager: sh.haven.core.reticulum.ReticulumSessionManager,
@@ -1296,15 +1294,6 @@ class SftpViewModel @Inject constructor(
                     .toSet()
             }
 
-            // Collect profile IDs from ET sessions that have a live SSH client
-            val etProfileIds = etSessionManager.sessions.value.values
-                .filter {
-                    it.status == EtSessionManager.SessionState.Status.CONNECTED &&
-                        it.sshClient != null
-                }
-                .map { it.profileId }
-                .toSet()
-
             // Collect profile IDs from SMB sessions
             val smbProfileIds = smbSessionManager.sessions.value.values
                 .filter { it.status == SmbSessionManager.SessionState.Status.CONNECTED }
@@ -1324,7 +1313,7 @@ class SftpViewModel @Inject constructor(
                 .map { it.profileId }
                 .toSet()
 
-            val connectedProfileIds = sshProfileIds + moshProfileIds + etProfileIds + smbProfileIds + rcloneProfileIds + reticulumProfileIds
+            val connectedProfileIds = sshProfileIds + moshProfileIds + smbProfileIds + rcloneProfileIds + reticulumProfileIds
 
             val profiles = withContext(Dispatchers.IO) { repository.getAll() }
             val remoteProfiles = profiles.filter { it.id in connectedProfileIds }
@@ -4830,7 +4819,7 @@ class SftpViewModel @Inject constructor(
                 // "Empty directory". Probe first so this is transparent.
                 sessionManager.probeAndReconnectStale(profileId = profileId)
 
-                // A profile whose SSH/Mosh/ET session just opened for the
+                // A profile whose SSH/Mosh session just opened for the
                 // first time can still be CONNECTING when this runs (e.g.
                 // right after tapping the connection card) — wait briefly
                 // for the handshake to resolve on whichever transport the
@@ -4843,12 +4832,6 @@ class SftpViewModel @Inject constructor(
                             moshSessionManager.sessions.first { sessions ->
                                 sessions.values.filter { it.profileId == profileId }
                                     .let { forProfile -> forProfile.isEmpty() || forProfile.any { it.status != MoshSessionManager.SessionState.Status.CONNECTING } }
-                            }
-                        }
-                        profile?.isEternalTerminal == true -> {
-                            etSessionManager.sessions.first { sessions ->
-                                sessions.values.filter { it.profileId == profileId }
-                                    .let { forProfile -> forProfile.isEmpty() || forProfile.any { it.status != EtSessionManager.SessionState.Status.CONNECTING } }
                             }
                         }
                         else -> {
@@ -5029,10 +5012,9 @@ class SftpViewModel @Inject constructor(
 
     private fun getOrOpenSession(profileId: String): SftpSession? {
         sftpSession?.let { if (it.isConnected) return it }
-        // Try SSH session first, then mosh/ET bootstrap SSH client
+        // Try SSH session first, then mosh bootstrap SSH client
         val session = sessionManager.openSftpSession(profileId)
             ?: openMoshSftpSession(profileId)
-            ?: openEtSftpSession(profileId)
             ?: return null
         sftpSession = session
         return session
@@ -5045,17 +5027,6 @@ class SftpViewModel @Inject constructor(
             client.openSftpSession()
         } catch (e: Exception) {
             Log.e(TAG, "Failed to open SFTP session via mosh SSH client", e)
-            null
-        }
-    }
-
-    private fun openEtSftpSession(profileId: String): SftpSession? {
-        val client = etSessionManager.getSshClientForProfile(profileId) as? SshClient
-            ?: return null
-        return try {
-            client.openSftpSession()
-        } catch (e: Exception) {
-            Log.e(TAG, "Failed to open SFTP session via ET SSH client", e)
             null
         }
     }

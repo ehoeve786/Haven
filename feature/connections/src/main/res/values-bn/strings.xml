@@ -330,7 +330,6 @@
     <string name="connections_field_proxy_username">প্রক্সি ব্যবহারকারীর নাম</string>
     <string name="connections_field_proxy_password">প্রক্সি পাসওয়ার্ড</string>
     <string name="connections_helper_proxy_socks4_userid">SOCKS4 শুধু একটি ইউজার-আইডি পাঠায় (কোনো পাসওয়ার্ড নয়)।</string>
-    <string name="connections_field_et_port">ET পোর্ট</string>
     <string name="connections_field_mosh_server_command">mosh-server কমান্ড</string>
     <string name="connections_helper_mosh_server">ডিফল্টের জন্য খালি রাখুন। 1024-এর নিচের পোর্টের জন্য authbind ব্যবহার করুন।</string>
     <string name="connections_username_placeholder_ask">সংযোগের সময় জিজ্ঞাসা করতে খালি রাখুন</string>
@@ -382,7 +381,6 @@
     <string name="connections_helper_add_reticulum_first">প্রথমে একটি Reticulum সংযোগ যোগ করুন</string>
     <string name="connections_toggle_rdp_nla">নেটওয়ার্ক লেভেল প্রমাণীকরণ (NLA)</string>
     <string name="connections_helper_mosh_required">রিমোট হোস্টে mosh-server প্রয়োজন</string>
-    <string name="connections_helper_et_required">রিমোট হোস্টে etserver প্রয়োজন (পোর্ট %1$s)</string>
     <string name="connections_helper_run_before_session_manager">সেশন ম্যানেজার শুরু হওয়ার আগে চলে।</string>
     <string name="connections_toggle_tunnel_only">শুধু টানেল (টার্মিনাল নেই)</string>
     <string name="connections_helper_tunnel_only">শুধু পোর্ট ফরওয়ার্ডের জন্য SSH চালু করে — কোনো টার্মিনাল সেশন খোলা হয় না।</string>

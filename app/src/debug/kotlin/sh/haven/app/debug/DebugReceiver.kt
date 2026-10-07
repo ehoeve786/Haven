@@ -79,10 +79,9 @@ class DebugReceiver : BroadcastReceiver() {
             // Never shipped in release builds (this whole file is src/debug/).
             sshPassword = intent.getStringExtra("sshPassword"),
             // Transport toggles. Needed so ADB-driven tests can reproduce
-            // issues that only manifest over mosh or Eternal Terminal,
+            // issues that only manifest over mosh,
             // rather than being limited to plain SSH. Added for Haven#73.
             useMosh = intent.getBooleanExtra("useMosh", false),
-            useEternalTerminal = intent.getBooleanExtra("useEternalTerminal", false),
             // Session manager for the terminal (tmux/zellij/screen/null).
             // Null means "run a plain shell" which is what we want for
             // terminal-state regression tests that care about the exact

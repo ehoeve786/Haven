@@ -17,7 +17,6 @@ class ConnectDeepLinkTest {
         port: Int = 22,
         type: String = "SSH",
         mosh: Boolean = false,
-        et: Boolean = false,
         remoteCommand: String? = null,
     ) = ConnectionProfile(
         id = id,
@@ -27,7 +26,6 @@ class ConnectDeepLinkTest {
         port = port,
         connectionType = type,
         useMosh = mosh,
-        useEternalTerminal = et,
         remoteCommand = remoteCommand,
     )
 
@@ -85,15 +83,12 @@ class ConnectDeepLinkTest {
     // --- matchesTransport ---
 
     @Test
-    fun `matchesTransport distinguishes mosh, et and plain ssh`() {
+    fun `matchesTransport distinguishes mosh and plain ssh`() {
         val mosh = profile(mosh = true)
-        val et = profile(et = true)
         val ssh = profile()
         assertTrue(ConnectDeepLink.matchesTransport(mosh, "mosh"))
         assertTrue(!ConnectDeepLink.matchesTransport(ssh, "mosh"))
-        assertTrue(ConnectDeepLink.matchesTransport(et, "et"))
-        assertTrue(!ConnectDeepLink.matchesTransport(mosh, "et"))
-        // plain "ssh" matches any SSH-family profile, incl. mosh/ET-enabled.
+        // plain "ssh" matches any SSH-family profile, incl. mosh-enabled.
         assertTrue(ConnectDeepLink.matchesTransport(mosh, "ssh"))
         assertTrue(ConnectDeepLink.matchesTransport(ssh, "ssh"))
     }

@@ -330,7 +330,6 @@
     <string name="connections_field_proxy_username">اسم مستخدم الوكيل</string>
     <string name="connections_field_proxy_password">كلمة مرور الوكيل</string>
     <string name="connections_helper_proxy_socks4_userid">يرسل SOCKS4 معرّف مستخدم فقط (بدون كلمة مرور).</string>
-    <string name="connections_field_et_port">منفذ ET</string>
     <string name="connections_field_mosh_server_command">أمر mosh-server</string>
     <string name="connections_helper_mosh_server">اتركه فارغًا للقيمة الافتراضية. استخدم authbind للمنافذ الأقل من 1024.</string>
     <string name="connections_username_placeholder_ask">اتركه فارغًا ليُسأل عند الاتصال</string>
@@ -382,7 +381,6 @@
     <string name="connections_helper_add_reticulum_first">أضف وصلة Reticulum أولاً</string>
     <string name="connections_toggle_rdp_nla">مصادقة على مستوى الشبكة (NLA)</string>
     <string name="connections_helper_mosh_required">يتطلب mosh-server على المضيف البعيد</string>
-    <string name="connections_helper_et_required">يتطلب etserver على المضيف البعيد (المنفذ %1$s)</string>
     <string name="connections_helper_run_before_session_manager">يُشغَّل قبل بدء مدير الجلسات.</string>
     <string name="connections_toggle_tunnel_only">نفق فقط (بدون طرفية)</string>
     <string name="connections_helper_tunnel_only">يُنشئ SSH لإعادة توجيه المنافذ فقط — لا تُفتح أي جلسة طرفية.</string>

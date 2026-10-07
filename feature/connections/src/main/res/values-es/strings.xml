@@ -330,7 +330,6 @@
     <string name="connections_field_proxy_username">Usuario del proxy</string>
     <string name="connections_field_proxy_password">Contraseña del proxy</string>
     <string name="connections_helper_proxy_socks4_userid">SOCKS4 solo envía un ID de usuario (sin contraseña).</string>
-    <string name="connections_field_et_port">Puerto ET</string>
     <string name="connections_field_mosh_server_command">Comando de mosh-server</string>
     <string name="connections_helper_mosh_server">Déjalo en blanco para el valor predeterminado. Usa authbind para puertos por debajo de 1024.</string>
     <string name="connections_username_placeholder_ask">Déjalo vacío para preguntar al conectar</string>
@@ -382,7 +381,6 @@
     <string name="connections_helper_add_reticulum_first">Añade primero una conexión Reticulum</string>
     <string name="connections_toggle_rdp_nla">Autenticación a nivel de red (NLA)</string>
     <string name="connections_helper_mosh_required">Requiere mosh-server en el host remoto</string>
-    <string name="connections_helper_et_required">Requiere etserver en el host remoto (puerto %1$s)</string>
     <string name="connections_helper_run_before_session_manager">Se ejecuta antes de que arranque el gestor de sesiones.</string>
     <string name="connections_toggle_tunnel_only">Solo túnel (sin terminal)</string>
     <string name="connections_helper_tunnel_only">Levanta SSH solo para reenvíos de puertos: no se abre ninguna sesión de terminal.</string>

@@ -77,14 +77,6 @@
 -keep class * extends com.google.protobuf.GeneratedMessageLite$Builder { *; }
 -keep class sh.haven.mosh.proto.** { *; }
 
-# Keep the entire et-kotlin submodule. The previous keep rule covered only
-# `sh.haven.et.protocol.**`, leaving `sh.haven.et.transport.EtTransport`,
-# `sh.haven.et.crypto.EtCrypto`, and `sh.haven.et.EtLogger` exposed to R8 —
-# verified against the v5.5.0 release mapping.txt where EtTransport is
-# renamed to h5.b. Eternal Terminal connections fail in release builds as
-# a result. Mirror the broad `sh.haven.mosh.**` rule for consistency.
--keep class sh.haven.et.** { *; }
-
 # Keep gomobile/rclone bindings — JNI native methods and Go runtime
 -keep class go.** { *; }
 -keep class sh.haven.rclone.binding.** { *; }

@@ -54,7 +54,6 @@ class SessionManagerRegistryInputTest {
         Transport.SSH to "SSH",
         Transport.LOCAL to "local",
         Transport.MOSH to "mosh",
-        Transport.ET to "ET",
         Transport.RETICULUM to "Reticulum",
         Transport.BTSERIAL to "Bluetooth-serial",
         Transport.BLESERIAL to "BLE-serial",
@@ -74,15 +73,6 @@ class SessionManagerRegistryInputTest {
         registry(mosh).sendTerminalInput("s1", "ls\r")
 
         assertEquals("s1" to "ls\r", mosh.received)
-    }
-
-    @Test
-    fun `input reaches an ET-owned session`() {
-        val et = Owning(Transport.ET, "ET")
-
-        registry(et).sendTerminalInput("s1", "x")
-
-        assertEquals("s1" to "x", et.received)
     }
 
     @Test

@@ -40,7 +40,6 @@ dependencies {
     implementation(project(":core:tunnel"))
     implementation(project(":core:reticulum"))
     implementation(project(":core:mosh"))
-    implementation(project(":core:et"))
     implementation(project(":core:btserial"))
     implementation(project(":core:bleserial"))
     implementation(project(":core:usbserial"))

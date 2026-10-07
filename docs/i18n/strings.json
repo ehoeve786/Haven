@@ -11610,26 +11610,6 @@
      }
     },
     {
-     "name": "connections_field_et_port",
-     "en": "ET Port",
-     "comment": "Group header",
-     "args": [],
-     "t": {
-      "ar": "منفذ ET",
-      "bn": "ET পোর্ট",
-      "de": "ET-Port",
-      "es": "Puerto ET",
-      "fr": "Port ET",
-      "hi": "ET पोर्ट",
-      "ja": "ETポート",
-      "ko": "ET 포트",
-      "pt": "Porta ET",
-      "ru": "Порт ET",
-      "sr": "ET порт",
-      "zh": "ET 端口"
-     }
-    },
-    {
      "name": "connections_field_mosh_server_command",
      "en": "mosh-server command",
      "comment": "Group header",
@@ -17325,28 +17305,6 @@
       "ru": "Требуется mosh-server на удалённом хосте",
       "sr": "На удаљеном хосту је потребан mosh-server",
       "zh": "需要远程主机上的 mosh-server"
-     }
-    },
-    {
-     "name": "connections_helper_et_required",
-     "en": "Requires etserver on remote host (port %1$s)",
-     "comment": "Connection edit dialog: remaining field labels, toggles and helper text.",
-     "args": [
-      "%1$s"
-     ],
-     "t": {
-      "ar": "يتطلب etserver على المضيف البعيد (المنفذ %1$s)",
-      "bn": "রিমোট হোস্টে etserver প্রয়োজন (পোর্ট %1$s)",
-      "de": "Erfordert etserver auf dem Remote-Host (Port %1$s)",
-      "es": "Requiere etserver en el host remoto (puerto %1$s)",
-      "fr": "Nécessite etserver sur l\\'hôte distant (port %1$s)",
-      "hi": "रिमोट होस्ट पर etserver आवश्यक है (पोर्ट %1$s)",
-      "ja": "リモートホストにetserverが必要です（ポート %1$s）",
-      "ko": "원격 호스트에 etserver가 필요합니다(포트 %1$s)",
-      "pt": "Requer etserver no host remoto (porta %1$s)",
-      "ru": "Требуется etserver на удалённом хосте (порт %1$s)",
-      "sr": "На удаљеном хосту је потребан etserver (порт %1$s)",
-      "zh": "需要远程主机上的 etserver（端口 %1$s）"
      }
     },
     {

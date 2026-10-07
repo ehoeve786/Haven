@@ -53,9 +53,8 @@ object ConnectDeepLink {
     fun matchesTransport(profile: ConnectionProfile, transport: String): Boolean =
         when (transport) {
             "mosh" -> profile.connectionType == "SSH" && profile.useMosh
-            "et", "eternal", "eternalterminal" -> profile.connectionType == "SSH" && profile.useEternalTerminal
             // Plain "ssh" matches any SSH-family profile for the host (incl.
-            // mosh/ET-enabled ones) rather than excluding them on a technicality.
+            // mosh-enabled ones) rather than excluding them on a technicality.
             "ssh" -> profile.connectionType == "SSH"
             else -> true
         }

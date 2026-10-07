@@ -43,13 +43,6 @@ includeBuild("termlib") {
     }
 }
 
-// Pure Kotlin ET transport library (submodule).
-includeBuild("et-kotlin") {
-    dependencySubstitution {
-        substitute(module("sh.haven:et-transport")).using(project(":"))
-    }
-}
-
 // Pure Kotlin SSP transport library (submodule).
 includeBuild("mosh-kotlin") {
     dependencySubstitution {
@@ -125,7 +118,6 @@ include(":feature:keys")
 include(":feature:tunnel")
 include(":core:reticulum")
 include(":core:mosh")
-include(":core:et")
 include(":core:btserial")
 include(":core:usbserial")
 include(":core:bleserial")
@@ -144,5 +136,3 @@ include(":core:scan")
 include(":feature:settings")
 include(":feature:editor")
 include(":feature:imagetools")
-
-include(":integration-tests")

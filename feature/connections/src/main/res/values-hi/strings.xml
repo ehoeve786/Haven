@@ -330,7 +330,6 @@
     <string name="connections_field_proxy_username">प्रॉक्सी उपयोगकर्ता नाम</string>
     <string name="connections_field_proxy_password">प्रॉक्सी पासवर्ड</string>
     <string name="connections_helper_proxy_socks4_userid">SOCKS4 केवल एक यूज़र-आईडी भेजता है (कोई पासवर्ड नहीं)।</string>
-    <string name="connections_field_et_port">ET पोर्ट</string>
     <string name="connections_field_mosh_server_command">mosh-server कमांड</string>
     <string name="connections_helper_mosh_server">डिफ़ॉल्ट के लिए खाली छोड़ें। 1024 से नीचे के पोर्ट के लिए authbind का उपयोग करें।</string>
     <string name="connections_username_placeholder_ask">कनेक्ट करते समय पूछने के लिए खाली छोड़ें</string>
@@ -382,7 +381,6 @@
     <string name="connections_helper_add_reticulum_first">पहले एक Reticulum कनेक्शन जोड़ें</string>
     <string name="connections_toggle_rdp_nla">नेटवर्क स्तर प्रमाणीकरण (NLA)</string>
     <string name="connections_helper_mosh_required">रिमोट होस्ट पर mosh-server आवश्यक है</string>
-    <string name="connections_helper_et_required">रिमोट होस्ट पर etserver आवश्यक है (पोर्ट %1$s)</string>
     <string name="connections_helper_run_before_session_manager">सत्र प्रबंधक के शुरू होने से पहले चलता है।</string>
     <string name="connections_toggle_tunnel_only">केवल टनल (कोई टर्मिनल नहीं)</string>
     <string name="connections_helper_tunnel_only">केवल पोर्ट फ़ॉरवर्ड के लिए SSH लाता है — कोई टर्मिनल सत्र नहीं खुलता।</string>

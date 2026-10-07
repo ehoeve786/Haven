@@ -238,7 +238,7 @@ class WorkspaceLauncher @Inject constructor(
             }
             return null
         }
-        val isPlainSsh = profile.isSsh && !profile.isMosh && !profile.isEternalTerminal
+        val isPlainSsh = profile.isSsh && !profile.isMosh
 
         var dialed = false
         var liveSessionId: String? = null

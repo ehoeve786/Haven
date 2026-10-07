@@ -339,7 +339,6 @@ fun ConnectionsScreen(
             port = p.port ?: 22,
             connectionType = "SSH",
             useMosh = p.transport == "mosh",
-            useEternalTerminal = p.transport == "et",
             sessionManager = if (p.session != null) "TMUX" else null,
         )
         showAddDialog = true
