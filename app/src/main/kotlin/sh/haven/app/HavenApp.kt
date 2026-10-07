@@ -411,7 +411,7 @@ class HavenApp : Application(), Configuration.Provider {
         val builder = NotificationCompat.Builder(this, USB_DRIVE_CHANNEL_ID)
             .setSmallIcon(android.R.drawable.ic_menu_save)
             .setContentTitle("USB drive detected")
-            .setContentText("Tap to open $name's files in Haven.")
+            .setContentText("Tap to open $name's files in Tidegate.")
             .setStyle(
                 NotificationCompat.BigTextStyle().bigText(
                     "Tap to open $name in a small on-device Linux VM and browse its files — even " +
@@ -477,7 +477,7 @@ class HavenApp : Application(), Configuration.Provider {
         // actionable notifications and each Allow/Deny resolves the right one.
         val notifId = consentNotifId(req.clientHint, req.toolName)
 
-        val title = if (isPairing) "Haven: a client wants to pair" else "Haven: agent needs approval"
+        val title = if (isPairing) "Tidegate: a client wants to pair" else "Tidegate: agent needs approval"
         val line = if (isPairing) {
             "A client tried to connect while Haven was in the background. Open Haven so it can retry."
         } else {

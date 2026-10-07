@@ -128,7 +128,7 @@
     <string name="mail_rules_history_uidreset">মেইলবক্স পুনঃসংখ্যায়িত — রিসেট করা হয়েছে</string>
     <string name="mail_rules_no_subject">(কোনো বিষয় নেই)</string>
     <string name="mail_rules_pending_empty">অনুমোদনের অপেক্ষায় কিছু নেই।</string>
-    <string name="mail_rules_pending_desc">Haven পটভূমিতে থাকাকালীন সারিতে রাখা হয়েছে। চালাতে অনুমোদন করুন, বা বাতিল করতে প্রত্যাখ্যান করুন।</string>
+    <string name="mail_rules_pending_desc">Tidegate পটভূমিতে থাকাকালীন সারিতে রাখা হয়েছে। চালাতে অনুমোদন করুন, বা বাতিল করতে প্রত্যাখ্যান করুন।</string>
     <string name="mail_rules_approve">অনুমোদন করুন</string>
     <string name="mail_rules_reject">প্রত্যাখ্যান করুন</string>
     <string name="mail_rules_approve_all">সব অনুমোদন করুন</string>

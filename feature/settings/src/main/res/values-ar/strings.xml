@@ -33,14 +33,14 @@
 
     <!-- Security section -->
     <string name="settings_biometric_title">قفل الشاشة</string>
-    <string name="settings_biometric_subtitle">طلب المصادقة لفتح Haven</string>
+    <string name="settings_biometric_subtitle">طلب المصادقة لفتح Tidegate</string>
     <string name="settings_lock_timeout_title">مهلة القفل</string>
     <string name="settings_prevent_screenshots_title">منع لقطات الشاشة</string>
     <string name="settings_prevent_screenshots_subtitle">حظر التقاط الشاشة ومعاينة مبدّل التطبيقات</string>
 
     <!-- Logging section -->
     <string name="settings_exclude_recents_title">الإخفاء من التطبيقات الأخيرة</string>
-    <string name="settings_exclude_recents_subtitle">يخفي بطاقة Haven من شاشة التطبيقات الأخيرة؛ تستمر الجلسات في العمل. أعد الفتح من أيقونة التطبيق.</string>
+    <string name="settings_exclude_recents_subtitle">يخفي بطاقة Tidegate من شاشة التطبيقات الأخيرة؛ تستمر الجلسات في العمل. أعد الفتح من أيقونة التطبيق.</string>
     <string name="settings_connection_logging_title">تسجيل الاتصالات</string>
     <string name="settings_connection_logging_subtitle">تسجيل أحداث الاتصال (اتصال، قطع، أخطاء). يُخزّن محلياً ومحمي بتشفير الجهاز</string>
     <string name="settings_view_connection_log_title">عرض سجل الاتصالات</string>
@@ -76,9 +76,9 @@
     <string name="settings_wayland_shell_title">Shell سطح مكتب Wayland</string>
     <string name="settings_proot_idle_title">إيقاف ضيف Linux الخامل تلقائيًا</string>
     <string name="settings_proot_idle_off">مُعطّل — يظل ضيف Linux قيد التشغيل حتى توقفه</string>
-    <string name="settings_proot_idle_on">يوقف الضيف بعد %1$d دقيقة من مغادرتك Haven (خدمة ضيف قيد التشغيل تُبقيه نشطًا)</string>
+    <string name="settings_proot_idle_on">يوقف الضيف بعد %1$d دقيقة من مغادرتك Tidegate (خدمة ضيف قيد التشغيل تُبقيه نشطًا)</string>
     <string name="settings_proot_idle_dialog_title">إيقاف ضيف Linux الخامل تلقائيًا</string>
-    <string name="settings_proot_idle_dialog_body">بعد بقاء Haven في الخلفية هذه المدة، أوقِف طرفيات وأسطح مكتب ضيف Linux لتحرير الذاكرة. خدمة ضيف قيد التشغيل تُبقيه نشطًا. المهمة الطويلة في طرفية بالخلفية ستتوقف أيضًا — اترك هذا مُعطّلًا إلا إذا كنت تريد استعادة الموارد عند الخمول.</string>
+    <string name="settings_proot_idle_dialog_body">بعد بقاء Tidegate في الخلفية هذه المدة، أوقِف طرفيات وأسطح مكتب ضيف Linux لتحرير الذاكرة. خدمة ضيف قيد التشغيل تُبقيه نشطًا. المهمة الطويلة في طرفية بالخلفية ستتوقف أيضًا — اترك هذا مُعطّلًا إلا إذا كنت تريد استعادة الموارد عند الخمول.</string>
     <string name="settings_proot_idle_off_label">مُعطّل</string>
     <string name="settings_shizuku_title">تكامل Shizuku</string>
     <string name="settings_shizuku_enabled">مفعّل — إعفاء تلقائي من البطارية، مشاركة مقبس Wayland</string>
@@ -109,7 +109,7 @@
     <string name="settings_backup_working">جارٍ المعالجة…</string>
 
     <!-- About section -->
-    <string name="settings_about_title">حول Haven</string>
+    <string name="settings_about_title">حول Tidegate</string>
     <string name="settings_support_title">ادعم Haven</string>
     <string name="settings_support_subtitle">اشترِ فنجان قهوة للمطوّر</string>
     <string name="settings_version_unknown">غير معروف</string>
@@ -145,8 +145,8 @@
     <string name="settings_backup_restore_button">استعادة</string>
 
     <!-- About dialog -->
-    <string name="settings_about_dialog_title">حول Haven</string>
-    <string name="settings_about_app_name">Haven</string>
+    <string name="settings_about_dialog_title">حول Tidegate</string>
+    <string name="settings_about_app_name">Tidegate SSH</string>
     <string name="settings_about_description">عميل مفتوح المصدر لـ SSH و VNC و RDP والتخزين السحابي لـ Android</string>
     <string name="settings_about_version">الإصدار %1$s (بناء %2$d)</string>
     <string name="settings_about_android">Android %1$s (API %2$d)</string>
@@ -442,7 +442,7 @@
     <string name="settings_terminal_locale_label">LANG</string>
     <string name="settings_terminal_opacity_title">عتامة الخلفية</string>
     <string name="settings_terminal_opacity_value">%1$d%%</string>
-    <string name="settings_terminal_opacity_hint" formatted="false">أقل من 100% يصبح Haven شبه شفاف ويعرض خلفية جهازك خلف كل شاشة (الطرفية، القوائم، الإعدادات). التجاوز الخاص بكل اتصال ينطبق على طرفيته فقط.</string>
+    <string name="settings_terminal_opacity_hint" formatted="false">أقل من 100% يصبح Tidegate شبه شفاف ويعرض خلفية جهازك خلف كل شاشة (الطرفية، القوائم، الإعدادات). التجاوز الخاص بكل اتصال ينطبق على طرفيته فقط.</string>
     <string name="settings_section_mcp">وكيل الذكاء الاصطناعي (MCP)</string>
     <string name="settings_audio_bridge_title">صوت proot (تجريبي)</string>
     <string name="settings_audio_bridge_subtitle">تشغيل الصوت من تطبيقات Linux عبر مكبّر صوت الجهاز من خلال جسر PulseAudio داخل الضيف. إخراج فقط. يبث باستمرار أثناء تفعيله — أوقفه عند عدم الاستخدام.</string>
@@ -471,8 +471,8 @@
     <string name="settings_rdp_desktop_size_width">العرض</string>
     <string name="settings_rdp_desktop_size_height">الارتفاع</string>
     <string name="settings_native_crash_title">أعطال التطبيق</string>
-    <string name="settings_native_crash_subtitle">أُغلق Haven بشكل غير متوقع. يوضّح التقرير أدناه أين حدث ذلك — يُرجى إرفاقه ببلاغ الخطأ.</string>
-    <string name="settings_native_crash_subtitle_no_trace">أُغلق Haven بشكل غير متوقع. لم يحتفظ Android بتقرير مفصّل لهذه الأعطال، لذا لا يُعرف سوى الوقت والإشارة — يُرجى إرفاقهما ببلاغ الخطأ على أي حال، فالإشارة تضيّق نطاق البحث.</string>
+    <string name="settings_native_crash_subtitle">أُغلق Tidegate بشكل غير متوقع. يوضّح التقرير أدناه أين حدث ذلك — يُرجى إرفاقه ببلاغ الخطأ.</string>
+    <string name="settings_native_crash_subtitle_no_trace">أُغلق Tidegate بشكل غير متوقع. لم يحتفظ Android بتقرير مفصّل لهذه الأعطال، لذا لا يُعرف سوى الوقت والإشارة — يُرجى إرفاقهما ببلاغ الخطأ على أي حال، فالإشارة تضيّق نطاق البحث.</string>
     <string name="settings_native_crash_no_trace">لم يُحفظ تقرير مفصّل لهذا العطل.</string>
     <string name="settings_native_crash_copy">نسخ التقرير</string>
     <string name="settings_native_crash_copied">تم نسخ تقرير العطل</string>
@@ -486,15 +486,15 @@
         <item quantity="other">%1$d دقيقة</item>
     </plurals>
     <string name="settings_hide_nav_bar_in_terminal_title">إخفاء شريط علامات تبويب التطبيق في الطرفية</string>
-    <string name="settings_hide_nav_bar_in_terminal_subtitle">يخفي شريط علامات التبويب السفلي لـ Haven في شاشة الطرفية. يبقى شريطا الحالة والتنقل في Android ظاهرين.</string>
+    <string name="settings_hide_nav_bar_in_terminal_subtitle">يخفي شريط علامات التبويب السفلي لـ Tidegate في شاشة الطرفية. يبقى شريطا الحالة والتنقل في Android ظاهرين.</string>
     <string name="settings_credential_keystore_broken_title">تخزين بيانات الاعتماد غير متاح</string>
-    <string name="settings_credential_keystore_broken_subtitle">فقد مخزن المفاتيح في هذا الجهاز مفتاح بيانات الاعتماد الخاص بـ Haven. لا يمكن قراءة كلمات المرور المحفوظة ولا حفظ كلمات جديدة. اضغط للإصلاح.</string>
+    <string name="settings_credential_keystore_broken_subtitle">فقد مخزن المفاتيح في هذا الجهاز مفتاح بيانات الاعتماد الخاص بـ Tidegate. لا يمكن قراءة كلمات المرور المحفوظة ولا حفظ كلمات جديدة. اضغط للإصلاح.</string>
     <string name="settings_credential_reset_title">إصلاح تخزين بيانات الاعتماد؟</string>
-    <string name="settings_credential_reset_body">سيؤدي هذا إلى إنشاء مفتاح جديد لبيانات الاعتماد حتى يمكن حفظ كلمات المرور مرة أخرى.\n\nستحتاج إلى إعادة إدخال كل كلمات المرور والعبارات والأسرار المحفوظة في Haven. هي غير قابلة للقراءة أصلاً — فقد ضاع المفتاح الذي كان يحميها — لذا فهذا يستعيد التطبيق بدل أن يفقد شيئًا إضافيًا.</string>
+    <string name="settings_credential_reset_body">سيؤدي هذا إلى إنشاء مفتاح جديد لبيانات الاعتماد حتى يمكن حفظ كلمات المرور مرة أخرى.\n\nستحتاج إلى إعادة إدخال كل كلمات المرور والعبارات والأسرار المحفوظة في Tidegate. هي غير قابلة للقراءة أصلاً — فقد ضاع المفتاح الذي كان يحميها — لذا فهذا يستعيد التطبيق بدل أن يفقد شيئًا إضافيًا.</string>
     <string name="settings_credential_reset_confirm">إصلاح</string>
     <string name="settings_credential_reset_cancel">إلغاء</string>
     <string name="settings_update_check_title">التحقق من التحديثات</string>
-    <string name="settings_update_check_subtitle">البحث عن إصدار أحدث عند بدء Haven، مرة واحدة كل ساعة على الأكثر. مُعطَّل افتراضيًا.</string>
+    <string name="settings_update_check_subtitle">البحث عن إصدار أحدث عند بدء Tidegate، مرة واحدة كل ساعة على الأكثر. مُعطَّل افتراضيًا.</string>
     <string name="settings_update_check_now_title">تحقّق الآن</string>
     <string name="settings_update_check_now_subtitle">اسأل GitHub عن أحدث إصدار</string>
     <string name="settings_update_checking">جارٍ التحقق…</string>
@@ -502,13 +502,13 @@
     <string name="settings_update_check_available">اضغط لفتح صفحة الإصدار</string>
     <string name="settings_update_check_up_to_date">مُحدَّث على %1$s</string>
     <string name="settings_update_check_failed">فشل التحقق: %1$s</string>
-    <string name="settings_update_check_other_channel">لم تُثبَّت هذه النسخة من إصدار GitHub، لذا لا يمكن لتنزيل الإصدار أن يحل محلها. حدِّث من حيث ثبَّتَ Haven.</string>
+    <string name="settings_update_check_other_channel">لم تُثبَّت هذه النسخة من إصدار GitHub، لذا لا يمكن لتنزيل الإصدار أن يحل محلها. حدِّث من حيث ثبَّتَ Tidegate.</string>
     <string name="settings_sshkey_keystore_broken_title">تخزين مفاتيح SSH غير متاح</string>
-    <string name="settings_sshkey_keystore_broken_subtitle">فقد مخزن المفاتيح في هذا الجهاز مفتاح SSH الخاص ب‎Haven. لا يمكن قراءة المفاتيح الخاصة المخزّنة ولا يمكن إنشاء مفاتيح جديدة. المس للإصلاح.</string>
+    <string name="settings_sshkey_keystore_broken_subtitle">فقد مخزن المفاتيح في هذا الجهاز مفتاح SSH الخاص ب‎Tidegate. لا يمكن قراءة المفاتيح الخاصة المخزّنة ولا يمكن إنشاء مفاتيح جديدة. المس للإصلاح.</string>
     <string name="settings_sshkey_reset_title">هل تريد إصلاح تخزين مفاتيح SSH؟</string>
     <string name="settings_sshkey_reset_body">ينشئ هذا مفتاحًا جديدًا حتى يمكن إنشاء مفاتيح SSH مرة أخرى.
 
-سيتطلب استيراد أو إنشاء كل مفتاح خاص مخزّن بالفعل في Haven من جديد. إنها غير مقروءة بالفعل — فقد ضاع المفتاح الذي كان يحميها، عادةً لأن التطبيق أعيد تثبيته من مصدر مختلف — لذلك يسترجع التطبيق بدلاً من أن يفقد مزيدًا.</string>
+سيتطلب استيراد أو إنشاء كل مفتاح خاص مخزّن بالفعل في Tidegate من جديد. إنها غير مقروءة بالفعل — فقد ضاع المفتاح الذي كان يحميها، عادةً لأن التطبيق أعيد تثبيته من مصدر مختلف — لذلك يسترجع التطبيق بدلاً من أن يفقد مزيدًا.</string>
     <string name="settings_sshkey_reset_confirm">إصلاح</string>
 
     <!-- Inline-image consent (#583) -->

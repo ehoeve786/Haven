@@ -35,7 +35,7 @@
 
     <!-- Battery optimization -->
     <string name="battery_title">Поддерживать соединения?</string>
-    <string name="battery_message">Android может закрывать фоновые SSH-подключения для экономии батареи. Отключение оптимизации батареи для Haven предотвращает это.</string>
+    <string name="battery_message">Android может закрывать фоновые SSH-подключения для экономии батареи. Отключение оптимизации батареи для Tidegate предотвращает это.</string>
 
     <!-- Workspace profiles -->
     <string name="workspace_section_title">Рабочие пространства</string>
@@ -67,7 +67,7 @@
     <string name="agent_deny">Отклонить</string>
 
     <!-- Biometric lock -->
-    <string name="app_biometric_locked_title">Haven заблокирован</string>
+    <string name="app_biometric_locked_title">Tidegate заблокирован</string>
     <string name="app_biometric_authenticate_prompt">Пройдите аутентификацию для продолжения</string>
     <string name="app_biometric_open_device_settings">Открыть настройки устройства</string>
 
@@ -118,7 +118,7 @@
     <string name="app_desktop_custom_cmd_unset">Сначала задайте команду сеанса</string>
     <string name="app_desktop_custom_cmd_edit">Изменить команду сеанса</string>
     <string name="app_desktop_custom_cmd_title">Своя команда сеанса</string>
-    <string name="app_desktop_custom_cmd_description">Выполняется на X-сервере Haven внутри активного дистрибутива — схема termux-x11, например dbus-launch startxfce4. Сначала установите пакеты рабочего стола в дистрибутиве. X11-рабочие столы используют программный рендеринг: окружения, требующие GL-композитор (GNOME Shell, KWin), не запустятся.</string>
+    <string name="app_desktop_custom_cmd_description">Выполняется на X-сервере Tidegate внутри активного дистрибутива — схема termux-x11, например dbus-launch startxfce4. Сначала установите пакеты рабочего стола в дистрибутиве. X11-рабочие столы используют программный рендеринг: окружения, требующие GL-композитор (GNOME Shell, KWin), не запустятся.</string>
     <string name="app_desktop_custom_cmd_label">Команда сеанса</string>
     <string name="app_desktop_custom_cmd_save_start">Сохранить и запустить</string>
     <string name="app_desktop_de_with_size">%1$s (%2$s)</string>
@@ -142,7 +142,7 @@
     <string name="app_agent_action_requested">Запрос действия агента</string>
     <string name="app_agent_from_client">От: %1$s</string>
     <string name="app_agent_tool">Инструмент: %1$s</string>
-    <string name="app_agent_bypass_label">Разрешить все MCP-запросы от \'%1$s\' до перезапуска Haven</string>
+    <string name="app_agent_bypass_label">Разрешить все MCP-запросы от \'%1$s\' до перезапуска Tidegate</string>
     <string name="app_agent_bypass_description">Включает деструктивные операции (ввод в терминал, запись/удаление файлов, установка APK). Сбрасывается при закрытии приложения.</string>
     <string name="app_agent_auto_allow_window">Окно автоодобрения:</string>
     <string name="app_agent_minutes">%1$dм</string>
@@ -159,10 +159,10 @@
     <string name="app_present_preparing_audio">Подготовка аудио…</string>
 
     <!-- i18n sweep #210 (follow-up batch) -->
-    <string name="app_biometric_blocked_no_activity_title">Haven заблокирован</string>
+    <string name="app_biometric_blocked_no_activity_title">Tidegate заблокирован</string>
     <string name="app_biometric_blocked_no_activity_body">В этом контексте невозможно показать запрос аутентификации.</string>
     <string name="app_biometric_not_enrolled_title">Настройте блокировку экрана</string>
-    <string name="app_biometric_not_enrolled_body">Блокировка приложения Haven включена, но на этом устройстве нет блокировки экрана или зарегистрированной биометрии. Настройте её в настройках устройства, чтобы разблокировать.</string>
+    <string name="app_biometric_not_enrolled_body">Блокировка приложения Tidegate включена, но на этом устройстве нет блокировки экрана или зарегистрированной биометрии. Настройте её в настройках устройства, чтобы разблокировать.</string>
     <string name="app_biometric_no_hardware_title">Аутентификация недоступна</string>
     <string name="app_biometric_no_hardware_body">Это устройство не может выполнить аутентификацию (нет биометрического оборудования и учётных данных устройства). Настройте PIN-код или пароль в настройках, чтобы разблокировать.</string>
     <string name="app_present_minimize">Свернуть</string>
@@ -170,7 +170,7 @@
 
     <!-- Local Linux desktop manager -->
     <string name="app_desktop_manager_title">Локальный рабочий стол Linux</string>
-    <string name="app_desktop_manager_description">Запустите полноценный рабочий стол Linux внутри Haven. Выберите дистрибутив, установите среду рабочего стола (Xfce4, Openbox или Sway), затем нажмите «Запустить» — отдельный сервер или подключение не нужны.</string>
+    <string name="app_desktop_manager_description">Запустите полноценный рабочий стол Linux внутри Tidegate. Выберите дистрибутив, установите среду рабочего стола (Xfce4, Openbox или Sway), затем нажмите «Запустить» — отдельный сервер или подключение не нужны.</string>
 
     <!-- App windows / installed-app launcher (#250) -->
     <string name="app_desktop_app_window_pin_home_cd">Добавить %1$s на главный экран</string>
@@ -293,11 +293,11 @@
     <string name="app_desktop_open_terminal_cd">Открыть терминал в %1$s</string>
     <string name="app_present_fullscreen">Во весь экран</string>
     <string name="app_present_exit_fullscreen">Выйти из полноэкранного режима</string>
-    <string name="tasker_plugin_name">Выполнить команду на сервере Haven</string>
-    <string name="tasker_edit_title">Выполнить команду оболочки на сохранённом SSH-подключении Haven.</string>
+    <string name="tasker_plugin_name">Выполнить команду на сервере Tidegate</string>
+    <string name="tasker_edit_title">Выполнить команду оболочки на сохранённом SSH-подключении Tidegate.</string>
     <string name="tasker_loading">Загрузка подключений…</string>
-    <string name="tasker_no_ssh_profiles">Нет сохранённых SSH-подключений. Сначала добавьте подключение в Haven.</string>
-    <string name="tasker_field_server">Сервер Haven</string>
+    <string name="tasker_no_ssh_profiles">Нет сохранённых SSH-подключений. Сначала добавьте подключение в Tidegate.</string>
+    <string name="tasker_field_server">Сервер Tidegate</string>
     <string name="tasker_field_command">Команда</string>
     <string name="tasker_field_command_help">Выполняется в командной оболочке входа. Переменные Tasker/MacroDroid подставляются перед выполнением.</string>
     <string name="tasker_toggle_overlay">Показывать команду в живом терминале</string>
@@ -325,7 +325,7 @@
     <string name="backup_pull_toast_success">Резервная копия восстановлена</string>
     <string name="backup_pull_toast_failure">Не удалось загрузить резервную копию: %1$s</string>
     <string name="backup_pull_started">Резервная копия загружается в фоне…</string>
-    <string name="backup_pull_no_password">Пароль не сохранён. Открывается Haven…</string>
+    <string name="backup_pull_no_password">Пароль не сохранён. Открывается Tidegate…</string>
     <plurals name="app_agent_more_pending">
         <item quantity="one">＋за этим ждёт ещё %1$d запрос — вы увидите его следом</item>
         <item quantity="few">＋за этим ждут ещё %1$d запроса — вы увидите их следом</item>
@@ -351,6 +351,6 @@
         <item quantity="other">%1$d удалённых хранилища</item>
     </plurals>
     <string name="update_notification_channel">Обновления приложения</string>
-    <string name="update_notification_title">Доступна версия Haven %1$s</string>
+    <string name="update_notification_title">Доступна версия Tidegate %1$s</string>
     <string name="update_notification_text">Нажмите, чтобы открыть страницу выпуска.</string>
 </resources>

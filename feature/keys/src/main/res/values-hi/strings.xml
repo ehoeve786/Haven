@@ -151,7 +151,7 @@
     <string name="keys_fido_pin_help">जारी रखने के लिए अपनी सुरक्षा कुंजी पर सेट किया गया PIN दर्ज करें।</string>
     <string name="keys_fido_pin_wrong">गलत PIN. कुंजी लॉक होने से पहले %1$d प्रयास शेष हैं।</string>
     <string name="keys_fido_waiting_title">सुरक्षा कुंजी आवश्यक</string>
-    <string name="keys_fido_waiting_body">अपनी सुरक्षा कुंजी को USB से जोड़ें, या NFC के लिए इसे डिवाइस के पीछे टैप करें। पता चलते ही Haven स्वतः जारी रहेगा।</string>
+    <string name="keys_fido_waiting_body">अपनी सुरक्षा कुंजी को USB से जोड़ें, या NFC के लिए इसे डिवाइस के पीछे टैप करें। पता चलते ही Tidegate स्वतः जारी रहेगा।</string>
     <string name="keys_fido_touch_usb_title">अपनी सुरक्षा कुंजी को स्पर्श करें</string>
     <string name="keys_fido_touch_usb_body">अनुरोध को अधिकृत करने के लिए अभी अपनी सुरक्षा कुंजी का बटन दबाएँ।</string>
     <string name="keys_fido_touch_nfc_title">अपनी सुरक्षा कुंजी पकड़ें</string>
@@ -240,7 +240,7 @@
     <string name="keys_section_collapse">%1$s संक्षिप्त करें</string>
     <string name="keys_section_expand">%1$s विस्तृत करें</string>
     <string name="keys_from_provider">%1$s से एक कुंजी उपयोग करें</string>
-    <string name="keys_from_provider_hint">उस ऐप के पास मौजूद कोई कुंजी चुनें। वह Haven की ओर से हस्ताक्षर करती है — निजी कुंजी जहाँ है वहीं रहती है, हार्डवेयर टोकन पर भी।</string>
+    <string name="keys_from_provider_hint">उस ऐप के पास मौजूद कोई कुंजी चुनें। वह Tidegate की ओर से हस्ताक्षर करती है — निजी कुंजी जहाँ है वहीं रहती है, हार्डवेयर टोकन पर भी।</string>
     <string name="keys_totp_code_copied">कोड कॉपी हुआ</string>
     <plurals name="keys_selected_count">
         <item quantity="one">%1$d चयनित</item>

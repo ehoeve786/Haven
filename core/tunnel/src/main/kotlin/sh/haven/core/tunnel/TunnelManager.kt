@@ -246,6 +246,6 @@ class DefaultTunnelFactory @Inject constructor(
             .map { if (it.isLetterOrDigit()) it else '-' }
             .joinToString("")
             .trim('-')
-        return if (safe.isBlank()) "haven-android" else "haven-$safe"
+        return if (safe.isBlank()) "tidegate-android" else "tidegate-$safe"
     }
 }

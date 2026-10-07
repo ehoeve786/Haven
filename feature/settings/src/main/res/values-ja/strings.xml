@@ -33,14 +33,14 @@
 
     <!-- Security section -->
     <string name="settings_biometric_title">画面ロック</string>
-    <string name="settings_biometric_subtitle">Havenを開くときに認証を要求</string>
+    <string name="settings_biometric_subtitle">Tidegateを開くときに認証を要求</string>
     <string name="settings_lock_timeout_title">ロックまでの時間</string>
     <string name="settings_prevent_screenshots_title">スクリーンショットを防止</string>
     <string name="settings_prevent_screenshots_subtitle">画面キャプチャとタスクスイッチャーのプレビューをブロック</string>
 
     <!-- Logging section -->
     <string name="settings_exclude_recents_title">最近のアプリから隠す</string>
-    <string name="settings_exclude_recents_subtitle">最近のアプリ画面でHavenのカードを非表示にします。セッションは継続します。アプリアイコンから再度開けます。</string>
+    <string name="settings_exclude_recents_subtitle">最近のアプリ画面でTidegateのカードを非表示にします。セッションは継続します。アプリアイコンから再度開けます。</string>
     <string name="settings_connection_logging_title">接続ログ</string>
     <string name="settings_connection_logging_subtitle">接続イベントを記録（接続、切断、エラー）。ローカルに保存、デバイス暗号化で保護</string>
     <string name="settings_view_connection_log_title">接続ログを表示</string>
@@ -76,9 +76,9 @@
     <string name="settings_wayland_shell_title">Waylandデスクトップシェル</string>
     <string name="settings_proot_idle_title">アイドル状態の Linux ゲストを自動停止</string>
     <string name="settings_proot_idle_off">オフ — 手動で停止するまで Linux ゲストは動き続けます</string>
-    <string name="settings_proot_idle_on">Haven を離れて %1$d 分後にゲストを停止します（実行中のゲストサービスがあれば維持されます）</string>
+    <string name="settings_proot_idle_on">Tidegate を離れて %1$d 分後にゲストを停止します（実行中のゲストサービスがあれば維持されます）</string>
     <string name="settings_proot_idle_dialog_title">アイドル状態の Linux ゲストを自動停止</string>
-    <string name="settings_proot_idle_dialog_body">Haven がこの時間バックグラウンドにあったら、メモリを解放するために Linux ゲストのターミナルとデスクトップを停止します。実行中のゲストサービスがあれば維持されます。バックグラウンドのターミナルで実行中の長いジョブも停止されるため、アイドル時のリソース回収が不要ならオフのままにしてください。</string>
+    <string name="settings_proot_idle_dialog_body">Tidegate がこの時間バックグラウンドにあったら、メモリを解放するために Linux ゲストのターミナルとデスクトップを停止します。実行中のゲストサービスがあれば維持されます。バックグラウンドのターミナルで実行中の長いジョブも停止されるため、アイドル時のリソース回収が不要ならオフのままにしてください。</string>
     <string name="settings_proot_idle_off_label">オフ</string>
     <string name="settings_shizuku_title">Shizuku連携</string>
     <string name="settings_shizuku_enabled">有効 — バッテリー最適化の自動除外、Waylandソケット共有</string>
@@ -109,7 +109,7 @@
     <string name="settings_backup_working">処理中…</string>
 
     <!-- About section -->
-    <string name="settings_about_title">Havenについて</string>
+    <string name="settings_about_title">Tidegateについて</string>
     <string name="settings_support_title">Havenを支援</string>
     <string name="settings_support_subtitle">開発者にコーヒーをおごる</string>
     <string name="settings_version_unknown">不明</string>
@@ -145,8 +145,8 @@
     <string name="settings_backup_restore_button">復元</string>
 
     <!-- About dialog -->
-    <string name="settings_about_dialog_title">Havenについて</string>
-    <string name="settings_about_app_name">Haven</string>
+    <string name="settings_about_dialog_title">Tidegateについて</string>
+    <string name="settings_about_app_name">Tidegate SSH</string>
     <string name="settings_about_description">Android向けオープンソースSSH、VNC、RDP、クラウドストレージクライアント</string>
     <string name="settings_about_version">バージョン %1$s（ビルド %2$d）</string>
     <string name="settings_about_android">Android %1$s（API %2$d）</string>
@@ -442,7 +442,7 @@
     <string name="settings_terminal_locale_label">LANG</string>
     <string name="settings_terminal_opacity_title">背景の不透明度</string>
     <string name="settings_terminal_opacity_value">%1$d%%</string>
-    <string name="settings_terminal_opacity_hint" formatted="false">100% 未満にすると Haven が半透明になり、すべての画面（ターミナル、リスト、設定）の背後にデバイスの壁紙が表示されます。接続ごとの上書きはそのターミナルにのみ適用されます。</string>
+    <string name="settings_terminal_opacity_hint" formatted="false">100% 未満にすると Tidegate が半透明になり、すべての画面（ターミナル、リスト、設定）の背後にデバイスの壁紙が表示されます。接続ごとの上書きはそのターミナルにのみ適用されます。</string>
     <string name="settings_section_mcp">AI エージェント (MCP)</string>
     <string name="settings_audio_bridge_title">Proot オーディオ（試験的）</string>
     <string name="settings_audio_bridge_subtitle">ゲスト内の PulseAudio ブリッジ経由で、Linux アプリの音をデバイスのスピーカーから再生します。出力のみ。オンの間は常時ストリーミングされるため、使わないときはオフにしてください。</string>
@@ -471,8 +471,8 @@
     <string name="settings_rdp_desktop_size_width">幅</string>
     <string name="settings_rdp_desktop_size_height">高さ</string>
     <string name="settings_native_crash_title">アプリのクラッシュ</string>
-    <string name="settings_native_crash_subtitle">Haven が予期せず終了しました。下のレポートに発生箇所が記録されています。バグ報告に添付してください。</string>
-    <string name="settings_native_crash_subtitle_no_trace">Haven が予期せず終了しました。これらについて Android は詳細なレポートを残しておらず、時刻とシグナルのみが分かります。シグナルだけでも原因を絞り込めるため、バグ報告に添付してください。</string>
+    <string name="settings_native_crash_subtitle">Tidegate が予期せず終了しました。下のレポートに発生箇所が記録されています。バグ報告に添付してください。</string>
+    <string name="settings_native_crash_subtitle_no_trace">Tidegate が予期せず終了しました。これらについて Android は詳細なレポートを残しておらず、時刻とシグナルのみが分かります。シグナルだけでも原因を絞り込めるため、バグ報告に添付してください。</string>
     <string name="settings_native_crash_no_trace">このクラッシュの詳細なレポートは保存されていません。</string>
     <string name="settings_native_crash_copy">レポートをコピー</string>
     <string name="settings_native_crash_copied">クラッシュレポートをコピーしました</string>
@@ -481,15 +481,15 @@
         <item quantity="other">%1$d 分</item>
     </plurals>
     <string name="settings_hide_nav_bar_in_terminal_title">ターミナルでアプリのタブバーを非表示</string>
-    <string name="settings_hide_nav_bar_in_terminal_subtitle">ターミナル画面で Haven の下部タブバーを非表示にします。Android のステータスバーとナビゲーションバーは表示されたままです。</string>
+    <string name="settings_hide_nav_bar_in_terminal_subtitle">ターミナル画面で Tidegate の下部タブバーを非表示にします。Android のステータスバーとナビゲーションバーは表示されたままです。</string>
     <string name="settings_credential_keystore_broken_title">認証情報ストレージを利用できません</string>
-    <string name="settings_credential_keystore_broken_subtitle">この端末のキーストアが Haven の認証情報キーを失いました。保存済みのパスワードは読み取れず、新しいパスワードも保存できません。タップして修復してください。</string>
+    <string name="settings_credential_keystore_broken_subtitle">この端末のキーストアが Tidegate の認証情報キーを失いました。保存済みのパスワードは読み取れず、新しいパスワードも保存できません。タップして修復してください。</string>
     <string name="settings_credential_reset_title">認証情報ストレージを修復しますか?</string>
-    <string name="settings_credential_reset_body">新しい認証情報キーを作成し、再びパスワードを保存できるようにします。\n\nHaven に保存済みのパスワード、パスフレーズ、シークレットはすべて入力し直す必要があります。それらは既に読み取れません(保護していたキーが失われたため)。したがってこれは、さらに何かを失うのではなくアプリを復旧する操作です。</string>
+    <string name="settings_credential_reset_body">新しい認証情報キーを作成し、再びパスワードを保存できるようにします。\n\nTidegate に保存済みのパスワード、パスフレーズ、シークレットはすべて入力し直す必要があります。それらは既に読み取れません(保護していたキーが失われたため)。したがってこれは、さらに何かを失うのではなくアプリを復旧する操作です。</string>
     <string name="settings_credential_reset_confirm">修復</string>
     <string name="settings_credential_reset_cancel">キャンセル</string>
     <string name="settings_update_check_title">アップデートを確認</string>
-    <string name="settings_update_check_subtitle">Haven の起動時に新しいリリースを探します（1 時間 1 回まで）。既定ではオフ。</string>
+    <string name="settings_update_check_subtitle">Tidegate の起動時に新しいリリースを探します（1 時間 1 回まで）。既定ではオフ。</string>
     <string name="settings_update_check_now_title">今すぐ確認</string>
     <string name="settings_update_check_now_subtitle">最新のリリースを GitHub に問い合わせます</string>
     <string name="settings_update_checking">確認中…</string>
@@ -497,13 +497,13 @@
     <string name="settings_update_check_available">タップしてリリースページを開く</string>
     <string name="settings_update_check_up_to_date">最新です（%1$s）</string>
     <string name="settings_update_check_failed">確認に失敗しました: %1$s</string>
-    <string name="settings_update_check_other_channel">このコピーは GitHub リリースからインストールされていないため、リリースをダウンロードしても上書きインストールできません。Haven を入手した場所から更新してください。</string>
+    <string name="settings_update_check_other_channel">このコピーは GitHub リリースからインストールされていないため、リリースをダウンロードしても上書きインストールできません。Tidegate を入手した場所から更新してください。</string>
     <string name="settings_sshkey_keystore_broken_title">SSHキーの保存が利用できません</string>
-    <string name="settings_sshkey_keystore_broken_subtitle">このデバイスのキーストアが Haven の SSH キーを失いました。保存された秘密鍶は読み込めず、新しいものも生成できません。タップして修復します。</string>
+    <string name="settings_sshkey_keystore_broken_subtitle">このデバイスのキーストアが Tidegate の SSH キーを失いました。保存された秘密鍶は読み込めず、新しいものも生成できません。タップして修復します。</string>
     <string name="settings_sshkey_reset_title">SSHキーの保存を修復しますか?</string>
     <string name="settings_sshkey_reset_body">これにより新しいキーが作成され、SSHキーを再び生成できるようになります。
 
-Haven にすでに保存されているすべての秘密鍶は、再びインポートまたは生成し直す必要があります。それらはすでに読み取れません — それらを保護していたキーは失われており、通常はアプリを別のソースから再インストールしたためです — したがって、これはこれ以上何かを失うのではなくアプリを回復します。</string>
+Tidegate にすでに保存されているすべての秘密鍶は、再びインポートまたは生成し直す必要があります。それらはすでに読み取れません — それらを保護していたキーは失われており、通常はアプリを別のソースから再インストールしたためです — したがって、これはこれ以上何かを失うのではなくアプリを回復します。</string>
     <string name="settings_sshkey_reset_confirm">修復</string>
 
     <!-- Inline-image consent (#583) -->

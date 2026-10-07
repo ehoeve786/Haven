@@ -39,7 +39,7 @@
 
     <!-- Battery optimization -->
     <string name="battery_title">Keep connections alive?</string>
-    <string name="battery_message">Android may close background SSH connections to save battery. Disabling battery optimization for Haven prevents this.</string>
+    <string name="battery_message">Android may close background SSH connections to save battery. Disabling battery optimization for Tidegate prevents this.</string>
 
     <!-- Workspace profiles -->
     <string name="workspace_section_title">Workspaces</string>
@@ -71,20 +71,20 @@
     <string name="agent_deny">Deny</string>
 
     <!-- Biometric lock screen -->
-    <string name="app_biometric_locked_title">Haven is locked</string>
+    <string name="app_biometric_locked_title">Tidegate is locked</string>
     <string name="app_biometric_authenticate_prompt">Authenticate to continue</string>
     <string name="app_biometric_open_device_settings">Open device settings</string>
-    <string name="app_biometric_blocked_no_activity_title">Haven is locked</string>
+    <string name="app_biometric_blocked_no_activity_title">Tidegate is locked</string>
     <string name="app_biometric_blocked_no_activity_body">Cannot show authentication prompt in this context.</string>
     <string name="app_biometric_not_enrolled_title">Set up a screen lock</string>
-    <string name="app_biometric_not_enrolled_body">Haven app-lock is enabled, but this device has no screen lock or biometric enrolled. Set one up in device Settings to unlock.</string>
+    <string name="app_biometric_not_enrolled_body">Tidegate app-lock is enabled, but this device has no screen lock or biometric enrolled. Set one up in device Settings to unlock.</string>
     <string name="app_biometric_no_hardware_title">Authentication unavailable</string>
     <string name="app_biometric_no_hardware_body">This device cannot authenticate (no biometric hardware and no device credential). Set up a PIN or password in Settings to unlock.</string>
 
     <!-- Desktop manager: header / intro -->
     <string name="app_desktop_manager_title">Local Linux</string>
     <string name="app_desktop_compositor_title">Compositor</string>
-    <string name="app_desktop_manager_description">Run a full Linux desktop inside Haven. Pick a distro, install a desktop environment (Xfce4, Openbox, or Sway), then Launch — no separate server or connection needed.</string>
+    <string name="app_desktop_manager_description">Run a full Linux desktop inside Tidegate. Pick a distro, install a desktop environment (Xfce4, Openbox, or Sway), then Launch — no separate server or connection needed.</string>
     <!-- Desktop manager: package mirror (#263) -->
     <string name="app_desktop_mirror_title">Package mirror</string>
     <string name="app_desktop_mirror_description">Where distro packages are downloaded from. Pick a region closer to you for faster, more reliable installs. Default uses each distro\'s own CDN.</string>
@@ -246,7 +246,7 @@
     <string name="app_desktop_custom_cmd_unset">Set the session command to start</string>
     <string name="app_desktop_custom_cmd_edit">Edit session command</string>
     <string name="app_desktop_custom_cmd_title">Custom session command</string>
-    <string name="app_desktop_custom_cmd_description">Runs against Haven\'s X server inside the active distro — the termux-x11 pattern, e.g. dbus-launch startxfce4. Install the desktop\'s packages in the distro first. X11 desktops render in software: desktops that require a GL compositor (GNOME Shell, KWin) won\'t start.</string>
+    <string name="app_desktop_custom_cmd_description">Runs against Tidegate\'s X server inside the active distro — the termux-x11 pattern, e.g. dbus-launch startxfce4. Install the desktop\'s packages in the distro first. X11 desktops render in software: desktops that require a GL compositor (GNOME Shell, KWin) won\'t start.</string>
     <string name="app_desktop_custom_cmd_label">Session command</string>
     <string name="app_desktop_custom_cmd_save_start">Save &amp; start</string>
 
@@ -274,7 +274,7 @@
     <string name="app_agent_action_requested">Agent action requested</string>
     <string name="app_agent_from_client">From: %1$s</string>
     <string name="app_agent_tool">Tool: %1$s</string>
-    <string name="app_agent_bypass_label">Allow all MCP requests from \'%1$s\' until Haven restarts</string>
+    <string name="app_agent_bypass_label">Allow all MCP requests from \'%1$s\' until Tidegate restarts</string>
     <string name="app_agent_bypass_description">Includes destructive operations (terminal input, file write/delete, APK install). Cleared on app kill.</string>
     <string name="app_agent_auto_allow_window">Auto-allow window:</string>
     <string name="app_agent_minutes">%1$dm</string>
@@ -323,11 +323,11 @@
     <string name="app_present_exit_fullscreen">Exit fullscreen</string>
 
     <!-- Tasker/MacroDroid plugin (#367) -->
-    <string name="tasker_plugin_name">Run command on a Haven server</string>
-    <string name="tasker_edit_title">Run a shell command on a saved Haven SSH connection.</string>
+    <string name="tasker_plugin_name">Run command on a Tidegate server</string>
+    <string name="tasker_edit_title">Run a shell command on a saved Tidegate SSH connection.</string>
     <string name="tasker_loading">Loading connections…</string>
-    <string name="tasker_no_ssh_profiles">No SSH connections saved. Add one in Haven first.</string>
-    <string name="tasker_field_server">Haven server</string>
+    <string name="tasker_no_ssh_profiles">No SSH connections saved. Add one in Tidegate first.</string>
+    <string name="tasker_field_server">Tidegate server</string>
     <string name="tasker_field_command">Command</string>
     <string name="tasker_field_command_help">Runs in the login shell. Tasker/MacroDroid variables are substituted before it runs.</string>
     <string name="tasker_insert_variable">Insert variable</string>
@@ -353,7 +353,7 @@
     <string name="backup_pull_toast_success">Backup restored</string>
     <string name="backup_pull_toast_failure">Backup pull failed: %1$s</string>
     <string name="backup_pull_started">Pulling backup in background…</string>
-    <string name="backup_pull_no_password">No password saved. Opening Haven…</string>
+    <string name="backup_pull_no_password">No password saved. Opening Tidegate…</string>
     <plurals name="app_agent_more_pending">
         <item quantity="one">＋%1$d more request waiting behind this one — you’ll see it after this</item>
         <item quantity="other">＋%1$d more requests waiting behind this one — you’ll see them after this</item>
@@ -371,6 +371,6 @@
         <item quantity="other">%1$d remotes</item>
     </plurals>
     <string name="update_notification_channel">App updates</string>
-    <string name="update_notification_title">Haven %1$s is available</string>
+    <string name="update_notification_title">Tidegate %1$s is available</string>
     <string name="update_notification_text">Tap to open the release page.</string>
 </resources>

@@ -17,17 +17,17 @@
     <string name="tunnel_wireguard_help">الصق إعدادًا بنمط wg-quick أو حمّل ملف ‎.conf. تُقرأ حقول [Interface] و[Peer] فقط؛ تُتجاهل المفاتيح غير المعروفة (PostUp وTable وMTU). تُحلَّل نقاط النهاية باسم المضيف وأسماء DNS عند بدء النفق.</string>
     <string name="tunnel_load_from_file">تحميل من ملف…</string>
     <string name="tunnel_wireguard_config">إعداد WireGuard</string>
-    <string name="tunnel_tailscale_help">أنشئ مفتاح مصادقة في وحدة تحكم Tailscale (الإعدادات ← Keys)، أو في واجهة Headscale الطرفية (`headscale preauthkeys create`). ينضم Haven إلى tailnet عند أول استخدام ويعيد استخدام حالة العقدة بعد ذلك، فمفتاح لمرة واحدة يكفي. تتيح لك المفاتيح القابلة لإعادة الاستخدام إعادة الاتصال بعد إعادة التثبيت.</string>
+    <string name="tunnel_tailscale_help">أنشئ مفتاح مصادقة في وحدة تحكم Tailscale (الإعدادات ← Keys)، أو في واجهة Headscale الطرفية (`headscale preauthkeys create`). ينضم Tidegate إلى tailnet عند أول استخدام ويعيد استخدام حالة العقدة بعد ذلك، فمفتاح لمرة واحدة يكفي. تتيح لك المفاتيح القابلة لإعادة الاستخدام إعادة الاتصال بعد إعادة التثبيت.</string>
     <string name="tunnel_tailscale_authkey_label">مفتاح المصادقة (tskey-auth-…)</string>
     <string name="tunnel_tailscale_control_url_label">رابط مستوى التحكم (اختياري)</string>
     <string name="tunnel_tailscale_control_url_help">اتركه فارغًا لمستوى التحكم المستضاف من Tailscale. اضبطه على رابط Headscale لخادم تنسيق ذاتي الاستضافة.</string>
-    <string name="tunnel_netbird_help">أنشئ مفتاح إعداد في لوحة NetBird (Setup Keys → Add setup key). ينضم Haven إلى شبكتك عند أول استخدام ويعيد استخدام حالة العقدة بعد ذلك، لذا يكفي مفتاح للاستخدام مرة واحدة. المفاتيح القابلة لإعادة الاستخدام تتيح لك إعادة الاتصال بعد إعادة التثبيت.</string>
+    <string name="tunnel_netbird_help">أنشئ مفتاح إعداد في لوحة NetBird (Setup Keys → Add setup key). ينضم Tidegate إلى شبكتك عند أول استخدام ويعيد استخدام حالة العقدة بعد ذلك، لذا يكفي مفتاح للاستخدام مرة واحدة. المفاتيح القابلة لإعادة الاستخدام تتيح لك إعادة الاتصال بعد إعادة التثبيت.</string>
     <string name="tunnel_netbird_setup_key_label">مفتاح الإعداد</string>
     <string name="tunnel_netbird_management_url_label">رابط الإدارة (اختياري)</string>
     <string name="tunnel_netbird_management_url_help">اتركه فارغًا للإدارة المستضافة من NetBird. اضبطه على رابط الخادم لخدمة إدارة ذاتية الاستضافة.</string>
 
     <!-- Cloudflare Access SSH tunnel (#154) -->
-    <string name="cf_experimental_banner">تجريبي — ينفّذ Haven بروتوكول WebSocket السلكي نفسه الذي يستخدمه `cloudflared access ssh`. اختُبر مع مجموعة صغيرة من المستأجرين؛ يُرجى الإبلاغ عن أي تباين عبر GitHub #154.</string>
+    <string name="cf_experimental_banner">تجريبي — ينفّذ Tidegate بروتوكول WebSocket السلكي نفسه الذي يستخدمه `cloudflared access ssh`. اختُبر مع مجموعة صغيرة من المستأجرين؛ يُرجى الإبلاغ عن أي تباين عبر GitHub #154.</string>
     <string name="cf_intro_blurb">توجيه SSH عبر اسم مضيف منشور لـ Cloudflare Tunnel — المكافئ داخل التطبيق لـ `cloudflared access ssh --hostname &lt;host&gt;`. تحتاج مسارات Tunnel العامة إلى اسم مضيف فقط. أما المسارات المحمية بـ Access فتتطلب إضافةً JWT — اضغط تسجيل الدخول لالتقاط واحد عبر IdP الخاص بفريقك.</string>
     <string name="cf_field_hostname">اسم المضيف (مثل ssh.example.com)</string>
     <string name="cf_jwt_none">بلا JWT — يعمل فقط مع مسارات Tunnel غير المحمية</string>

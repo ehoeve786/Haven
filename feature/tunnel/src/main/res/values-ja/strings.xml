@@ -24,17 +24,17 @@
     <string name="tunnel_wireguard_help">wg-quick 形式の設定を貼り付けるか、.conf ファイルを読み込んでください。[Interface] と [Peer] のフィールドのみが読み取られ、不明なキー（PostUp、Table、MTU）は無視されます。ホスト名のエンドポイントや DNS 名はトンネル開始時に解決されます。</string>
     <string name="tunnel_load_from_file">ファイルから読み込む…</string>
     <string name="tunnel_wireguard_config">WireGuard 設定</string>
-    <string name="tunnel_tailscale_help">Tailscale 管理コンソール（Settings → Keys）または Headscale CLI（`headscale preauthkeys create`）で authkey を生成してください。Haven は初回使用時に tailnet に参加し、以降はノードの状態を再利用するため、ワンタイムキーで問題ありません。再利用可能なキーを使うと、再インストール後でも再接続できます。</string>
+    <string name="tunnel_tailscale_help">Tailscale 管理コンソール（Settings → Keys）または Headscale CLI（`headscale preauthkeys create`）で authkey を生成してください。Tidegate は初回使用時に tailnet に参加し、以降はノードの状態を再利用するため、ワンタイムキーで問題ありません。再利用可能なキーを使うと、再インストール後でも再接続できます。</string>
     <string name="tunnel_tailscale_authkey_label">認証キー (tskey-auth-…)</string>
     <string name="tunnel_tailscale_control_url_label">コントロールプレーン URL（任意）</string>
     <string name="tunnel_tailscale_control_url_help">Tailscale のホスト型コントロールプレーンを使う場合は空欄にしてください。セルフホストの調整サーバーを使う場合は Headscale の URL を設定してください。</string>
-    <string name="tunnel_netbird_help">NetBird ダッシュボードでセットアップキーを発行してください（Setup Keys → Add setup key）。Haven は初回利用時にネットワークへ参加し、以降はピア状態を再利用するため、1 回限りのキーで問題ありません。再利用可能なキーなら再インストール後の再接続も可能です。</string>
+    <string name="tunnel_netbird_help">NetBird ダッシュボードでセットアップキーを発行してください（Setup Keys → Add setup key）。Tidegate は初回利用時にネットワークへ参加し、以降はピア状態を再利用するため、1 回限りのキーで問題ありません。再利用可能なキーなら再インストール後の再接続も可能です。</string>
     <string name="tunnel_netbird_setup_key_label">セットアップキー</string>
     <string name="tunnel_netbird_management_url_label">管理 URL（省略可）</string>
     <string name="tunnel_netbird_management_url_help">NetBird のホスト型管理サービスを使う場合は空欄にしてください。セルフホストの管理サーバーを使う場合はその URL を設定してください。</string>
 
     <!-- Cloudflare Access SSH tunnel (#154) -->
-    <string name="cf_experimental_banner">実験的機能 — Haven は `cloudflared access ssh` と同じ WebSocket ワイヤープロトコルを実装しています。少数のテナントでのみ検証済みです。不一致があれば GitHub #154 で報告してください。</string>
+    <string name="cf_experimental_banner">実験的機能 — Tidegate は `cloudflared access ssh` と同じ WebSocket ワイヤープロトコルを実装しています。少数のテナントでのみ検証済みです。不一致があれば GitHub #154 で報告してください。</string>
     <string name="cf_intro_blurb">Cloudflare Tunnel で公開されたホスト名経由で SSH をルーティングします — アプリ内での `cloudflared access ssh --hostname &lt;host&gt;` 相当です。パブリックな Tunnel ルートにはホスト名のみが必要です。Access で保護されたルートには JWT も必要です — 「サインイン」をタップしてチームの IdP 経由で取得してください。</string>
     <string name="cf_field_hostname">ホスト名（例: ssh.example.com）</string>
     <string name="cf_jwt_none">JWT なし — 保護されていない Tunnel ルートでのみ動作します</string>

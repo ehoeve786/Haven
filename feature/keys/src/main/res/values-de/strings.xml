@@ -151,7 +151,7 @@
     <string name="keys_fido_pin_help">Geben Sie die auf Ihrem Sicherheitsschlüssel eingerichtete PIN ein, um fortzufahren.</string>
     <string name="keys_fido_pin_wrong">Falsche PIN. Noch %1$d Versuche, bevor der Schlüssel gesperrt wird.</string>
     <string name="keys_fido_waiting_title">Sicherheitsschlüssel erforderlich</string>
-    <string name="keys_fido_waiting_body">Stecken Sie Ihren Sicherheitsschlüssel per USB ein oder halten Sie ihn für NFC an die Rückseite des Geräts. Haven fährt automatisch fort, sobald er erkannt wird.</string>
+    <string name="keys_fido_waiting_body">Stecken Sie Ihren Sicherheitsschlüssel per USB ein oder halten Sie ihn für NFC an die Rückseite des Geräts. Tidegate fährt automatisch fort, sobald er erkannt wird.</string>
     <string name="keys_fido_touch_usb_title">Berühren Sie Ihren Sicherheitsschlüssel</string>
     <string name="keys_fido_touch_usb_body">Drücken Sie jetzt die Taste auf Ihrem Sicherheitsschlüssel, um die Anfrage zu autorisieren.</string>
     <string name="keys_fido_touch_nfc_title">Halten Sie Ihren Sicherheitsschlüssel</string>
@@ -240,7 +240,7 @@
     <string name="keys_section_collapse">%1$s einklappen</string>
     <string name="keys_section_expand">%1$s ausklappen</string>
     <string name="keys_from_provider">Einen Schlüssel aus %1$s verwenden</string>
-    <string name="keys_from_provider_hint">Wähle einen Schlüssel, den diese App verwaltet. Sie signiert im Auftrag von Haven — der private Schlüssel bleibt, wo er ist, auch auf einem Hardware-Token.</string>
+    <string name="keys_from_provider_hint">Wähle einen Schlüssel, den diese App verwaltet. Sie signiert im Auftrag von Tidegate — der private Schlüssel bleibt, wo er ist, auch auf einem Hardware-Token.</string>
     <string name="keys_totp_code_copied">Code kopiert</string>
     <plurals name="keys_selected_count">
         <item quantity="one">%1$d ausgewählt</item>

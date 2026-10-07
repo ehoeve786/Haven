@@ -128,7 +128,7 @@
     <string name="mail_rules_history_uidreset">Buzón renumerado — restablecido</string>
     <string name="mail_rules_no_subject">(sin asunto)</string>
     <string name="mail_rules_pending_empty">No hay nada esperando aprobación.</string>
-    <string name="mail_rules_pending_desc">En cola mientras Haven estaba en segundo plano. Aprueba para ejecutar, o rechaza para descartar.</string>
+    <string name="mail_rules_pending_desc">En cola mientras Tidegate estaba en segundo plano. Aprueba para ejecutar, o rechaza para descartar.</string>
     <string name="mail_rules_approve">Aprobar</string>
     <string name="mail_rules_reject">Rechazar</string>
     <string name="mail_rules_approve_all">Aprobar todo</string>

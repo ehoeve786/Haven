@@ -30,7 +30,7 @@
     <string name="common_support">Подршка</string>
     <string name="common_unlock">Откључај</string>
     <string name="battery_title">Да одржавам активност веза?</string>
-    <string name="battery_message">Андроид може да затвори позадинске SSH везе да уштеди батерију. Искључивањем оптимизације батерије за апликацију Haven спречавате ово.</string>
+    <string name="battery_message">Андроид може да затвори позадинске SSH везе да уштеди батерију. Искључивањем оптимизације батерије за апликацију Tidegate спречавате ово.</string>
     <string name="workspace_section_title">Радни простори</string>
     <string name="workspace_save_current">Сачувај текуће…</string>
     <string name="workspace_empty_hint">Отворите сесије које желите да користите заједно, затим тапните на Сачувај текуће. Наредни пут ћете их отворити све једним тапом.</string>
@@ -58,18 +58,18 @@
     <string name="biometric_screen_lock_icon">Закључавање екрана</string>
     <string name="desktop_screen_title">Десктоп</string>
     <string name="agent_deny">Забрани</string>
-    <string name="app_biometric_locked_title">Haven је закључан</string>
+    <string name="app_biometric_locked_title">Tidegate је закључан</string>
     <string name="app_biometric_authenticate_prompt">Потврдите идентитет за наставак</string>
     <string name="app_biometric_open_device_settings">Отвори подешавања уређаја</string>
-    <string name="app_biometric_blocked_no_activity_title">Haven је закључан</string>
+    <string name="app_biometric_blocked_no_activity_title">Tidegate је закључан</string>
     <string name="app_biometric_blocked_no_activity_body">У овом контексту не може да се прикаже упит за потврду идентитета</string>
     <string name="app_biometric_not_enrolled_title">Постављање закључавања екрана</string>
-    <string name="app_biometric_not_enrolled_body">Укључено је закључавање апликације Haven, али на уређају није постављено закључавање екрана или биометријска провера.</string>
+    <string name="app_biometric_not_enrolled_body">Укључено је закључавање апликације Tidegate, али на уређају није постављено закључавање екрана или биометријска провера.</string>
     <string name="app_biometric_no_hardware_title">Није доступна провера идентитета</string>
     <string name="app_biometric_no_hardware_body">Овај уређај не може да провери идентитет (нема биометријски хардвер и нема овлашћење уређаја). Поставите PIN или лозинку за откључавање у Подешавањима.</string>
     <string name="app_desktop_manager_title">Локални Линукс</string>
     <string name="app_desktop_compositor_title">Композитор</string>
-    <string name="app_desktop_manager_description">Покрећите комплетан Линукс десктоп унутар апликације Haven. Изаберите дистрибуцију, инсталирајте десктоп окружење (Xfce4, Openbox, или Sway), па Покрени — није потребан посебан сервер или повезивање.</string>
+    <string name="app_desktop_manager_description">Покрећите комплетан Линукс десктоп унутар апликације Tidegate. Изаберите дистрибуцију, инсталирајте десктоп окружење (Xfce4, Openbox, или Sway), па Покрени — није потребан посебан сервер или повезивање.</string>
     <string name="app_desktop_mirror_title">Извор пакета</string>
     <string name="app_desktop_mirror_description">Место са којег се преузимају пакети. За бржа, поузданија инсталирања, изаберите регион у вашој близини. Подразумевани користи сопствени CDN сваке дистрибуције.</string>
     <string name="app_desktop_mirror_default">Подразумевани (CDN)</string>
@@ -203,7 +203,7 @@
     <string name="app_desktop_custom_cmd_unset">Постави команду сесије за покретање</string>
     <string name="app_desktop_custom_cmd_edit">Уреди команду сесије</string>
     <string name="app_desktop_custom_cmd_title">Произвољна команда сесије</string>
-    <string name="app_desktop_custom_cmd_description">Извршава се у односу на X сервер апликације Haven унутар активне дистрибуције — termux-x11 шаблон, нпр. dbus-launch startxfce4. Најпре инсталирајте пакете десктопа у дистрибуцију. X11 десктопи се исцртавају софтверски: неће се покренути десктопи који захтевају GL композитор (GNOME Shell, KWin).</string>
+    <string name="app_desktop_custom_cmd_description">Извршава се у односу на X сервер апликације Tidegate унутар активне дистрибуције — termux-x11 шаблон, нпр. dbus-launch startxfce4. Најпре инсталирајте пакете десктопа у дистрибуцију. X11 десктопи се исцртавају софтверски: неће се покренути десктопи који захтевају GL композитор (GNOME Shell, KWin).</string>
     <string name="app_desktop_custom_cmd_label">Команда сесије</string>
     <string name="app_desktop_custom_cmd_save_start">Сачувај &amp; покрени</string>
     <string name="app_desktop_de_with_size">%1$s (%2$s)</string>
@@ -225,7 +225,7 @@
     <string name="app_agent_action_requested">Захтевана је акција агента</string>
     <string name="app_agent_from_client">Од: %1$s</string>
     <string name="app_agent_tool">Алат: %1$s</string>
-    <string name="app_agent_bypass_label">Дозволи све MCP захтеве од ‘%1$s’ све док се Haven поново не покрене</string>
+    <string name="app_agent_bypass_label">Дозволи све MCP захтеве од ‘%1$s’ све док се Tidegate поново не покрене</string>
     <string name="app_agent_bypass_description">Укључује и деструктивне операције (терминалски унос, упис/брисање фајла, инсталација APK). Брише се приликом укидања апликације.</string>
     <string name="app_agent_auto_allow_window">Ауто-дозволи прозор:</string>
     <string name="app_agent_minutes">%1$dм</string>
@@ -268,11 +268,11 @@
     <string name="agent_summary_enabled">укључено</string>
     <string name="app_present_fullscreen">Пуни екран</string>
     <string name="app_present_exit_fullscreen">Напусти пуни екран</string>
-    <string name="tasker_plugin_name">Покрени команду на Haven серверу</string>
-    <string name="tasker_edit_title">Покреће команду љуске на сачуваној Haven SSH вези.</string>
+    <string name="tasker_plugin_name">Покрени команду на Tidegate серверу</string>
+    <string name="tasker_edit_title">Покреће команду љуске на сачуваној Tidegate SSH вези.</string>
     <string name="tasker_loading">Везе се учитавају…</string>
-    <string name="tasker_no_ssh_profiles">Није сачувана ниједна SSH веза. Најпре додајте неку у Haven.</string>
-    <string name="tasker_field_server">Haven сервер</string>
+    <string name="tasker_no_ssh_profiles">Није сачувана ниједна SSH веза. Најпре додајте неку у Tidegate.</string>
+    <string name="tasker_field_server">Tidegate сервер</string>
     <string name="tasker_field_command">Команда</string>
     <string name="tasker_field_command_help">Извршава се у login љуски. Tasker/MacroDroid променљиве се замењују пре него што се покрене.</string>
     <string name="tasker_insert_variable">Уметни променљиву</string>
@@ -294,8 +294,8 @@
     <string name="backup_pull_toast_success">Резервна копија је враћена</string>
     <string name="backup_pull_toast_failure">Повлачење резервне копије није успело: %1$s</string>
     <string name="backup_pull_started">Резервна копија се повлачи у позадини…</string>
-    <string name="backup_pull_no_password">Није сачувана ниједна лозинка. Отвара се Haven…</string>
+    <string name="backup_pull_no_password">Није сачувана ниједна лозинка. Отвара се Tidegate…</string>
     <string name="update_notification_channel">Ажурирања апликације</string>
-    <string name="update_notification_title">Доступан је Haven %1$s</string>
+    <string name="update_notification_title">Доступан је Tidegate %1$s</string>
     <string name="update_notification_text">Тапните да се отвори страница издања.</string>
 </resources>

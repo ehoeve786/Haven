@@ -151,7 +151,7 @@
     <string name="keys_fido_pin_help">続行するには、セキュリティキーに設定されたPINを入力してください。</string>
     <string name="keys_fido_pin_wrong">PINが間違っています。キーがロックされるまであと %1$d 回です。</string>
     <string name="keys_fido_waiting_title">セキュリティキーが必要です</string>
-    <string name="keys_fido_waiting_body">セキュリティキーをUSBで接続するか、NFCの場合はデバイスの背面にタップしてください。検出されると Haven は自動的に続行します。</string>
+    <string name="keys_fido_waiting_body">セキュリティキーをUSBで接続するか、NFCの場合はデバイスの背面にタップしてください。検出されると Tidegate は自動的に続行します。</string>
     <string name="keys_fido_touch_usb_title">セキュリティキーにタッチ</string>
     <string name="keys_fido_touch_usb_body">リクエストを承認するには、今すぐセキュリティキーのボタンを押してください。</string>
     <string name="keys_fido_touch_nfc_title">セキュリティキーを保持</string>
@@ -239,7 +239,7 @@
     <string name="keys_section_collapse">%1$s を折りたたむ</string>
     <string name="keys_section_expand">%1$s を展開する</string>
     <string name="keys_from_provider">%1$s の鍵を使う</string>
-    <string name="keys_from_provider_hint">そのアプリが保持している鍵を選びます。Haven の代わりに署名し、秘密鍵はハードウェアトークン上も含めて元の場所に留まります。</string>
+    <string name="keys_from_provider_hint">そのアプリが保持している鍵を選びます。Tidegate の代わりに署名し、秘密鍵はハードウェアトークン上も含めて元の場所に留まります。</string>
     <string name="keys_totp_code_copied">コードをコピーしました</string>
     <plurals name="keys_selected_count">
         <item quantity="other">%1$d 件選択中</item>

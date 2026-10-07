@@ -70,10 +70,10 @@
 
     <!-- Battery optimization dialog -->
     <string name="connections_battery_title">إبقاء الاتصالات نشطة؟</string>
-    <string name="connections_battery_message">قد يغلق Android اتصالات SSH في الخلفية لتوفير البطارية. تعطيل تحسين البطارية لـ Haven يمنع ذلك.</string>
-    <string name="connections_battery_redropped_message">تم إيقاف استثناء البطارية لـ Haven — غالبًا كأثر جانبي لتحديث التطبيق. بدونه قد يغلق Android اتصالات SSH في الخلفية مجددًا. هل تريد السماح به من جديد؟</string>
+    <string name="connections_battery_message">قد يغلق Android اتصالات SSH في الخلفية لتوفير البطارية. تعطيل تحسين البطارية لـ Tidegate يمنع ذلك.</string>
+    <string name="connections_battery_redropped_message">تم إيقاف استثناء البطارية لـ Tidegate — غالبًا كأثر جانبي لتحديث التطبيق. بدونه قد يغلق Android اتصالات SSH في الخلفية مجددًا. هل تريد السماح به من جديد؟</string>
     <string name="connections_battery_dont_ask_again">عدم السؤال مجددًا</string>
-    <string name="connections_process_killed_banner">أنهى Android تطبيق Haven في %1$s ‏(%2$s) — وفُقدت الجلسات في الخلفية معه.</string>
+    <string name="connections_process_killed_banner">أنهى Android تطبيق Tidegate في %1$s ‏(%2$s) — وفُقدت الجلسات في الخلفية معه.</string>
     <string name="process_exit_cause_debug_app">خيار المطوّر «اختيار تطبيق التصحيح»</string>
     <string name="process_exit_cause_force_stop">إيقاف قسري</string>
     <string name="process_exit_cause_memory">ذاكرة منخفضة</string>
@@ -238,7 +238,7 @@
     <string name="connections_fido_pin_help">سُجِّل مفتاح SSH هذا بخيار verify-required. أدخل رمز PIN المُعدّ على مفتاح الأمان للمتابعة.</string>
     <string name="connections_fido_pin_wrong">رمز PIN خاطئ. تبقّت %1$d محاولات قبل قفل المفتاح.</string>
     <string name="connections_fido_waiting_title">مطلوب مفتاح أمان</string>
-    <string name="connections_fido_waiting_body">وصّل مفتاح الأمان عبر USB، أو المسه بظهر الجهاز لاستخدام NFC. سيتابع Haven تلقائيًا بمجرد اكتشافه.</string>
+    <string name="connections_fido_waiting_body">وصّل مفتاح الأمان عبر USB، أو المسه بظهر الجهاز لاستخدام NFC. سيتابع Tidegate تلقائيًا بمجرد اكتشافه.</string>
     <string name="connections_fido_touch_usb_title">المس مفتاح الأمان</string>
     <string name="connections_fido_touch_usb_body">اضغط الزر على مفتاح الأمان الآن للسماح بتوقيع SSH. قد يومض المفتاح للإشارة إلى أنه في انتظارك.</string>
     <string name="connections_fido_touch_nfc_title">أمسك مفتاح الأمان</string>
@@ -255,7 +255,7 @@
     <string name="connections_vm_step_open_port_body">في إعدادات تطبيق الطرفية، أضف المنفذ 8022 إلى قائمة منافذ الاستماع.</string>
     <string name="connections_vm_step_password_body">شغّله في تطبيق الطرفية. سيُطلب منك تعيين كلمة مرور للمستخدم droid.</string>
     <string name="connections_vm_step_password_hint">ثم اتصل بـ: droid@localhost:8022</string>
-    <string name="connections_vm_step_vnc_body">للوصول إلى سطح المكتب البعيد عبر تبويب Desktop في Haven.</string>
+    <string name="connections_vm_step_vnc_body">للوصول إلى سطح المكتب البعيد عبر تبويب Desktop في Tidegate.</string>
     <string name="connections_vm_step_desktop_body">Xfce4 خفيف ويعمل جيدًا عبر VNC.</string>
     <string name="connections_vm_step_apps_body">مدير ملفات، محرر نصوص، عارض صور، متصفح، آلة حاسبة.</string>
 
@@ -361,8 +361,8 @@
     <string name="connections_section_embedded_vnc">VNC المضمّن</string>
     <string name="connections_section_reticulum">Reticulum</string>
     <string name="connections_section_routing">التوجيه</string>
-    <string name="connections_toggle_mcp_tunnel">إتاحة خادم MCP الخاص بـ Haven</string>
-    <string name="connections_helper_mcp_tunnel">يتيح MCP الخاص بـ Haven لكل جلسة على هذا الاتصال — تصل إلى http://127.0.0.1:8730/mcp وتتخطى (عبر الاسترجاع) الإقران والموافقة. يُطبَّق عند الاتصال. للوصول الدائم دون جلسة مفتوحة، عيّنه كاتصال MCP دائم التشغيل في الإعدادات → نقطة نهاية الوكيل.</string>
+    <string name="connections_toggle_mcp_tunnel">إتاحة خادم MCP الخاص بـ Tidegate</string>
+    <string name="connections_helper_mcp_tunnel">يتيح MCP الخاص بـ Tidegate لكل جلسة على هذا الاتصال — تصل إلى http://127.0.0.1:8730/mcp وتتخطى (عبر الاسترجاع) الإقران والموافقة. يُطبَّق عند الاتصال. للوصول الدائم دون جلسة مفتوحة، عيّنه كاتصال MCP دائم التشغيل في الإعدادات → نقطة نهاية الوكيل.</string>
     <string name="connections_section_reconnect">إعادة الاتصال</string>
     <string name="connections_local_shell_android_desc">يشغّل صدفة أندرويد الأصلية (/system/bin/sh). الوصول إلى أوامر أندرويد ونظام الملفات والجذر (إن توفّر).</string>
     <string name="connections_local_shell_proot_desc">يشغّل صدفة Alpine Linux محليًا عبر PRoot. ينزّل نظام جذر أدنى (~4 ميجابايت) عند أول استخدام. لا حاجة إلى الجذر أو اتصال بالشبكة.</string>
@@ -394,7 +394,7 @@
     <string name="connections_helper_vnc_host_via_ssh">أين يمكن الوصول إلى خادم VNC من خادم SSH — عادةً 127.0.0.1 إذا كانا نفس الجهاز (wayvnc وغيره يرتبط بالاسترجاع فقط).</string>
     <string name="connections_helper_vnc_auth">اترك اسم المستخدم فارغًا لـ VncAuth الكلاسيكي (كلمة مرور من 8 أحرف). املأ اسم المستخدم لـ VeNCrypt (wayvnc وTigerVNC) — يدعم كلمات مرور أطول وتشفير TLS.</string>
     <string name="connections_helper_rdp_host_via_ssh">أين يمكن الوصول إلى خادم RDP من خادم SSH — عادةً 127.0.0.1 إذا كانا نفس الجهاز.</string>
-    <string name="connections_helper_rdp_nla">مُفعَّل افتراضيًا. أوقفه إذا رفض الخادم NLA الخاص بـ Haven (بعض إعدادات Windows Server 2025 — يجب تعطيل \"Require NLA\" على الخادم للاتصال عبر SSL فقط).</string>
+    <string name="connections_helper_rdp_nla">مُفعَّل افتراضيًا. أوقفه إذا رفض الخادم NLA الخاص بـ Tidegate (بعض إعدادات Windows Server 2025 — يجب تعطيل \"Require NLA\" على الخادم للاتصال عبر SSL فقط).</string>
     <string name="connections_action_manage_tunnels">إدارة الأنفاق…</string>
     <string name="connections_helper_cloudflare_routing">التوجيه عبر موصّل Cloudflare Tunnel. يُستخدم المضيف أعلاه كاسم مضيف النفق؛ المنفذ لا ينطبق (الموصّل يحدد هدف SSH الأعلى).</string>
     <string name="connections_vnc_depth_24">لون 24 بت (أفضل جودة)</string>
@@ -602,7 +602,7 @@
     <string name="connections_identity_help">مشتركة بين جميع اتصالات Reticulum. الخادم الذي يسمح لك يعتمد على هذه البصمة.</string>
     <string name="connections_identity_import">استيراد ملف الهوية…</string>
     <string name="connections_identity_imported">تم استيراد الهوية: %1$s</string>
-    <string name="connections_identity_imported_restart">تم استيراد الهوية: %1$s. أعد تشغيل Haven لكي تستخدمها الاتصالات.</string>
+    <string name="connections_identity_imported_restart">تم استيراد الهوية: %1$s. أعد تشغيل Tidegate لكي تستخدمها الاتصالات.</string>
     <string name="connections_identity_not_an_identity">هذا الملف ليس هوية Reticulum. لم يتم تغيير أي شيء.</string>
     <string name="connections_identity_install_failed">تعذّر تثبيت الهوية: %1$s. الهوية السابقة ما زالت في مكانها.</string>
     <string name="connections_identity_unreadable">تعذّرت قراءة هذا الملف.</string>

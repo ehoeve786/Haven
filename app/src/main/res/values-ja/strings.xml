@@ -35,7 +35,7 @@
 
     <!-- Battery optimization -->
     <string name="battery_title">接続を維持しますか？</string>
-    <string name="battery_message">Androidはバッテリー節約のためにバックグラウンドのSSH接続を切断することがあります。Havenのバッテリー最適化を無効にするとこれを防げます。</string>
+    <string name="battery_message">Androidはバッテリー節約のためにバックグラウンドのSSH接続を切断することがあります。Tidegateのバッテリー最適化を無効にするとこれを防げます。</string>
 
     <!-- Workspace profiles -->
     <string name="workspace_section_title">ワークスペース</string>
@@ -67,7 +67,7 @@
     <string name="agent_deny">拒否</string>
 
     <!-- i18n sweep #210 -->
-    <string name="app_biometric_locked_title">Haven はロックされています</string>
+    <string name="app_biometric_locked_title">Tidegate はロックされています</string>
     <string name="app_biometric_authenticate_prompt">続けるには認証してください</string>
     <string name="app_biometric_open_device_settings">デバイス設定を開く</string>
     <string name="app_desktop_app_windows_title">アプリウィンドウ</string>
@@ -116,7 +116,7 @@
     <string name="app_desktop_custom_cmd_unset">先にセッションコマンドを設定してください</string>
     <string name="app_desktop_custom_cmd_edit">セッションコマンドを編集</string>
     <string name="app_desktop_custom_cmd_title">カスタムセッションコマンド</string>
-    <string name="app_desktop_custom_cmd_description">アクティブなディストリ内で Haven の X サーバーに対して実行します（termux-x11 方式、例: dbus-launch startxfce4）。先にディストリへデスクトップのパッケージをインストールしてください。X11 デスクトップはソフトウェアレンダリングのため、GL コンポジターを必要とするデスクトップ（GNOME Shell、KWin）は起動しません。</string>
+    <string name="app_desktop_custom_cmd_description">アクティブなディストリ内で Tidegate の X サーバーに対して実行します（termux-x11 方式、例: dbus-launch startxfce4）。先にディストリへデスクトップのパッケージをインストールしてください。X11 デスクトップはソフトウェアレンダリングのため、GL コンポジターを必要とするデスクトップ（GNOME Shell、KWin）は起動しません。</string>
     <string name="app_desktop_custom_cmd_label">セッションコマンド</string>
     <string name="app_desktop_custom_cmd_save_start">保存して起動</string>
     <string name="app_desktop_de_with_size">%1$s (%2$s)</string>
@@ -138,7 +138,7 @@
     <string name="app_agent_action_requested">エージェントのアクションが要求されました</string>
     <string name="app_agent_from_client">送信元: %1$s</string>
     <string name="app_agent_tool">ツール: %1$s</string>
-    <string name="app_agent_bypass_label">Haven が再起動するまで \'%1$s\' からのすべての MCP リクエストを許可する</string>
+    <string name="app_agent_bypass_label">Tidegate が再起動するまで \'%1$s\' からのすべての MCP リクエストを許可する</string>
     <string name="app_agent_bypass_description">破壊的な操作（ターミナル入力、ファイルの書き込み/削除、APK インストール）を含みます。アプリ終了時にクリアされます。</string>
     <string name="app_agent_auto_allow_window">自動許可ウィンドウ:</string>
     <string name="app_agent_minutes">%1$d 分</string>
@@ -153,10 +153,10 @@
     <string name="app_present_preparing_audio">オーディオを準備中…</string>
 
     <!-- i18n sweep #210 (follow-up batch) -->
-    <string name="app_biometric_blocked_no_activity_title">Haven はロックされています</string>
+    <string name="app_biometric_blocked_no_activity_title">Tidegate はロックされています</string>
     <string name="app_biometric_blocked_no_activity_body">この状況では認証プロンプトを表示できません。</string>
     <string name="app_biometric_not_enrolled_title">画面ロックを設定</string>
-    <string name="app_biometric_not_enrolled_body">Haven のアプリロックは有効ですが、このデバイスには画面ロックも生体認証も登録されていません。ロック解除するには、デバイスの設定でいずれかを設定してください。</string>
+    <string name="app_biometric_not_enrolled_body">Tidegate のアプリロックは有効ですが、このデバイスには画面ロックも生体認証も登録されていません。ロック解除するには、デバイスの設定でいずれかを設定してください。</string>
     <string name="app_biometric_no_hardware_title">認証を利用できません</string>
     <string name="app_biometric_no_hardware_body">このデバイスは認証できません（生体認証ハードウェアもデバイス認証情報もありません）。ロック解除するには、設定で PIN またはパスワードを設定してください。</string>
     <string name="app_present_minimize">最小化</string>
@@ -164,7 +164,7 @@
 
     <!-- Local Linux desktop manager -->
     <string name="app_desktop_manager_title">ローカル Linux デスクトップ</string>
-    <string name="app_desktop_manager_description">Haven 内でフル機能の Linux デスクトップを実行します。ディストリビューションを選び、デスクトップ環境（Xfce4、Openbox、Sway）をインストールして「起動」をタップするだけ — 別途サーバーや接続は不要です。</string>
+    <string name="app_desktop_manager_description">Tidegate 内でフル機能の Linux デスクトップを実行します。ディストリビューションを選び、デスクトップ環境（Xfce4、Openbox、Sway）をインストールして「起動」をタップするだけ — 別途サーバーや接続は不要です。</string>
 
     <!-- App windows / installed-app launcher (#250) -->
     <string name="app_desktop_app_window_pin_home_cd">%1$s をホーム画面に追加</string>
@@ -287,11 +287,11 @@
     <string name="app_desktop_open_terminal_cd">%1$s でターミナルを開く</string>
     <string name="app_present_fullscreen">全画面表示</string>
     <string name="app_present_exit_fullscreen">全画面表示を終了</string>
-    <string name="tasker_plugin_name">Haven サーバーでコマンドを実行</string>
-    <string name="tasker_edit_title">保存済みの Haven SSH 接続でシェルコマンドを実行します。</string>
+    <string name="tasker_plugin_name">Tidegate サーバーでコマンドを実行</string>
+    <string name="tasker_edit_title">保存済みの Tidegate SSH 接続でシェルコマンドを実行します。</string>
     <string name="tasker_loading">接続を読み込み中…</string>
-    <string name="tasker_no_ssh_profiles">保存された SSH 接続がありません。まず Haven で追加してください。</string>
-    <string name="tasker_field_server">Haven サーバー</string>
+    <string name="tasker_no_ssh_profiles">保存された SSH 接続がありません。まず Tidegate で追加してください。</string>
+    <string name="tasker_field_server">Tidegate サーバー</string>
     <string name="tasker_field_command">コマンド</string>
     <string name="tasker_field_command_help">ログインシェルで実行されます。Tasker/MacroDroid の変数は実行前に置換されます。</string>
     <string name="tasker_toggle_overlay">コマンドをライブターミナルに表示する</string>
@@ -319,7 +319,7 @@
     <string name="backup_pull_toast_success">バックアップを復元しました</string>
     <string name="backup_pull_toast_failure">バックアップの取得に失敗しました: %1$s</string>
     <string name="backup_pull_started">バックグラウンドでバックアップを取得中…</string>
-    <string name="backup_pull_no_password">パスワードが保存されていません。Haven を開きます…</string>
+    <string name="backup_pull_no_password">パスワードが保存されていません。Tidegate を開きます…</string>
     <plurals name="app_agent_more_pending">
         <item quantity="other">＋この後ろに %1$d 件のリクエストが待機しています — この後に表示されます</item>
     </plurals>
@@ -333,6 +333,6 @@
         <item quantity="other">%1$d 件のリモート</item>
     </plurals>
     <string name="update_notification_channel">アプリの更新</string>
-    <string name="update_notification_title">Haven %1$s が利用できます</string>
+    <string name="update_notification_title">Tidegate %1$s が利用できます</string>
     <string name="update_notification_text">タップしてリリースページを開きます。</string>
 </resources>

@@ -24,17 +24,17 @@
     <string name="tunnel_wireguard_help">wg-quick शैली का config पेस्ट करें या .conf फ़ाइल लोड करें। केवल [Interface] और [Peer] फ़ील्ड पढ़े जाते हैं; अज्ञात कुंजियाँ (PostUp, Table, MTU) अनदेखी की जाती हैं। होस्टनाम endpoints और DNS नाम टनल शुरू होने पर हल किए जाते हैं।</string>
     <string name="tunnel_load_from_file">फ़ाइल से लोड करें…</string>
     <string name="tunnel_wireguard_config">WireGuard config</string>
-    <string name="tunnel_tailscale_help">Tailscale एडमिन कंसोल (Settings → Keys) में, या अपने Headscale CLI (`headscale preauthkeys create`) में एक authkey बनाएँ। Haven पहली बार उपयोग पर आपके tailnet में शामिल होता है और उसके बाद node state का पुनः उपयोग करता है, इसलिए एक-बार की कुंजी ठीक है। पुनः-उपयोग योग्य कुंजियाँ आपको पुनः-इंस्टॉल के बाद फिर से कनेक्ट करने देती हैं।</string>
+    <string name="tunnel_tailscale_help">Tailscale एडमिन कंसोल (Settings → Keys) में, या अपने Headscale CLI (`headscale preauthkeys create`) में एक authkey बनाएँ। Tidegate पहली बार उपयोग पर आपके tailnet में शामिल होता है और उसके बाद node state का पुनः उपयोग करता है, इसलिए एक-बार की कुंजी ठीक है। पुनः-उपयोग योग्य कुंजियाँ आपको पुनः-इंस्टॉल के बाद फिर से कनेक्ट करने देती हैं।</string>
     <string name="tunnel_tailscale_authkey_label">Auth key (tskey-auth-…)</string>
     <string name="tunnel_tailscale_control_url_label">Control plane URL (वैकल्पिक)</string>
     <string name="tunnel_tailscale_control_url_help">Tailscale के होस्टेड controlplane के लिए खाली छोड़ें। स्व-होस्टेड coordination सर्वर के लिए Headscale URL पर सेट करें।</string>
-    <string name="tunnel_netbird_help">NetBird डैशबोर्ड में एक setup key बनाएं (Setup Keys → Add setup key)। Haven पहली बार उपयोग पर आपके नेटवर्क से जुड़ता है और उसके बाद peer state का पुनः उपयोग करता है, इसलिए एक बार उपयोग होने वाली key ही काफी है। पुनः उपयोग योग्य key से पुनर्स्थापना के बाद दोबारा कनेक्ट हुआ जा सकता है।</string>
+    <string name="tunnel_netbird_help">NetBird डैशबोर्ड में एक setup key बनाएं (Setup Keys → Add setup key)। Tidegate पहली बार उपयोग पर आपके नेटवर्क से जुड़ता है और उसके बाद peer state का पुनः उपयोग करता है, इसलिए एक बार उपयोग होने वाली key ही काफी है। पुनः उपयोग योग्य key से पुनर्स्थापना के बाद दोबारा कनेक्ट हुआ जा सकता है।</string>
     <string name="tunnel_netbird_setup_key_label">Setup key</string>
     <string name="tunnel_netbird_management_url_label">Management URL (वैकल्पिक)</string>
     <string name="tunnel_netbird_management_url_help">NetBird के होस्टेड management के लिए खाली छोड़ें। स्व-होस्टेड management सेवा के लिए अपने सर्वर के URL पर सेट करें।</string>
 
     <!-- Cloudflare Access SSH tunnel -->
-    <string name="cf_experimental_banner">प्रयोगात्मक — Haven वही WebSocket वायर प्रोटोकॉल लागू करता है जो `cloudflared access ssh` करता है। कुछ tenants के एक छोटे सेट पर परखा गया; कृपया बेमेल की रिपोर्ट GitHub #154 के माध्यम से करें।</string>
+    <string name="cf_experimental_banner">प्रयोगात्मक — Tidegate वही WebSocket वायर प्रोटोकॉल लागू करता है जो `cloudflared access ssh` करता है। कुछ tenants के एक छोटे सेट पर परखा गया; कृपया बेमेल की रिपोर्ट GitHub #154 के माध्यम से करें।</string>
     <string name="cf_intro_blurb">किसी Cloudflare Tunnel के प्रकाशित होस्टनाम के माध्यम से SSH रूट करें — यह `cloudflared access ssh --hostname &lt;host&gt;` के ऐप-भीतरी समकक्ष है। सार्वजनिक Tunnel मार्गों को केवल एक होस्टनाम चाहिए। Access-संरक्षित मार्गों को अतिरिक्त रूप से एक JWT चाहिए — अपनी टीम के IdP के माध्यम से एक कैप्चर करने के लिए साइन इन पर टैप करें।</string>
     <string name="cf_field_hostname">होस्टनाम (उदा. ssh.example.com)</string>
     <string name="cf_jwt_none">कोई JWT नहीं — केवल असुरक्षित Tunnel मार्गों के लिए काम करता है</string>

@@ -34,7 +34,7 @@
 
     <!-- Security section -->
     <string name="settings_biometric_title">Screen lock</string>
-    <string name="settings_biometric_subtitle">Require authentication to open Haven</string>
+    <string name="settings_biometric_subtitle">Require authentication to open Tidegate</string>
     <string name="settings_lock_timeout_title">Lock timeout</string>
     <string name="settings_prevent_screenshots_title">Prevent screenshots</string>
     <string name="settings_prevent_screenshots_subtitle">Block screen capture and task switcher preview</string>
@@ -47,7 +47,7 @@
 
     <!-- Logging section -->
     <string name="settings_exclude_recents_title">Hide from recent apps</string>
-    <string name="settings_exclude_recents_subtitle">Hide Haven\'s card in the recents screen; sessions keep running. Reopen from the app icon.</string>
+    <string name="settings_exclude_recents_subtitle">Hide Tidegate\'s card in the recents screen; sessions keep running. Reopen from the app icon.</string>
     <string name="settings_connection_logging_title">Connection logging</string>
     <string name="settings_connection_logging_subtitle">Record connection events (connect, disconnect, errors). Stored locally, protected by device encryption</string>
     <string name="settings_view_connection_log_title">View connection log</string>
@@ -102,9 +102,9 @@
     <string name="settings_wayland_shell_title">Wayland desktop shell</string>
     <string name="settings_proot_idle_title">Auto-stop idle Linux guest</string>
     <string name="settings_proot_idle_off">Off — the Linux guest keeps running until you stop it</string>
-    <string name="settings_proot_idle_on">Stops the guest %1$d min after you leave Haven (a running guest service keeps it up)</string>
+    <string name="settings_proot_idle_on">Stops the guest %1$d min after you leave Tidegate (a running guest service keeps it up)</string>
     <string name="settings_proot_idle_dialog_title">Auto-stop idle Linux guest</string>
-    <string name="settings_proot_idle_dialog_body">After Haven has been in the background this long, stop the Linux guest\'s terminals and desktops to free memory. A running guest service keeps it up. A long job in a backgrounded terminal would be stopped too — leave this off unless you want idle reclamation.</string>
+    <string name="settings_proot_idle_dialog_body">After Tidegate has been in the background this long, stop the Linux guest\'s terminals and desktops to free memory. A running guest service keeps it up. A long job in a backgrounded terminal would be stopped too — leave this off unless you want idle reclamation.</string>
     <string name="settings_proot_idle_off_label">Off</string>
     <string name="settings_shizuku_title">Shizuku integration</string>
     <string name="settings_shizuku_enabled">Enabled — auto battery exemption, Wayland socket sharing</string>
@@ -161,11 +161,11 @@
     <string name="settings_backup_working">Working…</string>
 
     <!-- About section -->
-    <string name="settings_about_title">About Haven</string>
+    <string name="settings_about_title">About Tidegate</string>
     <string name="settings_support_title">Support Haven</string>
     <string name="settings_support_subtitle">Buy the developer a coffee</string>
     <string name="settings_update_check_title">Check for updates</string>
-    <string name="settings_update_check_subtitle">Look for a newer release when Haven opens, at most once an hour. Off by default.</string>
+    <string name="settings_update_check_subtitle">Look for a newer release when Tidegate opens, at most once an hour. Off by default.</string>
     <string name="settings_update_check_now_title">Check now</string>
     <string name="settings_update_check_now_subtitle">Ask GitHub for the newest release</string>
     <string name="settings_update_checking">Checking\u2026</string>
@@ -173,7 +173,7 @@
     <string name="settings_update_check_available">Tap to open the release page</string>
     <string name="settings_update_check_up_to_date">Up to date at %1$s</string>
     <string name="settings_update_check_failed">Check failed: %1$s</string>
-    <string name="settings_update_check_other_channel">This copy was not installed from a GitHub release, so a release download cannot replace it. Update through wherever you installed Haven.</string>
+    <string name="settings_update_check_other_channel">This copy was not installed from a GitHub release, so a release download cannot replace it. Update through wherever you installed Tidegate.</string>
     <string name="settings_version_unknown">unknown</string>
 
     <!-- Wayland shell dialog -->
@@ -207,8 +207,8 @@
     <string name="settings_backup_restore_button">Restore</string>
 
     <!-- About dialog -->
-    <string name="settings_about_dialog_title">About Haven</string>
-    <string name="settings_about_app_name">Haven</string>
+    <string name="settings_about_dialog_title">About Tidegate</string>
+    <string name="settings_about_app_name">Tidegate SSH</string>
     <string name="settings_about_description">Open source SSH, VNC, RDP &amp; cloud storage client for Android</string>
     <string name="settings_about_version">Version %1$s (build %2$d)</string>
     <string name="settings_about_android">Android %1$s (API %2$d)</string>
@@ -235,7 +235,7 @@
     <!-- Terminal background opacity -->
     <string name="settings_terminal_opacity_title">Background opacity</string>
     <string name="settings_terminal_opacity_value">%1$d%%</string>
-    <string name="settings_terminal_opacity_hint" formatted="false">Below 100% Haven becomes translucent and shows your device wallpaper behind every screen (terminal, lists, settings). A per-connection override applies only to that terminal.</string>
+    <string name="settings_terminal_opacity_hint" formatted="false">Below 100% Tidegate becomes translucent and shows your device wallpaper behind every screen (terminal, lists, settings). A per-connection override applies only to that terminal.</string>
 
     <!-- Scrollback rows dialog -->
     <string name="settings_scrollback_rows_dialog_title">Scrollback rows per tab</string>
@@ -300,14 +300,14 @@
     <string name="settings_show_terminal_tab_bar_title">Show terminal tab bar</string>
     <string name="settings_show_terminal_tab_bar_subtitle">Show session tabs above the terminal</string>
     <string name="settings_hide_nav_bar_in_terminal_title">Hide app tab bar in terminal</string>
-    <string name="settings_hide_nav_bar_in_terminal_subtitle">Hide Haven\'s bottom tab bar on the terminal screen. The Android status and navigation bars stay visible.</string>
+    <string name="settings_hide_nav_bar_in_terminal_subtitle">Hide Tidegate\'s bottom tab bar on the terminal screen. The Android status and navigation bars stay visible.</string>
     <string name="settings_reflow_on_keyboard_title">Resize terminal for keyboard</string>
     <string name="settings_reflow_on_keyboard_subtitle">When the keyboard opens, resize the terminal to fit above it instead of scrolling the view up. Helps full-screen apps that show a status line at the top; leave off for plain shells.</string>
     <string name="settings_tab_titles_follow_session_title">Prefer session names in tab titles</string>
     <string name="settings_tab_titles_follow_session_subtitle">Tabs attached to tmux/zellij/screen keep their session name instead of titles set by running programs.</string>
     <string name="settings_gpu_venus_title">Experimental GPU stack (venus + zink)</string>
     <string name="settings_gpu_venus_subtitle">Use venus (Vulkan to the GPU) + zink for modern OpenGL (~3.2 core) on accelerated desktops, instead of virgl (GL 2.1). Native Vulkan apps display; OpenGL present is currently slow. Needs mesa-vulkan-drivers installed in the guest. Off = virgl default.</string>
-    <!-- RDP desktop size (#422): Haven asked every server for 1920x1080 with no
+    <!-- RDP desktop size (#422): Tidegate asked every server for 1920x1080 with no
          way to change it, so a server drawing a different size had its updates
          discarded. %1$d and %2$d are the width and height in pixels. -->
     <string name="settings_rdp_desktop_size_title">RDP desktop size</string>
@@ -472,8 +472,8 @@
 
     <!-- #509 #517: native crashes recovered from the system on the next launch -->
     <string name="settings_native_crash_title">App crashes</string>
-    <string name="settings_native_crash_subtitle">Haven closed unexpectedly. The report below identifies where — please attach it to a bug report.</string>
-    <string name="settings_native_crash_subtitle_no_trace">Haven closed unexpectedly. Android kept no detailed report for these, so only the time and the signal are known — please attach them to a bug report anyway, as the signal narrows it down.</string>
+    <string name="settings_native_crash_subtitle">Tidegate closed unexpectedly. The report below identifies where — please attach it to a bug report.</string>
+    <string name="settings_native_crash_subtitle_no_trace">Tidegate closed unexpectedly. Android kept no detailed report for these, so only the time and the signal are known — please attach them to a bug report anyway, as the signal narrows it down.</string>
     <string name="settings_native_crash_no_trace">No detailed report was kept for this crash.</string>
     <string name="settings_native_crash_copy">Copy report</string>
     <string name="settings_native_crash_copied">Crash report copied</string>
@@ -531,22 +531,22 @@
     <!-- #579: shown only when the Keystore has permanently lost the credential
          master key. Repair regenerates it; already-stored secrets are gone either way. -->
     <string name="settings_credential_keystore_broken_title">Credential storage unavailable</string>
-    <string name="settings_credential_keystore_broken_subtitle">This device\'s keystore lost Haven\'s credential key. Saved passwords cannot be read and new ones cannot be saved. Tap to repair.</string>
+    <string name="settings_credential_keystore_broken_subtitle">This device\'s keystore lost Tidegate\'s credential key. Saved passwords cannot be read and new ones cannot be saved. Tap to repair.</string>
     <string name="settings_credential_reset_title">Repair credential storage?</string>
     <string name="settings_credential_reset_body">This creates a new credential key so passwords can be saved again.
 
-Every password, passphrase and secret already stored in Haven will need to be entered again. They are already unreadable — the key that protected them is gone — so this recovers the app rather than losing anything further.</string>
+Every password, passphrase and secret already stored in Tidegate will need to be entered again. They are already unreadable — the key that protected them is gone — so this recovers the app rather than losing anything further.</string>
     <string name="settings_credential_reset_confirm">Repair</string>
     <string name="settings_credential_reset_cancel">Cancel</string>
-    <!-- #655: shown only when the Keystore has permanently lost Haven's SSH-key
+    <!-- #655: shown only when the Keystore has permanently lost Tidegate's SSH-key
          master key (typically after switching install channels). The stored keys
          are already unreadable; repair clears the keyset so new ones can be made. -->
     <string name="settings_sshkey_keystore_broken_title">SSH key storage unavailable</string>
-    <string name="settings_sshkey_keystore_broken_subtitle">This device\'s keystore lost Haven\'s SSH key. Stored private keys cannot be read and new ones cannot be generated. Tap to repair.</string>
+    <string name="settings_sshkey_keystore_broken_subtitle">This device\'s keystore lost Tidegate\'s SSH key. Stored private keys cannot be read and new ones cannot be generated. Tap to repair.</string>
     <string name="settings_sshkey_reset_title">Repair SSH key storage?</string>
     <string name="settings_sshkey_reset_body">This creates a new key so SSH keys can be generated again.
 
-Every private key already stored in Haven will need to be imported or generated again. They are already unreadable — the key that protected them is gone, usually because the app was reinstalled from a different source — so this recovers the app rather than losing anything further.</string>
+Every private key already stored in Tidegate will need to be imported or generated again. They are already unreadable — the key that protected them is gone, usually because the app was reinstalled from a different source — so this recovers the app rather than losing anything further.</string>
     <string name="settings_sshkey_reset_confirm">Repair</string>
 
     <!-- Inline-image consent (#583) -->
