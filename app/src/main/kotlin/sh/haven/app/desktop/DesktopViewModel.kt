@@ -35,7 +35,6 @@ import sh.haven.core.local.DesktopManager
 import sh.haven.core.local.LocalSessionManager
 import sh.haven.core.local.ProotManager
 import sh.haven.core.local.proot.Distro
-import sh.haven.core.mosh.MoshSessionManager
 import sh.haven.core.ssh.SshClient
 import sh.haven.core.ssh.SshConnection
 import sh.haven.core.ssh.SshSessionManager
@@ -58,7 +57,6 @@ private sealed class DesktopStartOutcome {
 @HiltViewModel
 class DesktopViewModel @Inject constructor(
     private val sshSessionManager: SshSessionManager,
-    private val moshSessionManager: MoshSessionManager,
     private val connectionLogRepository: ConnectionLogRepository,
     private val preferencesRepository: UserPreferencesRepository,
     private val connectionRepository: ConnectionRepository,

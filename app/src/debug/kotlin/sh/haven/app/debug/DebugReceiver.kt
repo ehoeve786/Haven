@@ -78,10 +78,6 @@ class DebugReceiver : BroadcastReceiver() {
             // Password auth — debug-only path used by ADB-driven integration tests.
             // Never shipped in release builds (this whole file is src/debug/).
             sshPassword = intent.getStringExtra("sshPassword"),
-            // Transport toggles. Needed so ADB-driven tests can reproduce
-            // issues that only manifest over mosh,
-            // rather than being limited to plain SSH. Added for Haven#73.
-            useMosh = intent.getBooleanExtra("useMosh", false),
             // Session manager for the terminal (tmux/zellij/screen/null).
             // Null means "run a plain shell" which is what we want for
             // terminal-state regression tests that care about the exact

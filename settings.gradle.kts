@@ -43,13 +43,6 @@ includeBuild("termlib") {
     }
 }
 
-// Pure Kotlin SSP transport library (submodule).
-includeBuild("mosh-kotlin") {
-    dependencySubstitution {
-        substitute(module("sh.haven:ssp-transport")).using(project(":"))
-    }
-}
-
 // Prns (Personal Reticulum, Rust engine) JVM SDK — upstream's own Gradle
 // project inside the submodule, consumed unmodified so the submodule tracks
 // pure upstream trunk (Prns#94: app-supplied Pipe transports). The native
@@ -117,7 +110,6 @@ include(":feature:chat")
 include(":feature:keys")
 include(":feature:tunnel")
 include(":core:reticulum")
-include(":core:mosh")
 include(":core:btserial")
 include(":core:usbserial")
 include(":core:bleserial")

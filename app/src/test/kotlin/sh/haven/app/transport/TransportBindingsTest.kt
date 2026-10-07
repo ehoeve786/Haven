@@ -29,7 +29,6 @@ class TransportBindingsTest {
         listOf(
             ssh(manager()),
             reticulum(manager()),
-            mosh(manager()),
             btSerial(manager()),
             bleSerial(manager()),
             usbSerial(manager()),
@@ -72,7 +71,7 @@ class TransportBindingsTest {
 
         assertEquals(
             setOf(
-                Transport.SSH, Transport.LOCAL, Transport.GUEST, Transport.MOSH,
+                Transport.SSH, Transport.LOCAL, Transport.GUEST,
                 Transport.RETICULUM, Transport.BTSERIAL, Transport.BLESERIAL, Transport.USBSERIAL,
             ),
             writable,

@@ -58,7 +58,6 @@ import sh.haven.core.ssh.SessionManagerRegistry
 import sh.haven.core.ssh.SshSessionManager
 import sh.haven.core.ssh.SshVerboseLogger
 import sh.haven.core.data.db.entities.KnownHost
-import sh.haven.core.mosh.MoshSessionManager
 import sh.haven.core.fido.FidoAuthenticator
 import sh.haven.core.fido.FidoTouchPrompt
 import sh.haven.core.local.LocalSessionManager
@@ -91,58 +90,6 @@ import javax.inject.Inject
 import sh.haven.core.redact.LogRedact
 
 private const val TAG = "ConnectionsVM"
-
-/**
- * Consecutive #421 auto-reconnects allowed before Haven stops trying. Each one
- * costs an SSH connect and a new mosh-server on the host, so an unreachable
- * server must not be retried forever — after this the session stays down and
- * the user reconnects when they know the server is back.
- */
-internal const val MOSH_RECONNECT_MAX_ATTEMPTS = 3
-
-/** Linear backoff between those attempts (0s, 30s, 60s). */
-internal const val MOSH_RECONNECT_BACKOFF_MS = 30_000L
-
-/**
- * Quiet period after which a profile's attempt counter resets. Longer than the
- * escalation threshold plus a couple of backoffs, so a session that genuinely
- * came back and ran for a while is treated as recovered rather than as another
- * failure in the same streak.
- */
-internal const val MOSH_RECONNECT_RESET_MS = 10 * 60_000L
-
-/** Outcome of the #421 reconnect policy: whether to retry, and after how long. */
-internal data class MoshReconnectDecision(
-    val reconnect: Boolean,
-    val backoffMs: Long,
-    val attempt: Int,
-)
-
-/**
- * Decide whether a died mosh session should be reconnected (#421).
- *
- * [attempts] is how many consecutive auto-reconnects this profile has already
- * had, [lastAttemptMs] when the last one was. A streak older than
- * [MOSH_RECONNECT_RESET_MS] is not a streak — the session recovered and later
- * failed for its own reasons — so the count starts over. Pure so the give-up
- * rule is tested directly: the whole point of this policy is that it *stops*,
- * and a policy that silently never stops looks identical in a passing test.
- */
-internal fun decideMoshReconnect(
-    attempts: Int,
-    lastAttemptMs: Long,
-    nowMs: Long,
-): MoshReconnectDecision {
-    val streak = if (nowMs - lastAttemptMs > MOSH_RECONNECT_RESET_MS) 0 else attempts
-    if (streak >= MOSH_RECONNECT_MAX_ATTEMPTS) {
-        return MoshReconnectDecision(reconnect = false, backoffMs = 0, attempt = streak)
-    }
-    return MoshReconnectDecision(
-        reconnect = true,
-        backoffMs = MOSH_RECONNECT_BACKOFF_MS * streak,
-        attempt = streak + 1,
-    )
-}
 
 /**
  * True when [profile] would offer an SSH key during auth: it has an explicit
@@ -227,7 +174,6 @@ class ConnectionsViewModel @Inject constructor(
     private val backgroundDisconnectDetector: sh.haven.core.ssh.BackgroundDisconnectDetector,
     private val sshSessionAttacher: sh.haven.core.ssh.SshSessionAttacher,
     private val reticulumSessionManager: ReticulumSessionManager,
-    private val moshSessionManager: MoshSessionManager,
     private val btSerialSessionManager: sh.haven.core.btserial.BtSerialSessionManager,
     private val bleSerialSessionManager: sh.haven.core.bleserial.BleSerialSessionManager,
     private val usbSerialSessionManager: sh.haven.core.usbserial.UsbSerialSessionManager,
@@ -470,7 +416,6 @@ class ConnectionsViewModel @Inject constructor(
             combine(
                 sshSessionManager.sessions,
                 reticulumSessionManager.sessions,
-                moshSessionManager.sessions,
                 localSessionManager.sessions,
                 umlGuestManager.sessions,
             ) { flows -> flows }
@@ -615,14 +560,13 @@ class ConnectionsViewModel @Inject constructor(
             map.toMap()
         }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyMap())
 
-    /** Derive profile-level statuses for the connections list UI (merges SSH + Reticulum + Mosh). */
+    /** Derive profile-level statuses for the connections list UI (merges SSH + Reticulum). */
     val profileStatuses: StateFlow<Map<String, ProfileStatus>> =
         combine(
             combine(
                 sshSessionManager.sessions,
                 reticulumSessionManager.sessions,
-                moshSessionManager.sessions,
-            ) { ssh, rns, mosh -> arrayOf(ssh, rns, mosh) },
+            ) { ssh, rns -> arrayOf(ssh, rns) },
             combine(
                 smbSessionManager.sessions,
                 localSessionManager.sessions,
@@ -637,8 +581,6 @@ class ConnectionsViewModel @Inject constructor(
             @Suppress("UNCHECKED_CAST")
             val rnsMap = base[1] as Map<String, ReticulumSessionManager.SessionState>
             @Suppress("UNCHECKED_CAST")
-            val moshMap = base[2] as Map<String, MoshSessionManager.SessionState>
-            @Suppress("UNCHECKED_CAST")
             val smbMap = extra[0] as Map<String, SmbSessionManager.SessionState>
             @Suppress("UNCHECKED_CAST")
             val localMap = extra[1] as Map<String, LocalSessionManager.SessionState>
@@ -650,7 +592,7 @@ class ConnectionsViewModel @Inject constructor(
             val openaiMap = openaiMap0 as Map<String, sh.haven.core.openai.OpenAiSessionManager.SessionState>
             val result = mutableMapOf<String, ProfileStatus>()
 
-            // Track which profiles have transport-specific sessions (Mosh/RNS/Local).
+            // Track which profiles have transport-specific sessions (RNS/Local).
             // Their status takes precedence over the SSH infrastructure session
             // (which stays CONNECTED for SFTP even after the transport disconnects).
             val transportProfiles = mutableSetOf<String>()
@@ -675,18 +617,6 @@ class ConnectionsViewModel @Inject constructor(
                     ReticulumSessionManager.SessionState.Status.CONNECTED in statuses -> ProfileStatus.CONNECTED
                     ReticulumSessionManager.SessionState.Status.CONNECTING in statuses -> ProfileStatus.CONNECTING
                     ReticulumSessionManager.SessionState.Status.ERROR in statuses -> ProfileStatus.ERROR
-                    else -> ProfileStatus.DISCONNECTED
-                }
-            }
-
-            // Mosh statuses (override SSH for this profile)
-            moshMap.values.groupBy { it.profileId }.forEach { (profileId, states) ->
-                transportProfiles.add(profileId)
-                val statuses = states.map { it.status }
-                result[profileId] = when {
-                    MoshSessionManager.SessionState.Status.CONNECTED in statuses -> ProfileStatus.CONNECTED
-                    MoshSessionManager.SessionState.Status.CONNECTING in statuses -> ProfileStatus.CONNECTING
-                    MoshSessionManager.SessionState.Status.ERROR in statuses -> ProfileStatus.ERROR
                     else -> ProfileStatus.DISCONNECTED
                 }
             }
@@ -828,14 +758,6 @@ class ConnectionsViewModel @Inject constructor(
     /** Cancel an in-flight FIDO key wait/touch (the dialog's Cancel button). */
     fun cancelFido() = fidoAuthenticator.cancelPending()
 
-    private val _showMoshSetupGuide = MutableStateFlow(false)
-    val showMoshSetupGuide: StateFlow<Boolean> = _showMoshSetupGuide.asStateFlow()
-
-    private val _showMoshClientMissing = MutableStateFlow(false)
-    val showMoshClientMissing: StateFlow<Boolean> = _showMoshClientMissing.asStateFlow()
-
-    fun dismissMoshSetupGuide() { _showMoshSetupGuide.value = false }
-    fun dismissMoshClientMissing() { _showMoshClientMissing.value = false }
 
     /** When non-null, key auth failed and the UI should show a password dialog as fallback. */
     private val _passwordFallback = MutableStateFlow<ConnectionProfile?>(null)
@@ -1088,7 +1010,7 @@ class ConnectionsViewModel @Inject constructor(
         /** Session names that were open last time (for "Restore" action). */
         val previousSessionNames: List<String> = emptyList(),
         val manager: SessionManager = SessionManager.NONE,
-        /** "SSH" or "MOSH" — determines which finish path onSessionSelected uses. */
+        /** "SSH" — determines which finish path onSessionSelected uses. */
         val transportType: String = "SSH",
         /** Pre-filled name for the "Create new session" text field. (#112) */
         val suggestedNewName: String = "",
@@ -1159,120 +1081,7 @@ class ConnectionsViewModel @Inject constructor(
                 )
             }
         }
-        // #421: a mosh session that died unexpectedly (transport declared it dead
-        // while online, or a fatal local error) is reconnected with the same
-        // bootstrap the user's manual close-and-reconnect runs, which recovers
-        // immediately where the transport's own retries never do.
-        //
-        // Bounded on purpose. One reconnect per death is not enough on its own:
-        // when the server side stays unreachable while the phone is online, the
-        // replacement session is dead too, escalates ~45s later, and reconnects
-        // again — a loop by succession rather than repetition, each cycle costing
-        // an SSH connect and a fresh mosh-server on the host. Device-verified with
-        // scripts/mosh-fault-rig.py. So: back off between attempts, give up after
-        // MOSH_RECONNECT_MAX_ATTEMPTS, and only re-arm once a session has actually
-        // survived (MOSH_RECONNECT_RESET_MS), which is what distinguishes a
-        // one-off stall from a server that is simply gone.
-        moshSessionManager.onSessionDied = { profileId, sessionId ->
-            // Drain the dead session's transport trace into the connection log
-            // before dropping it (#421). The #421 escalation discards the
-            // in-memory trace otherwise, so a log captured after auto-recovery
-            // only ever shows the fresh replacement session — the freeze window
-            // we actually need is lost.
-            moshSessionManager.sessions.value[sessionId]?.moshSession?.drainTransportLog()?.let { trace ->
-                viewModelScope.launch {
-                    connectionLogRepository.logEvent(
-                        profileId,
-                        ConnectionLog.Status.DISCONNECTED,
-                        verboseLog = trace,
-                    )
-                }
-            }
-            // Drop the dead session rather than leaving it behind: every
-            // reconnect used to add a tab while the corpse lingered, so a few
-            // cycles left a pile of DISCONNECTED entries for one profile.
-            moshSessionManager.removeSession(sessionId)
-            scheduleMoshReconnect(profileId)
-        }
     }
-
-    /**
-     * Run the #421 reconnect policy for [profileId], and keep running it if the
-     * reconnect itself fails.
-     *
-     * That last part is the fix for the second half of #421. The policy used to
-     * live inline in `onSessionDied`, so the only thing that could start an
-     * attempt was a session *dying*. When `connectMoshSilent` threw, the
-     * exception was logged and nothing rescheduled — and there was no session
-     * left to die a second time, so the chain ended there. A reporter's log
-     * caught exactly that: the transport escalated correctly, the reconnect
-     * fired 15s after the network came back, and
-     *
-     *     Mosh auto-reconnect failed for …: Could not resolve hostname: fire.walla
-     *
-     * was the last thing that ever happened. A name that had resolved fine when
-     * the session was established failed once during the network transition, and
-     * "no automatic reconnect" — the issue title — followed from that single
-     * transient DNS miss.
-     *
-     * Retrying is safe because the bound is in [decideMoshReconnect], not in the
-     * caller: the attempt counter is recorded *before* the connect is tried, so a
-     * failed attempt still counts against MOSH_RECONNECT_MAX_ATTEMPTS and the
-     * backoff still grows. Each retry is a fresh coroutine, not stack recursion.
-     */
-    private fun scheduleMoshReconnect(profileId: String) {
-        if (!reconnectingMoshProfiles.add(profileId)) return
-        viewModelScope.launch {
-            var retryAfterFailure = false
-            try {
-                val profile = repository.getById(profileId)
-                if (profile == null || !profile.isMosh) return@launch
-                val now = System.currentTimeMillis()
-                val state = moshReconnectState[profileId]
-                val decision = decideMoshReconnect(
-                    attempts = state?.attempts ?: 0,
-                    lastAttemptMs = state?.lastAttemptMs ?: 0L,
-                    nowMs = now,
-                )
-                if (!decision.reconnect) {
-                    Log.w(
-                        TAG,
-                        "Mosh session for ${profile.label} died again after ${decision.attempt} " +
-                            "reconnects — giving up, reconnect manually (#421)",
-                    )
-                    moshReconnectState[profileId] = MoshReconnectState(decision.attempt, now)
-                    return@launch
-                }
-                if (decision.backoffMs > 0) {
-                    Log.d(TAG, "Mosh reconnect for ${LogRedact.of(profile.label)} in ${decision.backoffMs}ms (attempt ${decision.attempt})")
-                    delay(decision.backoffMs)
-                }
-                moshReconnectState[profileId] =
-                    MoshReconnectState(decision.attempt, System.currentTimeMillis())
-                Log.d(TAG, "Mosh session for ${LogRedact.of(profile.label)} died — reconnecting (attempt ${decision.attempt}) (#421)")
-                connectMoshSilent(profile)
-            } catch (e: Exception) {
-                Log.e(TAG, "Mosh auto-reconnect failed for $profileId: ${e.message} — retrying (#421)", e)
-                retryAfterFailure = true
-            } finally {
-                reconnectingMoshProfiles.remove(profileId)
-            }
-            if (retryAfterFailure) scheduleMoshReconnect(profileId)
-        }
-    }
-
-    /** Consecutive #421 auto-reconnects for a profile, for the give-up rule. */
-    private data class MoshReconnectState(val attempts: Int, val lastAttemptMs: Long)
-
-    private val moshReconnectState = java.util.concurrent.ConcurrentHashMap<String, MoshReconnectState>()
-
-    /** Profiles with an in-flight #421 auto-reconnect, so a death can't re-enter. */
-    private val reconnectingMoshProfiles = java.util.concurrent.ConcurrentHashMap.newKeySet<String>()
-
-    /** SSH client + host kept alive during mosh session picker (for mosh-server exec). */
-    private var moshPendingClient: SshClient? = null
-    private var moshPendingHost: String? = null
-    private var moshPendingVerboseLogger: SshVerboseLogger? = null
 
     fun onNavigated() {
         _navigateToTerminal.value = null
@@ -1757,7 +1566,7 @@ class ConnectionsViewModel @Inject constructor(
     /**
      * Returns true if the profile can connect without interactive dialogs.
      * VNC/RDP/SMB are excluded (they navigate to non-terminal screens).
-     * SSH/Mosh/ET require a saved password or SSH keys.
+     * SSH requires a saved password or SSH keys.
      */
     /**
      * Build the pre-connect "knock" hook for a profile, or `null` if the
@@ -2371,17 +2180,6 @@ class ConnectionsViewModel @Inject constructor(
         val runtimeUsername = usernameOverride?.takeIf { it.isNotBlank() }
         if (profile.username.isBlank() && runtimeUsername == null) {
             _passwordFallback.value = profile
-            return
-        }
-        if (profile.isMosh) {
-            connectMosh(
-                profile,
-                password,
-                keyOnly,
-                usernameOverride = runtimeUsername,
-                preselectedSessionName = sessionName,
-                startupCommand = startupCommand,
-            )
             return
         }
         connectSsh(profile, password, keyOnly, rememberPassword, usernameOverride = runtimeUsername, preselectedSessionName = sessionName)
@@ -3895,214 +3693,6 @@ class ConnectionsViewModel @Inject constructor(
     }
 
     /**
-     * Phase-1 SSH bootstrap shared by the four Mosh/ET connect paths:
-     * build the client, resolve jump-host-over-proxy, connect, and verify
-     * host trust. Interactive connects get the keyboard-interactive/TOTP
-     * hooks and the TOFU flow — including a TOFU pass over the captured
-     * key when auth fails mid-handshake, so the trust decision isn't lost
-     * behind the auth error. Silent group-launch connects have no prompt
-     * hooks and fail closed on unknown or changed host keys (#5).
-     */
-    private suspend fun bootstrapMoshEtSsh(
-        profile: ConnectionProfile,
-        password: String,
-        config: ConnectionConfig,
-        verboseLogger: SshVerboseLogger?,
-        interactive: Boolean,
-    ): SshClient = withContext(Dispatchers.IO) {
-        val sshClient = SshClient().apply {
-            this.verboseLogger = verboseLogger
-        }
-
-        // Jump host takes priority, then SOCKS/HTTP proxy
-        val jumpProfileId = profile.jumpProfileId
-        val proxy = if (jumpProfileId != null) {
-            val (jid, _) = connectJumpHost(jumpProfileId, password)
-            sshSessionManager.createProxyJump(jid)
-        } else {
-            tunnelResolver.havenProxy(profile)
-        }
-
-        if (interactive) {
-            try {
-                val hostKeyEntry = sshClient.connect(
-                    config,
-                    proxy = proxy,
-                    keyboardInteractivePrompter = keyboardInteractivePrompter,
-                    totpCodeProvider = buildTotpCodeProvider(profile),
-                    confirmOtp = profile.totpConfirmBeforeSend,
-                    preConnect = buildKnockHook(profile, verboseLogger),
-                    trustedHostCaKeys = hostKeyVerifier.trustedHostCaKeys(),
-                )
-                runTofuVerification(hostKeyEntry, clientToDisconnectOnReject = sshClient)
-            } catch (e: HostKeyAuthFailure) {
-                runTofuVerification(e.hostKey, clientToDisconnectOnReject = null)
-                throw e.cause ?: e
-            }
-        } else {
-            val hostKeyEntry = sshClient.connect(
-                config,
-                proxy = proxy,
-                preConnect = buildKnockHook(profile, verboseLogger),
-                trustedHostCaKeys = hostKeyVerifier.trustedHostCaKeys(),
-            )
-            when (verifyOrCaTrusted(hostKeyEntry)) {
-                is HostKeyResult.Trusted -> {}
-                is HostKeyResult.NewHost -> {
-                    // Fail closed: don't silently trust an unknown host in a
-                    // background/workspace connect; require interactive TOFU. (#5)
-                    sshClient.disconnect()
-                    throw Exception(
-                        "Unknown host key for ${profile.host} — open this connection from " +
-                            "the Connections tab first to verify and trust its host key.",
-                    )
-                }
-                is HostKeyResult.KeyChanged -> {
-                    sshClient.disconnect()
-                    throw Exception("Host key changed for ${profile.host} — possible MITM")
-                }
-            }
-        }
-        sshClient
-    }
-
-    // internal for unit test (#559: a declined key unlock must not surface
-    // as an auth failure and pop the password fallback).
-    internal fun connectMosh(
-        profile: ConnectionProfile,
-        password: String,
-        keyOnly: Boolean,
-        usernameOverride: String? = null,
-        preselectedSessionName: String? = null,
-        startupCommand: String? = null,
-    ) {
-        val effectiveUsername = usernameOverride?.takeIf { it.isNotBlank() } ?: profile.username
-        viewModelScope.launch {
-            _connectingProfileId.value = profile.id
-            _error.value = null
-
-            val sessionId = moshSessionManager.registerSession(
-                profileId = profile.id,
-                label = profile.label,
-            )
-
-            val verboseEnabled = preferencesRepository.verboseLoggingEnabled.first()
-            val verboseLogger = if (verboseEnabled) SshVerboseLogger() else null
-
-            var isFidoAuth = false
-            try {
-                // Phase 1: SSH bootstrap — connect, verify host key
-                val client = withContext(Dispatchers.IO) {
-                    val authMethod = resolveAuthMethods(profile, password)
-                    isFidoAuth = authMethod is ConnectionConfig.AuthMethod.FidoKey
-                    val config = moshEtBootstrapConfig(
-                        profile, authMethod, agentIdentitiesFor(profile),
-                        username = effectiveUsername,
-                        reconnectPolicy = profile.reconnectPolicy,
-                    )
-                    bootstrapMoshEtSsh(profile, password, config, verboseLogger, interactive = true)
-                }
-
-                // Phase 2: Resolve session manager, check for existing sessions
-                val smgr = resolveSessionManager(profile)
-
-                // Profile RemoteCommand is passed through mosh-server's `--`
-                // exactly like a deep-link startup command. It replaces the
-                // default remote shell before its startup files can run.
-                val effectiveStartupCommand = startupCommand ?: profile.remoteCommand?.takeIf { it.isNotBlank() }
-                // Deep-link / profile RemoteCommand: skip interactive picker when session or command given.
-                if (preselectedSessionName != null || effectiveStartupCommand != null) {
-                    finishMoshConnect(
-                        sessionId = sessionId,
-                        profileId = profile.id,
-                        serverHost = profile.host,
-                        client = client,
-                        manager = smgr,
-                        chosenSessionName = preselectedSessionName,
-                        verboseLogger = verboseLogger,
-                        startupCommand = effectiveStartupCommand,
-                    )
-                    return@launch
-                }
-
-                val existingSessions = withContext(Dispatchers.IO) {
-                    listExistingMultiplexerSessions(smgr) { client.execCommand(it) }
-                }
-                // The session this profile was last on is still running: go
-                // straight back to it. A mosh-server can't be re-attached by a
-                // new client — it ignores one even with the right key (#371) —
-                // but the multiplexer session behind it survives the app, so
-                // re-attaching to that is what puts the user back where they
-                // left off.
-                val autoAttach = autoAttachSessionName(profile, existingSessions)
-                if (autoAttach == null && existingSessions.isNotEmpty()) {
-                    // Keep SSH client alive for mosh-server exec after user picks
-                    moshPendingClient = client
-                    moshPendingHost = profile.host
-                    moshPendingVerboseLogger = verboseLogger
-                    _sessionSelection.value = SessionSelection(
-                        sessionId = sessionId,
-                        profileId = profile.id,
-                        managerLabel = smgr.label,
-                        sessionNames = existingSessions,
-                        manager = smgr,
-                        transportType = "MOSH",
-                        suggestedNewName = generateUniqueSessionName(profile.label, existingSessions),
-                    )
-                    _connectingProfileId.value = null
-                    return@launch // UI will call onSessionSelected() to continue
-                }
-
-                // Re-attach to the remembered session, or (nothing remembered
-                // and nothing running) start a fresh one.
-                finishMoshConnect(sessionId, profile.id, profile.host, client, smgr, autoAttach, verboseLogger = verboseLogger)
-            } catch (e: Exception) {
-                Log.e(TAG, "connectMosh failed for ${LogRedact.of(profile.label)}: ${e.message}", e)
-                connectionLogRepository.logEvent(profile.id, ConnectionLog.Status.FAILED, details = e.message, verboseLog = verboseLogger?.drain())
-                moshPendingClient?.disconnect()
-                moshPendingClient = null
-                moshPendingHost = null
-                moshPendingVerboseLogger = null
-                moshSessionManager.updateStatus(sessionId, MoshSessionManager.SessionState.Status.ERROR)
-                moshSessionManager.removeSession(sessionId)
-                val msg = e.message ?: ""
-                val isAuthMessage =
-                    msg.contains("Auth fail", ignoreCase = true) ||
-                        msg.contains("Auth cancel", ignoreCase = true) ||
-                        msg.contains("authentication", ignoreCase = true) ||
-                        msg.contains("publickey", ignoreCase = true)
-                val isAuthError = keyOnly && isAuthMessage
-                if (e is KeyUnlockDeclinedException) {
-                    // Same rule as connectSsh (#559), and first for the same
-                    // reason: the message contains "authentication", which the
-                    // classifier below reads as an auth failure and answers
-                    // with the password fallback. A declined key unlock is
-                    // reported, not answered with another way in.
-                    _error.value = msg.ifBlank { "Key unlock was declined" }
-                } else if (isFidoAuth && (isAuthError || (keyOnly && msg.isBlank()))) {
-                    val fidoDetail = fidoAuthenticator.lastAssertionError
-                    _error.value = if (fidoDetail != null) "Security key: $fidoDetail"
-                    else msg.ifBlank { "Security key authentication failed" }
-                } else if (isAuthError || (keyOnly && msg.isBlank())) {
-                    _passwordFallback.value = profile
-                } else if (msg.contains("mosh-server not found", ignoreCase = true) ||
-                    msg.contains("command not found", ignoreCase = true) && msg.contains("mosh", ignoreCase = true)
-                ) {
-                    _showMoshSetupGuide.value = true
-                } else if (msg.contains("mosh-client binary not found", ignoreCase = true)) {
-                    _showMoshClientMissing.value = true
-                } else if (!keyOnly && isAuthMessage) {
-                    _error.value = "Authentication failed — check username and password"
-                } else {
-                    _error.value = msg.ifBlank { "Mosh connection failed" }
-                }
-            } finally {
-                _connectingProfileId.value = null
-            }
-        }
-    }
-
-    /**
      * Called from the session picker dialog when user selects a session.
      * @param sessionName The name to attach to, or null to create a new session.
      */
@@ -4162,17 +3752,14 @@ class ConnectionsViewModel @Inject constructor(
      * normally wrapped in a multiplexer, e.g. for a quick check that
      * shouldn't disturb the long-running session.
      *
-     * Only applies to SSH sessions today — Mosh and ET each require a
-     * remote-side helper that's tied to their session-manager wrapping,
-     * so a "plain" path on those transports would mean a different shape
-     * of connection.
+     * Only applies to SSH sessions.
      */
     fun onPlainShellSelected(sessionId: String) {
         val sel = _sessionSelection.value
         _sessionSelection.value = null
         if (sel?.transportType != "SSH" && sel?.transportType != null) {
             // Only meaningful for SSH right now; fall through to the
-            // normal "create new session" flow on Mosh/ET so users
+            // normal "create new session" flow on other transports so users
             // don't end up with a silently-no-op button.
             onSessionSelected(sessionId, null)
             return
@@ -4197,44 +3784,6 @@ class ConnectionsViewModel @Inject constructor(
     fun onSessionSelected(sessionId: String, sessionName: String?) {
         val sel = _sessionSelection.value
         _sessionSelection.value = null
-
-        if (sel?.transportType == "MOSH") {
-            // Mosh path: finish mosh connection with chosen session name
-            val client = moshPendingClient
-            val serverHost = moshPendingHost ?: ""
-            val pendingLogger = moshPendingVerboseLogger
-            moshPendingClient = null
-            moshPendingHost = null
-            moshPendingVerboseLogger = null
-            if (client == null) {
-                _error.value = "Mosh SSH connection lost"
-                moshSessionManager.removeSession(sessionId)
-                return
-            }
-            val profileId = sel.profileId
-            // "Create new session" → null sessionName. Generate a unique name
-            // here (matching the SSH path below) so each new-session click
-            // really creates a new session instead of attaching multiple
-            // participants to a session named after the connection. (#113)
-            val effectiveName = sessionName ?: generateUniqueSessionName(
-                moshSessionManager.sessions.value[sessionId]?.label ?: sessionId.take(8),
-                sel.sessionNames,
-            )
-            viewModelScope.launch {
-                _connectingProfileId.value = profileId
-                try {
-                    finishMoshConnect(sessionId, profileId, serverHost, client, sel.manager, effectiveName, verboseLogger = pendingLogger)
-                } catch (e: Exception) {
-                    client.disconnect()
-                    moshSessionManager.updateStatus(sessionId, MoshSessionManager.SessionState.Status.ERROR)
-                    _error.value = e.message ?: "Mosh connection failed"
-                    moshSessionManager.removeSession(sessionId)
-                } finally {
-                    _connectingProfileId.value = null
-                }
-            }
-            return
-        }
 
         // SSH path
         val profileId = sel?.profileId ?: sshSessionManager.getSession(sessionId)?.profileId ?: return
@@ -4263,10 +3812,7 @@ class ConnectionsViewModel @Inject constructor(
     fun killRemoteSession(sessionName: String) {
         val sel = _sessionSelection.value ?: return
         val killCmd = sel.manager.killCommand?.invoke(sessionName) ?: return
-        val client = when (sel.transportType) {
-            "MOSH" -> moshPendingClient
-            else -> sshSessionManager.getSession(sel.sessionId)?.client
-        }
+        val client = sshSessionManager.getSession(sel.sessionId)?.client
         if (client == null) return
 
         viewModelScope.launch {
@@ -4303,10 +3849,7 @@ class ConnectionsViewModel @Inject constructor(
     fun renameRemoteSession(oldName: String, newName: String) {
         val sel = _sessionSelection.value ?: return
         val renameCmd = sel.manager.renameCommand?.invoke(oldName, newName) ?: return
-        val client = when (sel.transportType) {
-            "MOSH" -> moshPendingClient
-            else -> sshSessionManager.getSession(sel.sessionId)?.client
-        }
+        val client = sshSessionManager.getSession(sel.sessionId)?.client
         if (client == null) return
 
         viewModelScope.launch {
@@ -4641,143 +4184,6 @@ class ConnectionsViewModel @Inject constructor(
             _navigateToTerminal.value = profileId
         }
         return true
-    }
-
-    /**
-     * Finish mosh connection: exec mosh-server on SSH, parse MOSH CONNECT,
-     * disconnect SSH, spawn mosh-client with session manager initial command.
-     */
-    private suspend fun finishMoshConnect(
-        sessionId: String,
-        profileId: String,
-        serverHost: String,
-        client: SshClient,
-        manager: SessionManager,
-        chosenSessionName: String?,
-        silent: Boolean = false,
-        verboseLogger: SshVerboseLogger? = null,
-        startupCommand: String? = null,
-    ) {
-        val moshConnect = withContext(Dispatchers.IO) {
-            val customMoshCmd = repository.getById(profileId)?.moshServerCommand?.takeIf { it.isNotBlank() }
-            val baseMoshCmd = customMoshCmd ?: "mosh-server new -s -c 256 -l LANG=en_US.UTF-8"
-            // Tin/ATP clean attach: mosh-server execs COMMAND instead of $SHELL — no nested tmux orphan.
-            val moshCmd = if (!startupCommand.isNullOrBlank()) "$baseMoshCmd -- $startupCommand" else baseMoshCmd
-            Log.d(TAG, "Running mosh-server bootstrap: $moshCmd")
-            val result = client.execCommand(moshCmd)
-
-            // Keep SSH client alive for SFTP — don't disconnect
-
-            val connectLine = (result.stdout + "\n" + result.stderr)
-                .lines()
-                .firstOrNull { it.startsWith("MOSH CONNECT") }
-                ?: run {
-                    client.disconnect()
-                    val stderr = result.stderr.trim()
-                    val out = result.stdout.trim()
-                    // Distinguish a genuinely-missing binary from one that's
-                    // installed but failed to start (most commonly a non-UTF-8
-                    // locale in the non-interactive SSH exec environment, which
-                    // mosh-server refuses to run under). Misreporting the latter
-                    // as "not installed" hid the real cause (#297).
-                    if (moshServerLooksMissing(result.exitStatus, stderr)) {
-                        throw Exception(
-                            "mosh-server not found. Install it on the remote host " +
-                                "(e.g. apt install mosh)."
-                        )
-                    }
-                    val detail = stderr.ifBlank { out }.take(300)
-                        .ifBlank { "(no output; mosh-server exited ${result.exitStatus})" }
-                    val hint = moshLocaleWorkaroundHint(customMoshCmd != null, stderr)
-                    throw Exception("mosh-server failed to start:\n$detail$hint")
-                }
-
-            val parts = connectLine.split(" ")
-            if (parts.size < 4) {
-                client.disconnect()
-                throw Exception("Unexpected mosh-server output: $connectLine")
-            }
-
-            Triple(serverHost, parts[2].toInt(), parts[3])
-        }
-
-        val (serverIp, moshPort, moshKey) = moshConnect
-        Log.d(TAG, "MOSH CONNECT parsed: $serverIp:$moshPort")
-
-        // Build session manager command with chosen or default session name.
-        // When startupCommand was passed to mosh-server via `--`, do NOT also inject keystrokes.
-        val smCmd = manager.command
-        var effectiveSessionName: String? = null
-        if (startupCommand == null && smCmd != null) {
-            val rawName = chosenSessionName
-                ?: moshSessionManager.sessions.value[sessionId]?.label
-                ?: sessionId.take(8)
-            val sanitized = sanitizeSessionName(rawName)
-            effectiveSessionName = sanitized
-            moshSessionManager.setInitialCommand(sessionId, smCmd(sanitized))
-        }
-
-        val transportLogBuffer = if (verboseLogger != null) java.util.concurrent.ConcurrentLinkedQueue<String>() else null
-
-        // Mosh-over-tunnel (issue #164): when the profile selects a
-        // WireGuard or Tailscale tunnel, route the UDP socket through
-        // it. udpSocketSupplier returns null for direct profiles or
-        // for backends that can't carry UDP (Cloudflare Access,
-        // legacy SOCKS) — in which case Mosh falls through to a raw
-        // DatagramSocket exactly as it did before this change.
-        val socketProvider: sh.haven.mosh.network.UdpSocketProvider? = run {
-            val profile = repository.getById(profileId) ?: return@run null
-            val supplier = tunnelResolver.udpSocketSupplier(profile) ?: return@run null
-            sh.haven.mosh.network.UdpSocketProvider {
-                sh.haven.feature.connections.mosh.TunneledUdpAdapter(supplier())
-            }
-        }
-
-        // #539: a tunneled UDP socket's WriteTo requires a literal IP — the
-        // tunnel's netstack cannot resolve MagicDNS/hostnames per packet.
-        // The SSH bootstrap already dialled through the same tunnel, so use
-        // the peer address it actually connected to. Fail fast with a real
-        // error when neither the profile host nor the bootstrap can produce
-        // a literal — the old behaviour retried forever while logging one
-        // line in twenty (symptom identical to #164).
-        val udpServerIp = if (socketProvider != null) {
-            moshTunnelDestination(serverIp, client.tunnelPeerAddress)
-                ?: throw Exception(
-                    "Mosh over this tunnel needs a literal IP destination, but " +
-                        "the host is a name ($serverIp) and the tunnel did not " +
-                        "report the address it connected to. Use the server's " +
-                        "in-tunnel IP as the profile host.",
-                )
-        } else serverIp
-        if (udpServerIp != serverIp) {
-            Log.d(TAG, "MOSH tunnel destination: ${LogRedact.of(serverIp)} -> ${LogRedact.of(udpServerIp)} (bootstrap-resolved)")
-        }
-
-        withContext(Dispatchers.IO) {
-            moshSessionManager.connectSession(
-                sessionId = sessionId,
-                serverIp = udpServerIp,
-                moshPort = moshPort,
-                moshKey = moshKey,
-                cols = 80,
-                rows = 24,
-                sshClient = client,
-                verboseBuffer = transportLogBuffer,
-                socketProvider = socketProvider,
-            )
-        }
-
-        repository.markConnected(profileId)
-        if (effectiveSessionName != null) {
-            repository.getById(profileId)?.let { profile ->
-                repository.save(profile.copy(lastSessionName = effectiveSessionName))
-            }
-        }
-        connectionLogRepository.logEvent(profileId, ConnectionLog.Status.CONNECTED, verboseLog = verboseLogger?.drain())
-        startForegroundServiceIfNeeded()
-        if (!silent) {
-            _navigateToTerminal.value = profileId
-        }
     }
 
 
@@ -5394,13 +4800,7 @@ class ConnectionsViewModel @Inject constructor(
     )
 
     fun disconnect(profileId: String) {
-        // Drain transport logs before disconnecting (Mosh captures logs in-session)
-        val moshLog = moshSessionManager.getSessionsForProfile(profileId)
-            .mapNotNull { it.moshSession?.drainTransportLog() }
-            .joinToString("\n").ifEmpty { null }
-        val transportLog = moshLog
-
-        viewModelScope.launch { connectionLogRepository.logEvent(profileId, ConnectionLog.Status.DISCONNECTED, verboseLog = transportLog) }
+        viewModelScope.launch { connectionLogRepository.logEvent(profileId, ConnectionLog.Status.DISCONNECTED) }
         // Tear down any USB/IP auto-forward this profile holds before the SSH
         // client goes away (Slice 1). Best-effort; the remote device also detaches
         // when the forward's socket closes.
@@ -5676,7 +5076,6 @@ class ConnectionsViewModel @Inject constructor(
         when {
             profile.isLocal -> connectLocalSilent(profile)
             profile.isReticulum -> connectReticulumSilent(profile)
-            profile.isMosh -> connectMoshSilent(profile)
             else -> connectSshSilent(profile)
         }
     }
@@ -5837,89 +5236,6 @@ class ConnectionsViewModel @Inject constructor(
             throw e
         }
     }
-
-    private suspend fun connectMoshSilent(profile: ConnectionProfile) {
-        val password = profile.sshPassword ?: ""
-        val sessionId = moshSessionManager.registerSession(profileId = profile.id, label = profile.label)
-        val verboseEnabled = preferencesRepository.verboseLoggingEnabled.first()
-        val verboseLogger = if (verboseEnabled) SshVerboseLogger() else null
-
-        try {
-            val client = withContext(Dispatchers.IO) {
-                val authMethod = resolveAuthMethods(profile, password)
-                val config = moshEtBootstrapConfig(profile, authMethod, agentIdentitiesFor(profile))
-                bootstrapMoshEtSsh(profile, password, config, verboseLogger, interactive = false)
-            }
-
-            val smgr = if (profile.remoteCommand.isNullOrBlank()) resolveSessionManager(profile) else SessionManager.NONE
-            finishMoshConnect(
-                sessionId,
-                profile.id,
-                profile.host,
-                client,
-                smgr,
-                profile.lastSessionName,
-                silent = true,
-                verboseLogger = verboseLogger,
-                startupCommand = profile.remoteCommand?.takeIf { it.isNotBlank() },
-            )
-        } catch (e: Exception) {
-            Log.e(TAG, "connectMoshSilent failed for ${LogRedact.of(profile.label)}: ${e.message}", e)
-            connectionLogRepository.logEvent(profile.id, ConnectionLog.Status.FAILED, details = e.message, verboseLog = verboseLogger?.drain())
-            moshSessionManager.updateStatus(sessionId, MoshSessionManager.SessionState.Status.ERROR)
-            moshSessionManager.removeSession(sessionId)
-            throw e
-        }
-    }
-}
-
-/**
- * Is this mosh-server exec failure a genuinely-missing binary (→ show the
- * install guide) rather than an installed-but-failed start (→ surface the
- * real stderr)? (#297)
- *
- * The not-found phrases are matched only on stderr LINES that also mention
- * mosh-server. A bare `contains("No such file")` misclassified the most
- * common startup failure — the locale error `"locale: Cannot set LC_CTYPE to
- * default locale: No such file or directory"` — as "not installed", which
- * re-masked exactly the stderr the v5.60.7 fix was meant to surface (the
- * reporter kept seeing the setup guide on v5.61.0 and v5.68.7).
- *
- * Covered shell wordings, all naming the binary on the same line:
- *   bash: `bash: mosh-server: command not found`
- *   zsh:  `zsh: command not found: mosh-server`
- *   dash: `sh: 1: mosh-server: not found`
- *   exec: `sh: /usr/bin/mosh-server: No such file or directory`
- * plus exit 127, the shell's canonical command-not-found status.
- */
-internal fun moshServerLooksMissing(exitStatus: Int, stderr: String): Boolean {
-    if (exitStatus == 127) return true
-    return stderr.lineSequence().any { line ->
-        line.contains("mosh-server", ignoreCase = true) &&
-            (
-                line.contains("command not found", ignoreCase = true) ||
-                    line.contains("No such file", ignoreCase = true) ||
-                    line.contains("not found", ignoreCase = true)
-                )
-    }
-}
-
-/**
- * When a mosh-server start fails on a missing UTF-8 locale, append a line
- * pointing at Haven's own workaround: force a locale in the connection's
- * custom mosh-server command, fixing it on-device without touching the server
- * (#297 — the reporter noted the surfaced stderr suggests server-side
- * `locale-gen` but not this in-app option).
- *
- * Returns "" (no hint) unless the failure looks locale-related AND they're on
- * the DEFAULT command — telling someone whose own custom command just failed
- * to "set a custom command" would be wrong, and their command may already
- * carry a locale override that failed for a different reason.
- */
-internal fun moshLocaleWorkaroundHint(hasCustomCommand: Boolean, stderr: String): String {
-    if (hasCustomCommand || !stderr.contains("locale", ignoreCase = true)) return ""
-    return "\n\nOr set this connection's mosh-server command to force a UTF-8 " +
-        "locale: LC_ALL=C.UTF-8 mosh-server new -s -c 256"
 }
 
 
@@ -5941,25 +5257,3 @@ internal fun moshLocaleWorkaroundHint(hasCustomCommand: Boolean, stderr: String)
  */
 internal fun holdsLoadablePrivateKey(keyType: String): Boolean =
     !keyType.startsWith("sk-") && keyType != OpenKeychainKeyData.KEY_TYPE
-
-/**
- * Whether [host] is an IP literal — the only form a tunneled UDP socket's
- * per-packet send can accept (#539). Names cannot contain ':', so any ':'
- * means an IPv6 literal; otherwise dotted-quad.
- */
-internal fun isIpLiteral(host: String): Boolean =
-    host.contains(':') || host.matches(Regex("""\d{1,3}(\.\d{1,3}){3}"""))
-
-/**
- * The UDP destination for a tunneled mosh session (#539). The profile host
- * is used when it is already a literal; otherwise the address the SSH
- * bootstrap's tunnel dial actually connected to ([SshClient.tunnelPeerAddress])
- * — the tunnel-resolved form of a MagicDNS or DNS name. Null when neither
- * yields a literal: the caller must fail the connect rather than let the
- * transport retry a send that can never succeed.
- */
-internal fun moshTunnelDestination(host: String, tunnelPeer: String?): String? = when {
-    isIpLiteral(host) -> host
-    tunnelPeer != null && isIpLiteral(tunnelPeer) -> tunnelPeer
-    else -> null
-}

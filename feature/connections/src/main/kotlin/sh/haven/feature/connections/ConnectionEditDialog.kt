@@ -203,7 +203,7 @@ fun ConnectionEditDialog(
     // connection, an optional deep-link [prefill] (#305). [existing] alone
     // drives edit-mode (title, save semantics); [seed] only drives initials.
     val seed = existing ?: prefill
-    // Transport dropdown maps to: connectionType + useMosh
+    // Transport dropdown maps to: connectionType
     val initialTransport = when {
         seed?.isLocal == true -> "LOCAL"
         seed?.isGuest == true -> "GUEST"
@@ -214,7 +214,6 @@ fun ConnectionEditDialog(
         seed?.isRclone == true -> "RCLONE"
         seed?.isEmail == true -> "EMAIL"
         seed?.isOpenai == true -> "OPENAI"
-        seed?.isMosh == true -> "MOSH"
         seed?.isReticulum == true -> "RETICULUM"
         else -> "SSH"
     }
@@ -341,7 +340,6 @@ fun ConnectionEditDialog(
             blob.jumpDestination.isNotBlank()
     }
     var sshOptions by rememberSaveable { mutableStateOf(existing?.sshOptions ?: "") }
-    var moshServerCommand by rememberSaveable { mutableStateOf(existing?.moshServerCommand ?: "") }
     var postLoginCommand by rememberSaveable { mutableStateOf(existing?.postLoginCommand ?: "") }
     var postLoginBeforeSessionManager by rememberSaveable { mutableStateOf(existing?.postLoginBeforeSessionManager ?: true) }
     var remoteCommand by rememberSaveable { mutableStateOf(existing?.remoteCommand ?: "") }
@@ -1052,7 +1050,6 @@ fun ConnectionEditDialog(
                 // editable result again. (#114)
                 val allTransportOptions = listOf(
                     "SSH" to "SSH",
-                    "MOSH" to "Mosh",
                     "LOCAL" to "Local Shell (PRoot)",
                     "GUEST" to "Linux Guest (UML)",
                     "BTSERIAL" to "Bluetooth Serial",
@@ -2354,27 +2351,6 @@ fun ConnectionEditDialog(
                         }
                     }
 
-                    // Transport helper text
-                    if (selectedTransport == "MOSH") {
-                        Spacer(Modifier.height(4.dp))
-                        Text(
-                            stringResource(R.string.connections_helper_mosh_required),
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        )
-                        Spacer(Modifier.height(4.dp))
-                        OutlinedTextField(
-                            value = moshServerCommand,
-                            onValueChange = { moshServerCommand = it },
-                            label = { Text(stringResource(R.string.connections_field_mosh_server_command)) },
-                            placeholder = { Text("mosh-server new -s -c 256 -l LANG=en_US.UTF-8") },
-                            supportingText = { Text(stringResource(R.string.connections_helper_mosh_server)) },
-                            singleLine = false,
-                            minLines = 1,
-                            maxLines = 3,
-                            modifier = Modifier.fillMaxWidth(),
-                        )
-                    }
                     // SSH options
                     Spacer(Modifier.height(4.dp))
                     OutlinedTextField(
@@ -2418,8 +2394,7 @@ fun ConnectionEditDialog(
                     }
 
                     // Remote command runs as an SSH exec request, before any
-                    // interactive shell startup file can take control. Mosh
-                    // forwards it to mosh-server with `--`.
+                    // interactive shell startup file can take control.
                     Spacer(Modifier.height(4.dp))
                     OutlinedTextField(
                         value = remoteCommand,
@@ -2855,7 +2830,7 @@ fun ConnectionEditDialog(
                             description = stringResource(R.string.connections_helper_mcp_enabled),
                         )
                         // Outbound exposure: reverse-tunnel Haven's own MCP back to the
-                        // remote host. SSH only (mosh/ET can't carry an SSH -R forward);
+                        // remote host. SSH only;
                         // disabled while inbound MCP is off.
                         if (selectedTransport == "SSH") {
                             Spacer(Modifier.height(8.dp))
@@ -3437,7 +3412,6 @@ fun ConnectionEditDialog(
                             // (shared standalone tunnel) is persisted as-is.
                             tunnelConfigId = if (useCloudflareTunnel) null else tunnelConfigId,
                             sshOptions = sshOptions.ifBlank { null },
-                            moshServerCommand = moshServerCommand.ifBlank { null },
                             postLoginCommand = postLoginCommand.ifBlank { null },
                             postLoginBeforeSessionManager = postLoginBeforeSessionManager,
                             remoteCommand = remoteCommand.ifBlank { null },
@@ -3457,7 +3431,6 @@ fun ConnectionEditDialog(
                             tunnelOnly = tunnelOnly,
                             mcpEnabled = mcpEnabled,
                             sessionManager = selectedSessionManager,
-                            useMosh = selectedTransport == "MOSH",
                             fileTransport = fileTransport,
                             colorTag = colorTag,
                             groupId = groupId,

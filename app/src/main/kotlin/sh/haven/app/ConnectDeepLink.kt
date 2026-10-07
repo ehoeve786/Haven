@@ -21,7 +21,7 @@ object ConnectDeepLink {
         val host: String,
         val username: String?,
         val port: Int?,
-        /** `ssh` / `mosh` / `et`, or null when the link didn't specify one. */
+        /** `ssh`, or null when the link didn't specify one. */
         val transport: String?,
         val session: String?,
         /** Optional remote command (Tin attach / clean tmux). `command` or `startupCommand` query. */
@@ -52,9 +52,6 @@ object ConnectDeepLink {
     /** Whether [profile] is the SSH-family transport named by [transport]. */
     fun matchesTransport(profile: ConnectionProfile, transport: String): Boolean =
         when (transport) {
-            "mosh" -> profile.connectionType == "SSH" && profile.useMosh
-            // Plain "ssh" matches any SSH-family profile for the host (incl.
-            // mosh-enabled ones) rather than excluding them on a technicality.
             "ssh" -> profile.connectionType == "SSH"
             else -> true
         }

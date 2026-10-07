@@ -61,12 +61,6 @@
 # failing for everyone.
 -keep class org.connectbot.sshlib.crypto.ed25519.Ed25519Provider { *; }
 
-# Keep mosh transport + generated protobuf classes.
-# The pure-Kotlin transport reflects on protobuf field names like `width_`.
-# If R8 renames those fields, Mosh connects but never establishes a usable
-# terminal session in release builds.
--keep class sh.haven.mosh.** { *; }
-
 # Keep smbj (reflection-based protocol handling)
 -keep class com.hierynomus.** { *; }
 -keep class net.engio.** { *; }
@@ -75,7 +69,6 @@
 # Keep protobuf generated classes — protobuf-lite uses reflection on field names
 -keep class * extends com.google.protobuf.GeneratedMessageLite { *; }
 -keep class * extends com.google.protobuf.GeneratedMessageLite$Builder { *; }
--keep class sh.haven.mosh.proto.** { *; }
 
 # Keep gomobile/rclone bindings — JNI native methods and Go runtime
 -keep class go.** { *; }

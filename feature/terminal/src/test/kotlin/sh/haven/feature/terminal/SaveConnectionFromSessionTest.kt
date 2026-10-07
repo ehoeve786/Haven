@@ -17,7 +17,6 @@ class SaveConnectionFromSessionTest {
         host: String = "seer.local",
         username: String = "tin",
         port: Int = 22,
-        useMosh: Boolean = true,
         keyId: String? = "key-1",
     ) = ConnectionProfile(
         id = id,
@@ -25,7 +24,6 @@ class SaveConnectionFromSessionTest {
         host = host,
         port = port,
         username = username,
-        useMosh = useMosh,
         keyId = keyId,
         connectionType = "SSH",
     )
@@ -95,7 +93,7 @@ class SaveConnectionFromSessionTest {
 
     @Test
     fun build_createsPinnedClone() {
-        val source = ssh(useMosh = true, keyId = "k1")
+        val source = ssh(keyId = "k1")
         val result = SaveConnectionFromSession.build(
             source = source,
             displayName = "Grok",
@@ -113,16 +111,15 @@ class SaveConnectionFromSessionTest {
         assertEquals("Grok-haven", p.lastSessionName)
         assertEquals("TMUX", p.sessionManager)
         assertTrue(p.requestPty)
-        assertTrue(p.useMosh)
         assertEquals("k1", p.keyId)
         assertNull(p.postLoginCommand)
     }
 
     @Test
     fun build_updatesExistingOnNameCollision() {
-        val source = ssh(id = "live", label = "live-tab", useMosh = false)
+        val source = ssh(id = "live", label = "live-tab", keyId = "live-key")
         val existing = listOf(
-            ssh(id = "old", label = "Grok", useMosh = true, keyId = "old-key").copy(
+            ssh(id = "old", label = "Grok", keyId = "old-key").copy(
                 remoteCommand = "tmux new -A -s old-name",
                 lastSessionName = "old-name",
             ),
@@ -141,18 +138,18 @@ class SaveConnectionFromSessionTest {
         assertEquals("tmux new -A -s Grok-haven", result.profile.remoteCommand)
         assertEquals("Grok-haven", result.profile.lastSessionName)
         // Live source wins for transport/auth refresh
-        assertFalse(result.profile.useMosh)
+        assertEquals("live-key", result.profile.keyId)
     }
 
     @Test
     fun build_preservesCustomFleetWrapperRemoteCommand() {
         val wrapper =
             "bash /home/tin/Central_Command/03_toolkit/bin/haven-role-attach dogfood"
-        val source = ssh(id = "live", label = "seer · Dogfood", useMosh = false).copy(
+        val source = ssh(id = "live", label = "seer · Dogfood").copy(
             remoteCommand = wrapper,
         )
         val existing = listOf(
-            ssh(id = "dogfood", label = "seer · Dogfood", useMosh = true, keyId = "k").copy(
+            ssh(id = "dogfood", label = "seer · Dogfood", keyId = "k").copy(
                 remoteCommand = wrapper,
                 lastSessionName = "haven-dogfood",
             ),

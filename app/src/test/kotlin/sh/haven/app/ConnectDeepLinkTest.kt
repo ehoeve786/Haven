@@ -16,7 +16,6 @@ class ConnectDeepLinkTest {
         username: String = "me",
         port: Int = 22,
         type: String = "SSH",
-        mosh: Boolean = false,
         remoteCommand: String? = null,
     ) = ConnectionProfile(
         id = id,
@@ -25,7 +24,6 @@ class ConnectDeepLinkTest {
         username = username,
         port = port,
         connectionType = type,
-        useMosh = mosh,
         remoteCommand = remoteCommand,
     )
 
@@ -54,14 +52,14 @@ class ConnectDeepLinkTest {
                 "host" to "Example.com",
                 "user" to "  me ",
                 "port" to "2022",
-                "transport" to "  MOSH ",
+                "transport" to "  SSH ",
                 "session" to " work ",
             ),
         )!!
         assertEquals("Example.com", p.host)
         assertEquals("me", p.username)
         assertEquals(2022, p.port)
-        assertEquals("mosh", p.transport)
+        assertEquals("ssh", p.transport)
         assertEquals("work", p.session)
     }
 
@@ -78,19 +76,6 @@ class ConnectDeepLinkTest {
     fun `parse treats a non-numeric port as unspecified`() {
         val p = ConnectDeepLink.parse(query("host" to "h", "port" to "abc"))!!
         assertNull(p.port)
-    }
-
-    // --- matchesTransport ---
-
-    @Test
-    fun `matchesTransport distinguishes mosh and plain ssh`() {
-        val mosh = profile(mosh = true)
-        val ssh = profile()
-        assertTrue(ConnectDeepLink.matchesTransport(mosh, "mosh"))
-        assertTrue(!ConnectDeepLink.matchesTransport(ssh, "mosh"))
-        // plain "ssh" matches any SSH-family profile, incl. mosh-enabled.
-        assertTrue(ConnectDeepLink.matchesTransport(mosh, "ssh"))
-        assertTrue(ConnectDeepLink.matchesTransport(ssh, "ssh"))
     }
 
     // --- matches ---

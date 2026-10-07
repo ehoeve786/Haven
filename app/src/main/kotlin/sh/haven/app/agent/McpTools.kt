@@ -441,7 +441,7 @@ internal class McpTools(
         ) { args -> unpairMcpClient(args) },
 
         "list_connections" to ToolHandler(
-            description = "List saved connection profiles (SSH, Mosh, SMB, rclone, local, Reticulum, OPENAI). Secrets like passwords and keys are redacted. SSH profiles also report `sshOptions` (the ssh_config-style lines set on the profile) and `sshEngine` — \"jsch\" (default) or \"sshlib\" (the experimental whole-connection engine, opted into with the 'HavenSshEngine sshlib' directive) — so an agent that sets the engine can confirm which one a profile is actually on.",
+            description = "List saved connection profiles (SSH, SMB, rclone, local, Reticulum, OPENAI). Secrets like passwords and keys are redacted. SSH profiles also report `sshOptions` (the ssh_config-style lines set on the profile) and `sshEngine` — \"jsch\" (default) or \"sshlib\" (the experimental whole-connection engine, opted into with the 'HavenSshEngine sshlib' directive) — so an agent that sets the engine can confirm which one a profile is actually on.",
             inputSchema = emptyObjectSchema(),
         ) { _ -> listConnections() },
 
@@ -453,7 +453,7 @@ internal class McpTools(
         ) { args -> readExitedSession(args) },
 
         "list_sessions" to ToolHandler(
-            description = "List currently registered sessions across all transports (ssh, mosh, reticulum, smb, local, mail, openai, and Bluetooth/BLE/USB serial) with sessionId, profileId, label, status (connecting, connected, reconnecting, disconnected, error), transport, and isAgentRepl — a screen heuristic (Claude Code TUI chrome in the bottom lines) marking which terminal session is an agent REPL, so a conversation peer can be picked without guessing; null when the session has no attached terminal tab. SSH sessions additionally include sessionManager, chosenSessionName (the stable tmux/zellij identity that survives reconnects), channel state, jump-session linkage, and active port forwards.",
+            description = "List currently registered sessions across all transports (ssh, reticulum, smb, local, mail, openai, and Bluetooth/BLE/USB serial) with sessionId, profileId, label, status (connecting, connected, reconnecting, disconnected, error), transport, and isAgentRepl — a screen heuristic (Claude Code TUI chrome in the bottom lines) marking which terminal session is an agent REPL, so a conversation peer can be picked without guessing; null when the session has no attached terminal tab. SSH sessions additionally include sessionManager, chosenSessionName (the stable tmux/zellij identity that survives reconnects), channel state, jump-session linkage, and active port forwards.",
             inputSchema = emptyObjectSchema(),
         ) { _ -> listSessions() },
 
@@ -732,7 +732,7 @@ internal class McpTools(
         // --- Write tools (require consent) ------------------------------
 
         "disconnect_profile" to ToolHandler(
-            description = "Disconnect every live session for a profile across all transports (SSH, Mosh, SMB, Reticulum, local, Bluetooth/BLE/USB serial). Use list_connections to find profileIds.",
+            description = "Disconnect every live session for a profile across all transports (SSH, SMB, Reticulum, local, Bluetooth/BLE/USB serial). Use list_connections to find profileIds.",
             inputSchema = objectSchema {
                 string("profileId", "ID of the connection profile to disconnect.", required = true)
             },
@@ -1603,7 +1603,7 @@ internal class McpTools(
         ) { args -> setProfileRouting(args) },
 
         "create_connection" to ToolHandler(
-            description = "Create a saved connection profile. Supports connectionType=SSH, SMB, EMAIL, RETICULUM. SSH-family fields: username (required), password (optional, stored), keyId (optional — references list_ssh_keys), ignoreSavedKeys (force password-only auth, never offer saved keys), useMosh (turn an SSH profile into a Mosh profile), sessionManager (optional: TMUX | ZELLIJ | SCREEN | BYOBU | HERDR | PSMUX — attach through that multiplexer; omit for a plain shell), remoteCommand (run a command via an SSH exec request instead of a login shell — e.g. 'tmux new -A -s work' to attach-or-create that session before shell startup files run) + requestPty (PTY for it, default true), bindAddress (local address the outgoing SSH socket binds to, ssh -b — direct connections only). SMB: smbShare (required), username + password, smbDomain. EMAIL: emailProvider (\"imap\" default, or \"proton\"); username = the email address; password = the account/app-password; for IMAP set emailServer (required) + emailPort (993) + emailSmtpPort (465) + emailTls (true), plus emailSmtpServer when the SMTP host differs (e.g. smtp.gmail.com); for Proton add emailMailboxPassword if two-password mode. EMAIL host is optional (the tunnel-ingress/bastion SPA/knock guards), not the mail server. OPENAI (OpenAI-compatible endpoint, e.g. llama-server or CLIProxyAPI): host = server IP/hostname (a full http:// URL also works), port = TCP port (default 80), optional password arg = the API key (sent as a Bearer token; omit for keyless servers), openaiPathPrefix = optional path inserted before /v1 (e.g. \"/api\"). Connect verifies via GET /v1/models; chat via the chat screen or openai_chat. BTSERIAL (Bluetooth-serial console, #406): host = the paired device's Bluetooth MAC (from list_bluetooth_devices); no other fields. The device must already be paired in Android Settings. BLESERIAL (Bluetooth-LE-serial console — Nordic UART Service / HM-10): host = the BLE peripheral's MAC; no other fields. It needn't be paired — scan-and-pick in the editor; the GATT service/characteristics are auto-detected (NUS 6E400001…, then HM-10 FFE0/FFE1). USBSERIAL (USB-serial console, #408 — Arduino / Duet3D G-code / ESP32 / USB-TTL): host = the device's vendorId:productId hex, e.g. 1a86:7523, from list_usb_devices; usbBaudRate = baud (default 115200); usbDataBits/usbParity/usbStopBits/usbFlowControl set the rest of the line format (default 8N1, no flow control). Plug the adapter in first; connect_profile pops the Android USB-permission prompt. Chipsets: CDC-ACM, CH34x, FTDI, CP21xx, Prolific. RETICULUM: destinationHash (required, 32 hex chars) is the address; reticulumHost + reticulumPort are only how this phone reaches the mesh, defaulting to 127.0.0.1:37428 which is a Sideband or Columba shared instance on this device — any other host is a TCP gateway. reticulumNetworkName + reticulumPassphrase set IFAC on an authenticated gateway. The new profile id is returned for follow-up calls (set_profile_routing, connect_profile). For rclone / local create the profile in the UI — those need an OAuth flow the agent can't drive.",
+            description = "Create a saved connection profile. Supports connectionType=SSH, SMB, EMAIL, RETICULUM. SSH-family fields: username (required), password (optional, stored), keyId (optional — references list_ssh_keys), ignoreSavedKeys (force password-only auth, never offer saved keys), sessionManager (optional: TMUX | ZELLIJ | SCREEN | BYOBU | HERDR | PSMUX — attach through that multiplexer; omit for a plain shell), remoteCommand (run a command via an SSH exec request instead of a login shell — e.g. 'tmux new -A -s work' to attach-or-create that session before shell startup files run) + requestPty (PTY for it, default true), bindAddress (local address the outgoing SSH socket binds to, ssh -b — direct connections only). SMB: smbShare (required), username + password, smbDomain. EMAIL: emailProvider (\"imap\" default, or \"proton\"); username = the email address; password = the account/app-password; for IMAP set emailServer (required) + emailPort (993) + emailSmtpPort (465) + emailTls (true), plus emailSmtpServer when the SMTP host differs (e.g. smtp.gmail.com); for Proton add emailMailboxPassword if two-password mode. EMAIL host is optional (the tunnel-ingress/bastion SPA/knock guards), not the mail server. OPENAI (OpenAI-compatible endpoint, e.g. llama-server or CLIProxyAPI): host = server IP/hostname (a full http:// URL also works), port = TCP port (default 80), optional password arg = the API key (sent as a Bearer token; omit for keyless servers), openaiPathPrefix = optional path inserted before /v1 (e.g. \"/api\"). Connect verifies via GET /v1/models; chat via the chat screen or openai_chat. BTSERIAL (Bluetooth-serial console, #406): host = the paired device's Bluetooth MAC (from list_bluetooth_devices); no other fields. The device must already be paired in Android Settings. BLESERIAL (Bluetooth-LE-serial console — Nordic UART Service / HM-10): host = the BLE peripheral's MAC; no other fields. It needn't be paired — scan-and-pick in the editor; the GATT service/characteristics are auto-detected (NUS 6E400001…, then HM-10 FFE0/FFE1). USBSERIAL (USB-serial console, #408 — Arduino / Duet3D G-code / ESP32 / USB-TTL): host = the device's vendorId:productId hex, e.g. 1a86:7523, from list_usb_devices; usbBaudRate = baud (default 115200); usbDataBits/usbParity/usbStopBits/usbFlowControl set the rest of the line format (default 8N1, no flow control). Plug the adapter in first; connect_profile pops the Android USB-permission prompt. Chipsets: CDC-ACM, CH34x, FTDI, CP21xx, Prolific. RETICULUM: destinationHash (required, 32 hex chars) is the address; reticulumHost + reticulumPort are only how this phone reaches the mesh, defaulting to 127.0.0.1:37428 which is a Sideband or Columba shared instance on this device — any other host is a TCP gateway. reticulumNetworkName + reticulumPassphrase set IFAC on an authenticated gateway. The new profile id is returned for follow-up calls (set_profile_routing, connect_profile). For rclone / local create the profile in the UI — those need an OAuth flow the agent can't drive.",
             inputSchema = objectSchema {
                 string("label", "User-facing label.", required = true)
                 string("connectionType", "SSH | SMB | EMAIL | BTSERIAL | BLESERIAL | USBSERIAL | RETICULUM | GUEST.", required = true)
@@ -1624,7 +1624,6 @@ internal class McpTools(
                 string("protocol", "OPENAI only: wire protocol — OPENAI (default, OpenAI-compatible /v1/chat/completions), OLLAMA (native /api), ANTHROPIC (Messages API /v1/messages), or GEMINI (generativelanguage /v1beta/models/{model}:generateContent).")
                 string("tunnelConfigId", "Optional: route the new profile through this tunnel (from list_tunnels). Equivalent to follow-up set_profile_routing.")
                 boolean("tunnelOnly", "SSH only: tunnel-only mode (#150). When true, the profile brings up the SSH transport and registers port forwards but does not open a terminal. Default false. Pair with auto_reconnect for autossh-style keepalive.")
-                boolean("useMosh", "SSH only: when true, the profile uses Mosh on top of the SSH bootstrap. SSH execs `mosh-server new -s`, parses MOSH CONNECT, then the UDP transport takes over. Default false.")
                 string("keyId", "SSH only: id of a saved SSH key (from list_ssh_keys) to authenticate with. Mutually optional with password.")
                 string("sshOptions", "SSH only: ssh_config-style option lines ('Key value' or 'Key=value', newline-separated) applied to this profile — e.g. 'ServerAliveInterval 60' or the Haven-internal 'HavenSshEngine sshlib' engine toggle (#58).")
                 string("remoteCommand", "SSH only (#436): run this command via an SSH exec request instead of opening a login shell — it executes before shell startup files, so e.g. 'tmux new -A -s work' attaches to/creates that named session without racing a .bashrc auto-tmux hook. Omit for the normal interactive shell.")
@@ -1663,7 +1662,7 @@ internal class McpTools(
         ) { args -> createConnection(args) },
 
         "update_connection" to ToolHandler(
-            description = "Edit fields on an existing connection profile (load → change → save). Pass profileId (required) plus only the fields you want to change — anything omitted is left as-is. Common SSH-family fields: label, host, port, username, password (stored, mapped to the profile's transport), keyId, ignoreSavedKeys (force password-only auth), useMosh, forwardAgent, remoteCommand (SSH exec instead of a login shell; empty string clears) + requestPty, bindAddress (ssh -b; direct connections only, empty string clears). SMB tunnel: smbSshForward + smbSshProfileId. USB/IP auto-forward: usbForwardVidPid (export a phone-attached USB device to this host on every connect). Passwords are stored encrypted and never echoed back. OPENAI: password maps to the API key (empty string clears). For routing/proxy use set_profile_routing; for port-knock/SPA use set_port_knock/set_spa. Returns the updated profile (secrets redacted).",
+            description = "Edit fields on an existing connection profile (load → change → save). Pass profileId (required) plus only the fields you want to change — anything omitted is left as-is. Common SSH-family fields: label, host, port, username, password (stored, mapped to the profile's transport), keyId, ignoreSavedKeys (force password-only auth), forwardAgent, remoteCommand (SSH exec instead of a login shell; empty string clears) + requestPty, bindAddress (ssh -b; direct connections only, empty string clears). SMB tunnel: smbSshForward + smbSshProfileId. USB/IP auto-forward: usbForwardVidPid (export a phone-attached USB device to this host on every connect). Passwords are stored encrypted and never echoed back. OPENAI: password maps to the API key (empty string clears). For routing/proxy use set_profile_routing; for port-knock/SPA use set_port_knock/set_spa. Returns the updated profile (secrets redacted).",
             inputSchema = objectSchema {
                 string("profileId", "Profile id from list_connections.", required = true)
                 string("label", "New user-facing label.")
@@ -1678,13 +1677,11 @@ internal class McpTools(
                 boolean("requestPty", "SSH only (#436): allocate a PTY for remoteCommand (tmux needs one). Ignored when remoteCommand is empty.")
                 string("jumpProfileId", "SSH only: id of the SSH profile to jump through (ssh -J). The target host is dialled from the jump host, so it may be an address only the jump can reach. Empty string clears.")
                 boolean("ignoreSavedKeys", "SSH-family only: force password-only auth, never offer saved keystore keys (#121).")
-                boolean("useMosh", "SSH only: use Mosh on top of the SSH bootstrap.")
                 boolean("forwardAgent", "SSH only: enable SSH agent forwarding. Keys with a stored passphrase (or none) are exposed to the remote's ssh-agent socket (#377).")
                 string("openaiPathPrefix", "OPENAI only: path prefix inserted before /v1 (e.g. \"/api\"). Empty string clears.")
                 string("protocol", "OPENAI only: wire protocol — OPENAI (default), OLLAMA, ANTHROPIC, or GEMINI. Empty string clears (back to OPENAI).")
                 boolean("smbSshForward", "SMB only: tunnel through a saved SSH profile (set smbSshProfileId).")
                 string("smbSshProfileId", "SMB only: SSH profile id to tunnel through. Empty string clears.")
-                string("moshServerCommand", "Mosh only: override the command Haven runs over SSH to start mosh-server (default 'mosh-server new -s -c 256 …'). It must print a 'MOSH CONNECT <port> <key>' line, which Haven parses to find the session — so a wrapper can point Haven at a different port (e.g. scripts/mosh-fault-rig.py bootstrap, which puts a fault-injecting relay in front). Empty string restores the default.")
                 string("usbForwardVidPid", "SSH only: VID:PID of a phone-attached USB device (e.g. '1050:0406' — see list_usb_devices) to auto-export over USB/IP whenever this profile connects. Haven opens the device, starts the usbip server on loopback, adds the remote forward, and runs `usbip attach` on the host, re-attaching after a tunnel drop. Empty string clears (no auto-forward).")
             },
             consentLevel = ConsentLevel.EVERY_CALL,
@@ -2144,7 +2141,6 @@ internal class McpTools(
             put("sftp")
             put("smb")
             put("reticulum")
-            put("mosh")
             put("proot")
             // The desktop and media capabilities are reported from what the
             // build actually shipped, not asserted. The terminal flavour
@@ -2256,13 +2252,11 @@ internal class McpTools(
             put("authMethods", org.json.JSONArray(p.authMethodSpecs.map { it.serialize() }))
         }
         put("lastConnected", p.lastConnected ?: JSONObject.NULL)
-        if (p.useMosh) put("useMosh", true)
         if (!p.remoteCommand.isNullOrBlank()) {
             put("remoteCommand", p.remoteCommand)
             put("requestPty", p.requestPty)
         }
         if (!p.usbForwardVidPid.isNullOrBlank()) put("usbForwardVidPid", p.usbForwardVidPid)
-        if (!p.moshServerCommand.isNullOrBlank()) put("moshServerCommand", p.moshServerCommand)
         // sshOptions was settable but never readable, so an agent could opt a
         // profile into the sshlib engine and then have no way to confirm which
         // engine it was actually on — the same write-only asymmetry
@@ -4332,9 +4326,9 @@ internal class McpTools(
 
     /**
      * Write a raw string to a session's PTY on whichever transport owns it —
-     * SSH, local, mosh, ET, or Reticulum (#366: only the first two were
-     * tried, so agent input to a mosh session failed "No local session"
-     * while snapshot reads resolved it fine).
+     * SSH, local, or Reticulum (#366: only the first two were tried, so
+     * agent input to other transports failed "No local session" while
+     * snapshot reads resolved it fine).
      */
     /** @return the transport that accepted the write (see #555). */
     private fun sendRawInput(sessionId: String, s: String): String {
@@ -6263,11 +6257,9 @@ internal class McpTools(
             requestPty = if (existing.connectionType == "SSH") bool("requestPty", existing.requestPty) else existing.requestPty,
             jumpProfileId = str("jumpProfileId", existing.jumpProfileId),
             ignoreSavedKeys = bool("ignoreSavedKeys", existing.ignoreSavedKeys),
-            useMosh = bool("useMosh", existing.useMosh),
             forwardAgent = bool("forwardAgent", existing.forwardAgent),
             smbSshForward = bool("smbSshForward", existing.smbSshForward),
             smbSshProfileId = str("smbSshProfileId", existing.smbSshProfileId),
-            moshServerCommand = str("moshServerCommand", existing.moshServerCommand),
             usbForwardVidPid = if (existing.connectionType == "SSH") {
                 str("usbForwardVidPid", existing.usbForwardVidPid)
             } else {
@@ -6375,7 +6367,6 @@ internal class McpTools(
                 username = username,
                 sshPassword = password.ifBlank { null },
                 connectionType = "SSH",
-                useMosh = args.optBoolean("useMosh", false),
                 keyId = args.optString("keyId").ifBlank { null },
                 sshOptions = args.optString("sshOptions").ifBlank { null },
                 remoteCommand = args.optString("remoteCommand").ifBlank { null },
