@@ -5,8 +5,7 @@ title: Files & cloud storage
 
 # Files & cloud storage
 
-A unified file browser across SFTP/SCP, SMB, 60+ cloud providers, and Reticulum
-mesh, plus on-device media transcoding and streaming.
+A unified file browser across SFTP/SCP, SMB and 60+ cloud providers, plus on-device media transcoding and streaming.
 
 ## Files
 

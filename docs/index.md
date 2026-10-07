@@ -69,14 +69,13 @@ sideloads track the GitHub Releases key.
 
 ## At a glance
 
-- **[Terminal](features/terminal.md)** — Mosh / Eternal Terminal / SSH, USB / Bluetooth / BLE serial consoles with a serial↔TCP bridge, tmux session restore, configurable keyboard toolbar, OSC 7/8/9/52/133/777 integration.
+- **[Terminal](features/terminal.md)** — SSH, USB / Bluetooth / BLE serial consoles with a serial↔TCP bridge, tmux session restore, configurable keyboard toolbar, OSC 7/8/9/52/133/777 integration.
 - **[Desktops](features/desktops.md)** — a GPU-accelerated native Wayland compositor and a multi-distro local-desktop manager.
 - **[Files & cloud](features/files-and-cloud.md)** — SFTP/SCP, SMB, 60+ cloud providers (rclone), cross-filesystem copy/move; plus FFmpeg transcode, HLS, and DLNA.
 - **[Connections](features/connections.md)** — port forwarding (-L/-R/-D/-J), SOCKS/HTTP/Tor proxies, per-app WireGuard & Tailscale tunnels, port knocking + fwknop SPA, SSH keys & FIDO2.
 - **[Email](features/email.md)** — ProtonMail + IMAP/SMTP, compose/reply/forward, multi-account, Mail Rules automation.
 - **[Local Linux](features/local-linux.md)** — Alpine / Debian / Arch / Void via PRoot, side-by-side, no root required.
 - **[USB forwarding](features/usb.md)** — broker a USB device to the agent, the Linux guest, or a remote host over USB/IP.
-- **[Reticulum](features/reticulum.md)** — rnsh shell, file transfer, and `-L`/`-D` forwarding over mesh. The one transport that keeps working with no internet at all.
 - **[Agent transport (MCP)](mcp-tools.md)** — ~130 consent-gated tools; the agent can even drive Haven's own UI.
 - **[Security](features/security.md)** — biometric lock, no telemetry, encrypted backup/restore (AES-256-GCM).
 
@@ -101,10 +100,10 @@ Available in 12 languages: English, Chinese (simplified), Spanish, Hindi, Arabic
 
 ## Why Haven?
 
-- **One app covers the whole loop.** SSH + Mosh + ET + SFTP + cloud storage + on-device Linux + media transcode, from a single tab bar.
+- **One app covers the whole loop.** SSH + SFTP + cloud storage + on-device Linux + media transcode, from a single tab bar.
 - **No telemetry, no ads, no account.** Nothing is phoned home. See the [privacy policy](privacy-policy.html).
 - **Per-app tunnels.** Route individual SSH profiles through WireGuard or Tailscale *without* taking Android's one VPN slot — other apps keep using the direct network.
-- **Native everything.** FFmpeg, labwc, rclone, and the Kotlin Reticulum transport are all compiled from source — no Python runtime, no Chaquopy.
+- **Native everything.** FFmpeg, labwc and rclone are all compiled from source — no Python runtime, no Chaquopy.
 - **Ships often.** Releases reach F-Droid within 24 hours via an automated MR. See the [release history](https://github.com/GlassHaven/Haven/releases).
 
 ## Build from source

@@ -66,7 +66,6 @@ installations manuelles directes suivent la clé des versions GitHub.
 - **[E-mail](../features/email.md)** — ProtonMail + IMAP/SMTP, rédaction/réponse/transfert, multi-comptes, automatisation par règles de courrier.
 - **[Linux local](../features/local-linux.md)** — Alpine / Debian / Arch / Void via PRoot, côte à côte, sans accès root requis.
 - **[Redirection USB](../features/usb.md)** — partagez un périphérique USB avec l'agent, l'invité Linux ou un hôte distant via USB/IP.
-- **[Reticulum](../features/reticulum.md)** — shell rnsh, transfert de fichiers, et redirection `-L`/`-D` sur le maillage. Le seul transport qui continue de fonctionner sans aucune connexion internet.
 - **[Transport agent (MCP)](../mcp-tools.md)** — environ 130 outils soumis à consentement ; l'agent peut même piloter l'interface de Haven elle-même.
 - **[Sécurité](../features/security.md)** — verrouillage biométrique, pas de télémétrie, sauvegarde/restauration chiffrée (AES-256-GCM).
 

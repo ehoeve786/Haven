@@ -66,7 +66,6 @@ sideloads diretos seguem a chave do GitHub Releases.
 - **[E-mail](../features/email.md)** — ProtonMail + IMAP/SMTP, escrever/responder/encaminhar, várias contas, automação de Regras de E-mail.
 - **[Linux local](../features/local-linux.md)** — Alpine / Debian / Arch / Void via PRoot, lado a lado, sem necessidade de root.
 - **[Encaminhamento USB](../features/usb.md)** — disponibilize um dispositivo USB para o agente, para o convidado Linux ou para um host remoto via USB/IP.
-- **[Reticulum](../features/reticulum.md)** — shell rnsh, transferência de arquivos e encaminhamento `-L`/`-D` sobre malha (mesh). O único transporte que continua funcionando sem nenhuma internet.
 - **[Transporte de agente (MCP)](../mcp-tools.md)** — cerca de 130 ferramentas protegidas por consentimento; o agente pode até controlar a própria interface do Haven.
 - **[Segurança](../features/security.md)** — bloqueio biométrico, sem telemetria, backup/restauração criptografados (AES-256-GCM).
 

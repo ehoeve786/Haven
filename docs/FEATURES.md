@@ -9,7 +9,7 @@ Haven is one app for SSH/terminal, remote and local desktops, files and cloud
 storage, email, on-device Linux, and an AI-agent bridge. Each area has its own
 page below; the [landing page](index.md) has a short summary.
 
-- **[Terminal](features/terminal.md)** — Mosh / Eternal Terminal / SSH, USB / Bluetooth / BLE serial consoles with a serial↔TCP bridge, tmux-aware session restore, configurable keyboard toolbar, OSC 7/8/9/52/133/777 integration.
+- **[Terminal](features/terminal.md)** — SSH, USB / Bluetooth / BLE serial consoles with a serial↔TCP bridge, tmux-aware session restore, configurable keyboard toolbar, OSC 7/8/9/52/133/777 integration.
 - **[Desktops](features/desktops.md)** — a GPU-accelerated native Wayland compositor and a multi-distro local-desktop manager.
 - **[GPU acceleration](gpu-acceleration.md)** — how guest Linux GL/Vulkan apps reach the phone's real Mali GPU from a proot cage (no `/dev/dri`): the host-brokered virgl/venus renderer and the R1→R8 deep-dive behind it.
 - **[Files & cloud storage](features/files-and-cloud.md)** — unified browser for SFTP/SCP, SMB, and 60+ cloud providers; cross-filesystem copy/move, editor and image tools, folder sync; plus on-device FFmpeg transcode, HLS streaming, and a DLNA server.
@@ -21,7 +21,6 @@ page below; the [landing page](index.md) has a short summary.
 - **[USB device forwarding](features/usb.md)** — broker an attached USB device through Android and re-expose it to the agent, into the Linux guest, or over USB/IP to a **remote host** (e.g. forward a phone-hosted YubiKey, touch on the phone); includes a device-class support matrix for what works where.
 - **[Reading USB drives](features/usb-drives.md)** — plug in a USB flash drive or SSD and read its files, even Linux-formatted (ext4/GPT) drives the phone can't open itself; Haven mounts them in a small on-device Linux VM and surfaces the files in the normal file browser. No jargon required.
 - **[USB card rescue console](features/usb-recovery-live.md)** — the fast route for a failing SD card: the raw card reaches a small Linux guest in seconds, ready for `ddrescue`; the rescued image lands in app storage.
-- **[Reticulum mesh](features/reticulum.md)** — rnsh shell, file transfer, and `-L`/`-D` port forwarding over Reticulum, pure Kotlin. The one transport that keeps working with no internet at all.
 - **[Agent transport (MCP)](mcp-tools.md)** — an optional MCP server exposing ~130 consent-gated, audited tools, including ones that drive Haven's own UI for a self-hosting build → install → verify loop.
 - **[Automation (Tasker / MacroDroid)](features/automation.md)** — a native Tasker/Locale/MacroDroid plugin action to run a command on a saved SSH server, with host-variable substitution, wait-until-finished, output returned as `%hstdout`/`%hstderr`/`%hexit` variables, and an optional live-terminal watch.
 - **[Security & privacy](features/security.md)** — biometric lock, no telemetry, encrypted backup/restore (AES-256-GCM).
