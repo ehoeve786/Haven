@@ -28,7 +28,7 @@ private const val GITHUB_RELEASE_SIGNER_SHA256 =
     "ea03a3a70e1c11d0a78932f959b21f20d8735d9cd750997657cb7f7d7c2b90b3"
 
 private const val LATEST_RELEASE_API =
-    "https://api.github.com/repos/ehoeve786/Haven/releases/latest"
+    "https://api.github.com/repos/ehoeve786/Tidegate/releases/latest"
 
 /** Enough for the release JSON; a redirected or hostile reply cannot fill memory. */
 private const val MAX_RESPONSE_BYTES = 512 * 1024
@@ -147,7 +147,7 @@ class UpdateChecker @Inject constructor(
             return@withContext Result.Failed("Release carried no tag")
         }
         val url = json.optString("html_url").ifBlank {
-            "https://github.com/ehoeve786/Haven/releases/tag/$tag"
+            "https://github.com/ehoeve786/Tidegate/releases/tag/$tag"
         }
         val latest = normaliseVersion(tag)
 

@@ -2472,7 +2472,7 @@ private fun BackupPasswordDialog(
     )
 }
 
-private const val GITHUB_URL = "https://github.com/ehoeve786/Haven"
+private const val GITHUB_URL = "https://github.com/ehoeve786/Tidegate"
 private const val KOFI_URL = "https://ko-fi.com/glassontin"
 
 @Composable
