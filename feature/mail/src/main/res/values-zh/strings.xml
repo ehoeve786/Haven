@@ -128,7 +128,7 @@
     <string name="mail_rules_history_uidreset">邮箱已重新编号——已重置</string>
     <string name="mail_rules_no_subject">（无主题）</string>
     <string name="mail_rules_pending_empty">没有等待批准的项目。</string>
-    <string name="mail_rules_pending_desc">在 Haven 处于后台时已排队。批准以运行，或拒绝以丢弃。</string>
+    <string name="mail_rules_pending_desc">在 Tidegate 处于后台时已排队。批准以运行，或拒绝以丢弃。</string>
     <string name="mail_rules_approve">批准</string>
     <string name="mail_rules_reject">拒绝</string>
     <string name="mail_rules_approve_all">全部批准</string>

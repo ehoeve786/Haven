@@ -244,7 +244,7 @@ class SshConnectionService : Service() {
 
         val builder = NotificationCompat.Builder(this, CHANNEL_ID)
             .setSmallIcon(R.drawable.ic_haven_notification)
-            .setContentTitle("Haven — $count active session${if (count != 1) "s" else ""}")
+            .setContentTitle("Tidegate — $count active session${if (count != 1) "s" else ""}")
             .setContentText(labels.ifEmpty { "Connecting..." })
             // Expanded view: one session per line, so the MCP status line
             // (running tool / last error) isn't truncated behind the other

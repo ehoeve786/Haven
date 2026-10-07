@@ -70,10 +70,10 @@
 
     <!-- Battery optimization dialog -->
     <string name="connections_battery_title">接続を維持しますか？</string>
-    <string name="connections_battery_message">Androidはバッテリー節約のためにバックグラウンドのSSH接続を切断することがあります。Havenのバッテリー最適化を無効にするとこれを防げます。</string>
-    <string name="connections_battery_redropped_message">Havenのバッテリー最適化の除外が解除されました — アプリ更新の副作用でよく起こります。除外がないと、Androidは再びバックグラウンドのSSH接続を切断することがあります。再度許可しますか？</string>
+    <string name="connections_battery_message">Androidはバッテリー節約のためにバックグラウンドのSSH接続を切断することがあります。Tidegateのバッテリー最適化を無効にするとこれを防げます。</string>
+    <string name="connections_battery_redropped_message">Tidegateのバッテリー最適化の除外が解除されました — アプリ更新の副作用でよく起こります。除外がないと、Androidは再びバックグラウンドのSSH接続を切断することがあります。再度許可しますか？</string>
     <string name="connections_battery_dont_ask_again">今後表示しない</string>
-    <string name="connections_process_killed_banner">Androidが%1$sにHavenを終了しました（%2$s）— バックグラウンドのセッションも失われました。</string>
+    <string name="connections_process_killed_banner">Androidが%1$sにTidegateを終了しました（%2$s）— バックグラウンドのセッションも失われました。</string>
     <string name="process_exit_cause_debug_app">開発者向けオプション「デバッグアプリを選択」</string>
     <string name="process_exit_cause_force_stop">強制停止</string>
     <string name="process_exit_cause_memory">メモリ不足</string>
@@ -238,7 +238,7 @@
     <string name="connections_fido_pin_help">この SSH 鍵は verify-required で登録されています。続行するにはセキュリティ キーに設定した PIN を入力してください。</string>
     <string name="connections_fido_pin_wrong">PIN が違います。鍵がロックされるまで残り %1$d 回です。</string>
     <string name="connections_fido_waiting_title">セキュリティ キーが必要です</string>
-    <string name="connections_fido_waiting_body">セキュリティ キーを USB で接続するか、NFC の場合は本体の背面にかざしてください。検出されると Haven は自動的に続行します。</string>
+    <string name="connections_fido_waiting_body">セキュリティ キーを USB で接続するか、NFC の場合は本体の背面にかざしてください。検出されると Tidegate は自動的に続行します。</string>
     <string name="connections_fido_touch_usb_title">セキュリティ キーにタッチ</string>
     <string name="connections_fido_touch_usb_body">SSH 署名を許可するため、セキュリティ キーのボタンを今すぐ押してください。待機中であることを示して点滅する場合があります。</string>
     <string name="connections_fido_touch_nfc_title">セキュリティ キーをかざしたままに</string>
@@ -255,7 +255,7 @@
     <string name="connections_vm_step_open_port_body">ターミナル アプリの設定で、待ち受けポートの一覧にポート 8022 を追加します。</string>
     <string name="connections_vm_step_password_body">ターミナル アプリで実行します。droid ユーザーのパスワードを設定するよう求められます。</string>
     <string name="connections_vm_step_password_hint">その後、droid@localhost:8022 で接続します</string>
-    <string name="connections_vm_step_vnc_body">Haven の Desktop タブからリモート デスクトップに接続するために使います。</string>
+    <string name="connections_vm_step_vnc_body">Tidegate の Desktop タブからリモート デスクトップに接続するために使います。</string>
     <string name="connections_vm_step_desktop_body">Xfce4 は軽量で、VNC 経由でも快適に動作します。</string>
     <string name="connections_vm_step_apps_body">ファイル マネージャー、テキスト エディター、画像ビューアー、ブラウザー、電卓。</string>
 
@@ -361,8 +361,8 @@
     <string name="connections_section_embedded_vnc">埋め込みVNC</string>
     <string name="connections_section_reticulum">Reticulum</string>
     <string name="connections_section_routing">ルーティング</string>
-    <string name="connections_toggle_mcp_tunnel">HavenのMCPサーバーを公開</string>
-    <string name="connections_helper_mcp_tunnel">Haven の MCP をこの接続のすべてのセッションに公開します。各セッションは http://127.0.0.1:8730/mcp に接続し、(ループバック経由で) ペアリングと同意をスキップします。接続時に適用されます。セッションを開かずに常時アクセスするには、設定 → エージェントエンドポイント で「常時接続のMCP接続」に設定してください。</string>
+    <string name="connections_toggle_mcp_tunnel">TidegateのMCPサーバーを公開</string>
+    <string name="connections_helper_mcp_tunnel">Tidegate の MCP をこの接続のすべてのセッションに公開します。各セッションは http://127.0.0.1:8730/mcp に接続し、(ループバック経由で) ペアリングと同意をスキップします。接続時に適用されます。セッションを開かずに常時アクセスするには、設定 → エージェントエンドポイント で「常時接続のMCP接続」に設定してください。</string>
     <string name="connections_section_reconnect">再接続</string>
     <string name="connections_local_shell_android_desc">ネイティブのAndroidシェル (/system/bin/sh) を実行します。Androidのコマンド、ファイルシステム、root（利用可能な場合）にアクセスできます。</string>
     <string name="connections_local_shell_proot_desc">PRoot経由でAlpine Linuxシェルをローカルで実行します。初回使用時に最小限のrootfs（約4MB）をダウンロードします。rootやネットワーク接続は不要です。</string>
@@ -394,7 +394,7 @@
     <string name="connections_helper_vnc_host_via_ssh">SSHサーバーからVNCサーバーに到達できる場所 — 同じマシンの場合は通常127.0.0.1（wayvncなどはループバックのみにバインドします）。</string>
     <string name="connections_helper_vnc_auth">従来のVncAuth（8文字のパスワード）にはユーザー名を空欄のままにします。VeNCrypt（wayvnc、TigerVNC）にはユーザー名を入力します — より長いパスワードとTLS暗号化に対応します。</string>
     <string name="connections_helper_rdp_host_via_ssh">SSHサーバーからRDPサーバーに到達できる場所 — 同じマシンの場合は通常127.0.0.1。</string>
-    <string name="connections_helper_rdp_nla">既定でオン。サーバーがHavenのNLAを拒否する場合はオフにします（一部のWindows Server 2025構成 — SSLのみで接続するにはサーバーで\"Require NLA\"を無効にする必要があります）。</string>
+    <string name="connections_helper_rdp_nla">既定でオン。サーバーがTidegateのNLAを拒否する場合はオフにします（一部のWindows Server 2025構成 — SSLのみで接続するにはサーバーで\"Require NLA\"を無効にする必要があります）。</string>
     <string name="connections_action_manage_tunnels">トンネルを管理…</string>
     <string name="connections_helper_cloudflare_routing">Cloudflare Tunnelコネクタ経由のルーティング。上記のホストがトンネルのホスト名として使用されます。ポートは適用されません（コネクタがアップストリームのSSHターゲットを決定します）。</string>
     <string name="connections_vnc_depth_24">24ビットカラー（最高品質）</string>
@@ -602,7 +602,7 @@
     <string name="connections_identity_help">すべての Reticulum 接続で共有されます。許可リストに登録するサーバーはこのハッシュを見ます。</string>
     <string name="connections_identity_import">アイデンティティファイルを読み込む…</string>
     <string name="connections_identity_imported">アイデンティティを読み込みました: %1$s</string>
-    <string name="connections_identity_imported_restart">アイデンティティを読み込みました: %1$s。接続で使うには Haven を再起動してください。</string>
+    <string name="connections_identity_imported_restart">アイデンティティを読み込みました: %1$s。接続で使うには Tidegate を再起動してください。</string>
     <string name="connections_identity_not_an_identity">このファイルは Reticulum のアイデンティティではありません。変更はありません。</string>
     <string name="connections_identity_install_failed">アイデンティティを設定できませんでした: %1$s。以前のものがそのまま残っています。</string>
     <string name="connections_identity_unreadable">このファイルを読み込めませんでした。</string>

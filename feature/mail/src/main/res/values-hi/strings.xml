@@ -128,7 +128,7 @@
     <string name="mail_rules_history_uidreset">मेलबॉक्स की पुनः नंबरिंग हुई — रीसेट किया गया</string>
     <string name="mail_rules_no_subject">(कोई विषय नहीं)</string>
     <string name="mail_rules_pending_empty">अनुमोदन की प्रतीक्षा में कुछ नहीं।</string>
-    <string name="mail_rules_pending_desc">Haven के बैकग्राउंड में रहने के दौरान कतार में रखा गया। चलाने के लिए अनुमोदित करें, या छोड़ने के लिए अस्वीकार करें।</string>
+    <string name="mail_rules_pending_desc">Tidegate के बैकग्राउंड में रहने के दौरान कतार में रखा गया। चलाने के लिए अनुमोदित करें, या छोड़ने के लिए अस्वीकार करें।</string>
     <string name="mail_rules_approve">अनुमोदित करें</string>
     <string name="mail_rules_reject">अस्वीकार करें</string>
     <string name="mail_rules_approve_all">सभी अनुमोदित करें</string>

@@ -168,7 +168,7 @@
     <string name="keys_security_key_hint">Set up a new SSH key on a FIDO2 key, or import keys already on it.</string>
     <!-- #487: a key held by another app (OpenKeychain), signed there, never copied here -->
     <string name="keys_from_provider">Use a key from %1$s</string>
-    <string name="keys_from_provider_hint">Pick a key that app holds. It signs on Haven\'s behalf — the private key stays where it is, including on a hardware token.</string>
+    <string name="keys_from_provider_hint">Pick a key that app holds. It signs on Tidegate\'s behalf — the private key stays where it is, including on a hardware token.</string>
     <string name="keys_security_key_setup">Set up a new key on it</string>
     <string name="keys_security_key_setup_hint">Create an SSH key on the security key (sets a PIN if it is new). No laptop or ssh-keygen.</string>
     <string name="keys_security_key_import">Import keys already on it</string>
@@ -228,7 +228,7 @@
     <string name="keys_fido_pin_confirm_label">Confirm PIN</string>
     <string name="keys_fido_pin_mismatch">PINs do not match</string>
     <string name="keys_fido_waiting_title">Security key required</string>
-    <string name="keys_fido_waiting_body">Plug in your security key over USB, or tap it on the back of the device for NFC. Haven will continue automatically once it is detected.</string>
+    <string name="keys_fido_waiting_body">Plug in your security key over USB, or tap it on the back of the device for NFC. Tidegate will continue automatically once it is detected.</string>
     <string name="keys_fido_touch_usb_title">Touch your security key</string>
     <string name="keys_fido_touch_usb_body">Press the button on your security key now to authorise the request.</string>
     <string name="keys_fido_touch_nfc_title">Hold your security key</string>

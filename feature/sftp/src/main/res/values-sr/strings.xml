@@ -37,7 +37,7 @@
     <string name="sftp_saf_grant_failed">Не може да се одржи приступ том фолдеру</string>
     <string name="sftp_remove_folder_location">Уклони локацију фолдера</string>
     <string name="sftp_remove_folder_title">Желите ли да уклоните локацију фолдера?</string>
-    <string name="sftp_remove_folder_message">%1$s ће се уклонити из Фајлова. Ваши фајлови се не бришу — само приступ апликације Haven том фолдеру.</string>
+    <string name="sftp_remove_folder_message">%1$s ће се уклонити из Фајлова. Ваши фајлови се не бришу — само приступ апликације Tidegate том фолдеру.</string>
     <string name="sftp_remove_folder_confirm">Уклони</string>
     <string name="sftp_rename_not_supported">Ова локација не подржава преименовање</string>
     <string name="sftp_upload_file">Отпреми фајл</string>

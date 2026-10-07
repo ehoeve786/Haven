@@ -151,7 +151,7 @@
     <string name="keys_fido_pin_help">চালিয়ে যেতে আপনার সিকিউরিটি কী-তে সেট করা PIN লিখুন।</string>
     <string name="keys_fido_pin_wrong">ভুল PIN। কী লক হওয়ার আগে %1$d বার চেষ্টা বাকি।</string>
     <string name="keys_fido_waiting_title">সিকিউরিটি কী প্রয়োজন</string>
-    <string name="keys_fido_waiting_body">আপনার সিকিউরিটি কী USB দিয়ে সংযুক্ত করুন, অথবা NFC-এর জন্য ডিভাইসের পিছনে ট্যাপ করুন। শনাক্ত হলেই Haven স্বয়ংক্রিয়ভাবে চালিয়ে যাবে।</string>
+    <string name="keys_fido_waiting_body">আপনার সিকিউরিটি কী USB দিয়ে সংযুক্ত করুন, অথবা NFC-এর জন্য ডিভাইসের পিছনে ট্যাপ করুন। শনাক্ত হলেই Tidegate স্বয়ংক্রিয়ভাবে চালিয়ে যাবে।</string>
     <string name="keys_fido_touch_usb_title">আপনার সিকিউরিটি কী স্পর্শ করুন</string>
     <string name="keys_fido_touch_usb_body">অনুরোধটি অনুমোদন করতে এখনই আপনার সিকিউরিটি কী-এর বোতাম টিপুন।</string>
     <string name="keys_fido_touch_nfc_title">আপনার সিকিউরিটি কী ধরে রাখুন</string>
@@ -240,7 +240,7 @@
     <string name="keys_section_collapse">%1$s সংকুচিত করুন</string>
     <string name="keys_section_expand">%1$s প্রসারিত করুন</string>
     <string name="keys_from_provider">%1$s থেকে একটি কী ব্যবহার করুন</string>
-    <string name="keys_from_provider_hint">ওই অ্যাপে থাকা একটি কী বেছে নিন। এটি Haven-এর হয়ে স্বাক্ষর করে — ব্যক্তিগত কী যেখানে আছে সেখানেই থাকে, হার্ডওয়্যার টোকেনেও।</string>
+    <string name="keys_from_provider_hint">ওই অ্যাপে থাকা একটি কী বেছে নিন। এটি Tidegate-এর হয়ে স্বাক্ষর করে — ব্যক্তিগত কী যেখানে আছে সেখানেই থাকে, হার্ডওয়্যার টোকেনেও।</string>
     <string name="keys_totp_code_copied">কোড কপি হয়েছে</string>
     <plurals name="keys_selected_count">
         <item quantity="one">%1$dটি নির্বাচিত</item>

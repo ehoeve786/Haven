@@ -70,10 +70,10 @@
 
     <!-- Battery optimization dialog -->
     <string name="connections_battery_title">Maintenir les connexions ?</string>
-    <string name="connections_battery_message">Android peut fermer les connexions SSH en arrière-plan pour économiser la batterie. Désactiver l\'optimisation de la batterie pour Haven empêche cela.</string>
-    <string name="connections_battery_redropped_message">L\'exemption de batterie de Haven a été désactivée — souvent un effet secondaire d\'une mise à jour. Sans elle, Android peut de nouveau fermer les connexions SSH en arrière-plan. La réactiver ?</string>
+    <string name="connections_battery_message">Android peut fermer les connexions SSH en arrière-plan pour économiser la batterie. Désactiver l\'optimisation de la batterie pour Tidegate empêche cela.</string>
+    <string name="connections_battery_redropped_message">L\'exemption de batterie de Tidegate a été désactivée — souvent un effet secondaire d\'une mise à jour. Sans elle, Android peut de nouveau fermer les connexions SSH en arrière-plan. La réactiver ?</string>
     <string name="connections_battery_dont_ask_again">Ne plus demander</string>
-    <string name="connections_process_killed_banner">Android a tué Haven à %1$s (%2$s) — les sessions en arrière-plan ont été perdues.</string>
+    <string name="connections_process_killed_banner">Android a tué Tidegate à %1$s (%2$s) — les sessions en arrière-plan ont été perdues.</string>
     <string name="process_exit_cause_debug_app">l’option développeur « Sélectionner l’application à déboguer »</string>
     <string name="process_exit_cause_force_stop">arrêt forcé</string>
     <string name="process_exit_cause_memory">mémoire insuffisante</string>
@@ -238,7 +238,7 @@
     <string name="connections_fido_pin_help">Cette clé SSH a été enregistrée avec verify-required. Saisissez le code PIN configuré sur votre clé de sécurité pour continuer.</string>
     <string name="connections_fido_pin_wrong">Code PIN incorrect. Il reste %1$d tentatives avant le blocage de la clé.</string>
     <string name="connections_fido_waiting_title">Clé de sécurité requise</string>
-    <string name="connections_fido_waiting_body">Branchez votre clé de sécurité en USB, ou présentez-la à l’arrière de l’appareil pour le NFC. Haven poursuivra automatiquement dès qu’elle sera détectée.</string>
+    <string name="connections_fido_waiting_body">Branchez votre clé de sécurité en USB, ou présentez-la à l’arrière de l’appareil pour le NFC. Tidegate poursuivra automatiquement dès qu’elle sera détectée.</string>
     <string name="connections_fido_touch_usb_title">Touchez votre clé de sécurité</string>
     <string name="connections_fido_touch_usb_body">Appuyez maintenant sur le bouton de votre clé de sécurité pour autoriser la signature SSH. La clé peut clignoter pour indiquer qu’elle attend.</string>
     <string name="connections_fido_touch_nfc_title">Maintenez votre clé de sécurité</string>
@@ -255,7 +255,7 @@
     <string name="connections_vm_step_open_port_body">Dans les paramètres de l’application Terminal, ajoutez le port 8022 à la liste des ports d’écoute.</string>
     <string name="connections_vm_step_password_body">À exécuter dans l’application Terminal. Vous serez invité à définir un mot de passe pour l’utilisateur droid.</string>
     <string name="connections_vm_step_password_hint">Connectez-vous ensuite avec : droid@localhost:8022</string>
-    <string name="connections_vm_step_vnc_body">Pour l’accès au bureau à distance via l’onglet Desktop de Haven.</string>
+    <string name="connections_vm_step_vnc_body">Pour l’accès au bureau à distance via l’onglet Desktop de Tidegate.</string>
     <string name="connections_vm_step_desktop_body">Xfce4 est léger et fonctionne bien via VNC.</string>
     <string name="connections_vm_step_apps_body">Gestionnaire de fichiers, éditeur de texte, visionneuse d’images, navigateur, calculatrice.</string>
 
@@ -361,8 +361,8 @@
     <string name="connections_section_embedded_vnc">VNC intégré</string>
     <string name="connections_section_reticulum">Reticulum</string>
     <string name="connections_section_routing">Routage</string>
-    <string name="connections_toggle_mcp_tunnel">Exposer le serveur MCP de Haven</string>
-    <string name="connections_helper_mcp_tunnel">Expose le MCP de Haven à chaque session de cette connexion — elles atteignent http://127.0.0.1:8730/mcp et (via loopback) ignorent l\'appairage et le consentement. Appliqué à la connexion. Pour un accès permanent sans session ouverte, définissez-la comme Connexion MCP permanente dans Paramètres → Point de terminaison de l\'agent.</string>
+    <string name="connections_toggle_mcp_tunnel">Exposer le serveur MCP de Tidegate</string>
+    <string name="connections_helper_mcp_tunnel">Expose le MCP de Tidegate à chaque session de cette connexion — elles atteignent http://127.0.0.1:8730/mcp et (via loopback) ignorent l\'appairage et le consentement. Appliqué à la connexion. Pour un accès permanent sans session ouverte, définissez-la comme Connexion MCP permanente dans Paramètres → Point de terminaison de l\'agent.</string>
     <string name="connections_section_reconnect">Reconnexion</string>
     <string name="connections_local_shell_android_desc">Exécute le shell natif d\'Android (/system/bin/sh). Accès aux commandes Android, au système de fichiers et au root (si disponible).</string>
     <string name="connections_local_shell_proot_desc">Exécute un shell Alpine Linux localement via PRoot. Télécharge un rootfs minimal (~4 Mo) à la première utilisation. Aucun root ni connexion réseau requis.</string>
@@ -394,7 +394,7 @@
     <string name="connections_helper_vnc_host_via_ssh">Où le serveur VNC est accessible depuis le serveur SSH — généralement 127.0.0.1 s\'il s\'agit de la même machine (wayvnc, etc. ne se lient qu\'au loopback).</string>
     <string name="connections_helper_vnc_auth">Laissez le nom d\'utilisateur vide pour le VncAuth classique (mot de passe de 8 caractères). Renseignez le nom d\'utilisateur pour VeNCrypt (wayvnc, TigerVNC) — prend en charge des mots de passe plus longs et le chiffrement TLS.</string>
     <string name="connections_helper_rdp_host_via_ssh">Où le serveur RDP est accessible depuis le serveur SSH — généralement 127.0.0.1 s\'il s\'agit de la même machine.</string>
-    <string name="connections_helper_rdp_nla">Activé par défaut. Désactivez-le si le serveur rejette la NLA de Haven (certaines configurations Windows Server 2025 — le serveur doit avoir \"Require NLA\" désactivé pour se connecter en SSL uniquement).</string>
+    <string name="connections_helper_rdp_nla">Activé par défaut. Désactivez-le si le serveur rejette la NLA de Tidegate (certaines configurations Windows Server 2025 — le serveur doit avoir \"Require NLA\" désactivé pour se connecter en SSL uniquement).</string>
     <string name="connections_action_manage_tunnels">Gérer les tunnels…</string>
     <string name="connections_helper_cloudflare_routing">Routage via un connecteur Cloudflare Tunnel. L\'hôte ci-dessus sert de nom d\'hôte du tunnel ; le port ne s\'applique pas (le connecteur décide de la cible SSH en amont).</string>
     <string name="connections_vnc_depth_24">Couleur 24 bits (meilleure qualité)</string>
@@ -602,7 +602,7 @@
     <string name="connections_identity_help">Partagée par toutes les connexions Reticulum. Un serveur qui vous autorise se fonde sur cette empreinte.</string>
     <string name="connections_identity_import">Importer un fichier d\'identité…</string>
     <string name="connections_identity_imported">Identité importée : %1$s</string>
-    <string name="connections_identity_imported_restart">Identité importée : %1$s. Redémarrez Haven pour que les connexions l\'utilisent.</string>
+    <string name="connections_identity_imported_restart">Identité importée : %1$s. Redémarrez Tidegate pour que les connexions l\'utilisent.</string>
     <string name="connections_identity_not_an_identity">Ce fichier n\'est pas une identité Reticulum. Rien n\'a été modifié.</string>
     <string name="connections_identity_install_failed">Impossible d\'installer l\'identité : %1$s. La précédente est toujours en place.</string>
     <string name="connections_identity_unreadable">Impossible de lire ce fichier.</string>

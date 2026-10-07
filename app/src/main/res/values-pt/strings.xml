@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">Haven</string>
+    <string name="app_name">Tidegate SSH</string>
 
 
     <!-- Common strings shared across modules -->
@@ -35,7 +35,7 @@
 
     <!-- Battery optimization -->
     <string name="battery_title">Manter conexões ativas?</string>
-    <string name="battery_message">O Android pode encerrar conexões SSH em segundo plano para economizar bateria. Desativar a otimização de bateria para o Haven evita isso.</string>
+    <string name="battery_message">O Android pode encerrar conexões SSH em segundo plano para economizar bateria. Desativar a otimização de bateria para o Tidegate evita isso.</string>
 
     <!-- Workspace profiles -->
     <string name="workspace_section_title">Espaços de trabalho</string>
@@ -67,7 +67,7 @@
     <string name="agent_deny">Deny</string>
 
     <!-- i18n sweep #210 -->
-    <string name="app_biometric_locked_title">Haven está bloqueado</string>
+    <string name="app_biometric_locked_title">Tidegate está bloqueado</string>
     <string name="app_biometric_authenticate_prompt">Autentique-se para continuar</string>
     <string name="app_biometric_open_device_settings">Abrir configurações do dispositivo</string>
     <string name="app_desktop_app_windows_title">Janelas de aplicativo</string>
@@ -116,7 +116,7 @@
     <string name="app_desktop_custom_cmd_unset">Defina primeiro o comando de sessão</string>
     <string name="app_desktop_custom_cmd_edit">Editar comando de sessão</string>
     <string name="app_desktop_custom_cmd_title">Comando de sessão personalizado</string>
-    <string name="app_desktop_custom_cmd_description">Executa contra o servidor X do Haven dentro da distro ativa — o padrão do termux-x11, ex.: dbus-launch startxfce4. Instale antes os pacotes do desktop na distro. Desktops X11 usam renderização por software: desktops que exigem um compositor GL (GNOME Shell, KWin) não iniciarão.</string>
+    <string name="app_desktop_custom_cmd_description">Executa contra o servidor X do Tidegate dentro da distro ativa — o padrão do termux-x11, ex.: dbus-launch startxfce4. Instale antes os pacotes do desktop na distro. Desktops X11 usam renderização por software: desktops que exigem um compositor GL (GNOME Shell, KWin) não iniciarão.</string>
     <string name="app_desktop_custom_cmd_label">Comando de sessão</string>
     <string name="app_desktop_custom_cmd_save_start">Salvar e iniciar</string>
     <string name="app_desktop_de_with_size">%1$s (%2$s)</string>
@@ -138,7 +138,7 @@
     <string name="app_agent_action_requested">Ação do agente solicitada</string>
     <string name="app_agent_from_client">De: %1$s</string>
     <string name="app_agent_tool">Ferramenta: %1$s</string>
-    <string name="app_agent_bypass_label">Permitir todas as solicitações MCP de \'%1$s\' até o Haven reiniciar</string>
+    <string name="app_agent_bypass_label">Permitir todas as solicitações MCP de \'%1$s\' até o Tidegate reiniciar</string>
     <string name="app_agent_bypass_description">Inclui operações destrutivas (entrada no terminal, escrita/exclusão de arquivos, instalação de APK). Apagado ao fechar o app.</string>
     <string name="app_agent_auto_allow_window">Janela de permissão automática:</string>
     <string name="app_agent_minutes">%1$dm</string>
@@ -153,10 +153,10 @@
     <string name="app_present_preparing_audio">Preparando áudio…</string>
 
     <!-- i18n sweep #210 (follow-up batch) -->
-    <string name="app_biometric_blocked_no_activity_title">O Haven está bloqueado</string>
+    <string name="app_biometric_blocked_no_activity_title">O Tidegate está bloqueado</string>
     <string name="app_biometric_blocked_no_activity_body">Não é possível mostrar o aviso de autenticação neste contexto.</string>
     <string name="app_biometric_not_enrolled_title">Configure um bloqueio de tela</string>
-    <string name="app_biometric_not_enrolled_body">O bloqueio do app Haven está ativado, mas este dispositivo não tem bloqueio de tela nem biometria cadastrada. Configure um nas Configurações do dispositivo para desbloquear.</string>
+    <string name="app_biometric_not_enrolled_body">O bloqueio do app Tidegate está ativado, mas este dispositivo não tem bloqueio de tela nem biometria cadastrada. Configure um nas Configurações do dispositivo para desbloquear.</string>
     <string name="app_biometric_no_hardware_title">Autenticação indisponível</string>
     <string name="app_biometric_no_hardware_body">Este dispositivo não consegue autenticar (sem hardware biométrico nem credencial do dispositivo). Configure um PIN ou senha nas Configurações para desbloquear.</string>
     <string name="app_present_minimize">Minimizar</string>
@@ -164,7 +164,7 @@
 
     <!-- Local Linux desktop -->
     <string name="app_desktop_manager_title">Desktop Linux local</string>
-    <string name="app_desktop_manager_description">Execute um desktop Linux completo dentro do Haven. Escolha uma distro, instale um ambiente de área de trabalho (Xfce4, Openbox ou Sway) e toque em Iniciar — sem servidor ou conexão separados.</string>
+    <string name="app_desktop_manager_description">Execute um desktop Linux completo dentro do Tidegate. Escolha uma distro, instale um ambiente de área de trabalho (Xfce4, Openbox ou Sway) e toque em Iniciar — sem servidor ou conexão separados.</string>
 
     <!-- App windows / installed-app launcher (#250) -->
     <string name="app_desktop_app_window_pin_home_cd">Adicionar %1$s à tela inicial</string>
@@ -287,11 +287,11 @@
     <string name="app_desktop_open_terminal_cd">Abrir terminal em %1$s</string>
     <string name="app_present_fullscreen">Tela cheia</string>
     <string name="app_present_exit_fullscreen">Sair da tela cheia</string>
-    <string name="tasker_plugin_name">Executar um comando em um servidor Haven</string>
-    <string name="tasker_edit_title">Execute um comando de shell em uma conexão SSH do Haven salva.</string>
+    <string name="tasker_plugin_name">Executar um comando em um servidor Tidegate</string>
+    <string name="tasker_edit_title">Execute um comando de shell em uma conexão SSH do Tidegate salva.</string>
     <string name="tasker_loading">Carregando conexões…</string>
-    <string name="tasker_no_ssh_profiles">Nenhuma conexão SSH salva. Adicione uma no Haven primeiro.</string>
-    <string name="tasker_field_server">Servidor Haven</string>
+    <string name="tasker_no_ssh_profiles">Nenhuma conexão SSH salva. Adicione uma no Tidegate primeiro.</string>
+    <string name="tasker_field_server">Servidor Tidegate</string>
     <string name="tasker_field_command">Comando</string>
     <string name="tasker_field_command_help">É executado no shell de login. As variáveis do Tasker/MacroDroid são substituídas antes da execução.</string>
     <string name="tasker_toggle_overlay">Mostrar o comando num terminal ao vivo</string>
@@ -319,7 +319,7 @@
     <string name="backup_pull_toast_success">Backup restaurado</string>
     <string name="backup_pull_toast_failure">Falha ao obter backup: %1$s</string>
     <string name="backup_pull_started">Baixando o backup em segundo plano…</string>
-    <string name="backup_pull_no_password">Nenhuma senha salva. Abrindo o Haven…</string>
+    <string name="backup_pull_no_password">Nenhuma senha salva. Abrindo o Tidegate…</string>
     <plurals name="app_agent_more_pending">
         <item quantity="one">＋%1$d solicitação a mais aguardando atrás desta — você a verá depois</item>
         <item quantity="other">＋%1$d solicitações a mais aguardando atrás desta — você as verá depois</item>
@@ -337,6 +337,6 @@
         <item quantity="other">%1$d remotos</item>
     </plurals>
     <string name="update_notification_channel">Atualizações do aplicativo</string>
-    <string name="update_notification_title">Haven %1$s está disponível</string>
+    <string name="update_notification_title">Tidegate %1$s está disponível</string>
     <string name="update_notification_text">Toque para abrir a página da versão.</string>
 </resources>

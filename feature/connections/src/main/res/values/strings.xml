@@ -78,10 +78,10 @@
 
     <!-- Battery optimization dialog -->
     <string name="connections_battery_title">Keep connections alive?</string>
-    <string name="connections_battery_message">Android may close background SSH connections to save battery. Disabling battery optimization for Haven prevents this.</string>
-    <string name="connections_battery_redropped_message">Haven\'s battery exemption has been switched off — often a side effect of an app update. Without it, Android may close background SSH connections again. Re-allow it?</string>
+    <string name="connections_battery_message">Android may close background SSH connections to save battery. Disabling battery optimization for Tidegate prevents this.</string>
+    <string name="connections_battery_redropped_message">Tidegate\'s battery exemption has been switched off — often a side effect of an app update. Without it, Android may close background SSH connections again. Re-allow it?</string>
     <string name="connections_battery_dont_ask_again">Don\'t ask again</string>
-    <string name="connections_process_killed_banner">Android killed Haven at %1$s (%2$s) — background sessions died with it.</string>
+    <string name="connections_process_killed_banner">Android killed Tidegate at %1$s (%2$s) — background sessions died with it.</string>
     <string name="process_exit_cause_debug_app">the “Select debug app” developer setting</string>
     <string name="process_exit_cause_force_stop">force stop</string>
     <string name="process_exit_cause_memory">low memory</string>
@@ -328,7 +328,7 @@
     <string name="connections_fido_pin_help">This SSH key was registered with verify-required. Enter the PIN configured on your security key to continue.</string>
     <string name="connections_fido_pin_wrong">Wrong PIN. %1$d attempts remaining before the key locks.</string>
     <string name="connections_fido_waiting_title">Security key required</string>
-    <string name="connections_fido_waiting_body">Plug in your security key over USB, or tap it on the back of the device for NFC. Haven will continue automatically once it is detected.</string>
+    <string name="connections_fido_waiting_body">Plug in your security key over USB, or tap it on the back of the device for NFC. Tidegate will continue automatically once it is detected.</string>
     <string name="connections_fido_touch_usb_title">Touch your security key</string>
     <string name="connections_fido_touch_usb_body">Press the button on your security key now to authorise the SSH signature. The key may blink to indicate it is waiting.</string>
     <string name="connections_fido_touch_nfc_title">Hold your security key</string>
@@ -365,7 +365,7 @@
     <string name="connections_vm_step_open_port_body">In the Terminal app settings, add port 8022 to the listening ports list.</string>
     <string name="connections_vm_step_password_body">Run in the Terminal app. You\'ll be prompted to set a password for the droid user.</string>
     <string name="connections_vm_step_password_hint">Then connect with: droid@localhost:8022</string>
-    <string name="connections_vm_step_vnc_body">For remote desktop access via Haven\'s Desktop tab.</string>
+    <string name="connections_vm_step_vnc_body">For remote desktop access via Tidegate\'s Desktop tab.</string>
     <string name="connections_vm_step_desktop_body">Xfce4 is lightweight and works well over VNC.</string>
     <string name="connections_vm_step_apps_body">File manager, text editor, image viewer, browser, calculator.</string>
 
@@ -510,8 +510,8 @@
     <string name="connections_section_routing">Routing</string>
 
     <!-- MCP reverse-tunnel toggle (SSH section). -->
-    <string name="connections_toggle_mcp_tunnel">Reverse-expose Haven\'s MCP to this host</string>
-    <string name="connections_helper_mcp_tunnel">Reverse-tunnels Haven\'s own MCP server back to the remote host, so processes there (e.g. Claude Code running on the server) reach http://127.0.0.1:8730/mcp and (over loopback) skip pairing &amp; consent. Applied on connect. For always-on access with no session open, set this as the Always-on MCP connection in Settings → Agent endpoint.</string>
+    <string name="connections_toggle_mcp_tunnel">Reverse-expose Tidegate\'s MCP to this host</string>
+    <string name="connections_helper_mcp_tunnel">Reverse-tunnels Tidegate\'s own MCP server back to the remote host, so processes there (e.g. Claude Code running on the server) reach http://127.0.0.1:8730/mcp and (over loopback) skip pairing &amp; consent. Applied on connect. For always-on access with no session open, set this as the Always-on MCP connection in Settings → Agent endpoint.</string>
 
     <!-- Connection edit dialog: remaining field labels, toggles and helper text. -->
     <string name="connections_section_reconnect">Reconnect</string>
@@ -550,7 +550,7 @@
     <string name="connections_helper_vnc_auth">Leave username blank for classic VncAuth (8-char password). Fill username for VeNCrypt (wayvnc, TigerVNC) — supports longer passwords and TLS encryption.</string>
     <string name="connections_helper_spice_auth">SPICE uses a single optional ticket/password. Leave blank for an unticketed server.</string>
     <string name="connections_helper_rdp_host_via_ssh">Where the RDP server is reachable from the SSH server — usually 127.0.0.1 if they\'re the same machine.</string>
-    <string name="connections_helper_rdp_nla">Default on. Turn off if the server rejects Haven\'s NLA (some Windows Server 2025 setups — the server must have \"Require NLA\" disabled for SSL-only to connect).</string>
+    <string name="connections_helper_rdp_nla">Default on. Turn off if the server rejects Tidegate\'s NLA (some Windows Server 2025 setups — the server must have \"Require NLA\" disabled for SSL-only to connect).</string>
     <string name="connections_action_manage_tunnels">Manage tunnels…</string>
     <string name="connections_helper_cloudflare_routing">Routing through a Cloudflare Tunnel connector. The host above is used as the tunnel hostname; port doesn\'t apply (the connector decides the upstream SSH target).</string>
     <string name="connections_vnc_depth_24">24-bit colour (best quality)</string>
@@ -638,7 +638,7 @@
     <string name="connections_identity_help">Shared by every Reticulum connection. A server that whitelists you keys on this hash.</string>
     <string name="connections_identity_import">Import identity file…</string>
     <string name="connections_identity_imported">Identity imported: %1$s</string>
-    <string name="connections_identity_imported_restart">Identity imported: %1$s. Restart Haven for connections to use it.</string>
+    <string name="connections_identity_imported_restart">Identity imported: %1$s. Restart Tidegate for connections to use it.</string>
     <string name="connections_identity_not_an_identity">That file is not a Reticulum identity. Nothing was changed.</string>
     <string name="connections_identity_install_failed">Could not install the identity: %1$s. The previous one is still in place.</string>
     <string name="connections_identity_unreadable">Could not read that file.</string>

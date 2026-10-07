@@ -33,14 +33,14 @@
 
     <!-- Security section -->
     <string name="settings_biometric_title">Блокировка экрана</string>
-    <string name="settings_biometric_subtitle">Требовать аутентификацию для открытия Haven</string>
+    <string name="settings_biometric_subtitle">Требовать аутентификацию для открытия Tidegate</string>
     <string name="settings_lock_timeout_title">Время блокировки</string>
     <string name="settings_prevent_screenshots_title">Запрет снимков экрана</string>
     <string name="settings_prevent_screenshots_subtitle">Блокировать захват экрана и превью в диспетчере задач</string>
 
     <!-- Logging section -->
     <string name="settings_exclude_recents_title">Скрывать из недавних</string>
-    <string name="settings_exclude_recents_subtitle">Скрывает карточку Haven на экране недавних; сеансы продолжают работать. Открыть снова — с иконки приложения.</string>
+    <string name="settings_exclude_recents_subtitle">Скрывает карточку Tidegate на экране недавних; сеансы продолжают работать. Открыть снова — с иконки приложения.</string>
     <string name="settings_connection_logging_title">Журнал подключений</string>
     <string name="settings_connection_logging_subtitle">Записывать события подключений (подключение, отключение, ошибки). Хранится локально, защищено шифрованием устройства</string>
     <string name="settings_view_connection_log_title">Просмотр журнала подключений</string>
@@ -76,9 +76,9 @@
     <string name="settings_wayland_shell_title">Оболочка рабочего стола Wayland</string>
     <string name="settings_proot_idle_title">Автоостановка простаивающего гостя Linux</string>
     <string name="settings_proot_idle_off">Выключено — гость Linux работает, пока вы его не остановите</string>
-    <string name="settings_proot_idle_on">Останавливает гостя через %1$d мин после выхода из Haven (запущенная гостевая служба удерживает его)</string>
+    <string name="settings_proot_idle_on">Останавливает гостя через %1$d мин после выхода из Tidegate (запущенная гостевая служба удерживает его)</string>
     <string name="settings_proot_idle_dialog_title">Автоостановка простаивающего гостя Linux</string>
-    <string name="settings_proot_idle_dialog_body">Когда Haven пробыл в фоне столько времени, остановить терминалы и рабочие столы гостя Linux, чтобы освободить память. Запущенная гостевая служба удерживает его. Долгая задача в фоновом терминале тоже будет остановлена — оставьте выключенным, если не нужна очистка при простое.</string>
+    <string name="settings_proot_idle_dialog_body">Когда Tidegate пробыл в фоне столько времени, остановить терминалы и рабочие столы гостя Linux, чтобы освободить память. Запущенная гостевая служба удерживает его. Долгая задача в фоновом терминале тоже будет остановлена — оставьте выключенным, если не нужна очистка при простое.</string>
     <string name="settings_proot_idle_off_label">Выключено</string>
     <string name="settings_shizuku_title">Интеграция Shizuku</string>
     <string name="settings_shizuku_enabled">Включено — автоисключение батареи, общий сокет Wayland</string>
@@ -109,7 +109,7 @@
     <string name="settings_backup_working">Обработка…</string>
 
     <!-- About section -->
-    <string name="settings_about_title">О Haven</string>
+    <string name="settings_about_title">О Tidegate</string>
     <string name="settings_support_title">Поддержать Haven</string>
     <string name="settings_support_subtitle">Угостить разработчика кофе</string>
     <string name="settings_version_unknown">неизвестно</string>
@@ -145,8 +145,8 @@
     <string name="settings_backup_restore_button">Восстановить</string>
 
     <!-- About dialog -->
-    <string name="settings_about_dialog_title">О Haven</string>
-    <string name="settings_about_app_name">Haven</string>
+    <string name="settings_about_dialog_title">О Tidegate</string>
+    <string name="settings_about_app_name">Tidegate SSH</string>
     <string name="settings_about_description">Клиент SSH, VNC, RDP и облачного хранилища с открытым кодом для Android</string>
     <string name="settings_about_version">Версия %1$s (сборка %2$d)</string>
     <string name="settings_about_android">Android %1$s (API %2$d)</string>
@@ -442,7 +442,7 @@
     <string name="settings_terminal_locale_label">LANG</string>
     <string name="settings_terminal_opacity_title">Непрозрачность фона</string>
     <string name="settings_terminal_opacity_value">%1$d%%</string>
-    <string name="settings_terminal_opacity_hint" formatted="false">Ниже 100% Haven становится полупрозрачным и показывает обои устройства за каждым экраном (терминал, списки, настройки). Переопределение для отдельного подключения действует только на его терминал.</string>
+    <string name="settings_terminal_opacity_hint" formatted="false">Ниже 100% Tidegate становится полупрозрачным и показывает обои устройства за каждым экраном (терминал, списки, настройки). Переопределение для отдельного подключения действует только на его терминал.</string>
     <string name="settings_section_mcp">ИИ-агент (MCP)</string>
     <string name="settings_audio_bridge_title">Звук proot (экспериментально)</string>
     <string name="settings_audio_bridge_subtitle">Воспроизводит звук из приложений Linux через динамик устройства с помощью моста PulseAudio в гостевой системе. Только вывод. Поток идёт непрерывно, пока включено — выключайте, когда не используется.</string>
@@ -471,8 +471,8 @@
     <string name="settings_rdp_desktop_size_width">Ширина</string>
     <string name="settings_rdp_desktop_size_height">Высота</string>
     <string name="settings_native_crash_title">Сбои приложения</string>
-    <string name="settings_native_crash_subtitle">Haven неожиданно закрылся. Отчёт ниже показывает, где именно — приложите его к сообщению об ошибке.</string>
-    <string name="settings_native_crash_subtitle_no_trace">Haven неожиданно закрылся. Android не сохранил подробный отчёт для таких случаев, известны только время и сигнал — всё равно приложите их к сообщению об ошибке: сигнал сужает круг причин.</string>
+    <string name="settings_native_crash_subtitle">Tidegate неожиданно закрылся. Отчёт ниже показывает, где именно — приложите его к сообщению об ошибке.</string>
+    <string name="settings_native_crash_subtitle_no_trace">Tidegate неожиданно закрылся. Android не сохранил подробный отчёт для таких случаев, известны только время и сигнал — всё равно приложите их к сообщению об ошибке: сигнал сужает круг причин.</string>
     <string name="settings_native_crash_no_trace">Подробный отчёт для этого сбоя не сохранён.</string>
     <string name="settings_native_crash_copy">Скопировать отчёт</string>
     <string name="settings_native_crash_copied">Отчёт о сбое скопирован</string>
@@ -484,15 +484,15 @@
         <item quantity="other">%1$d минуты</item>
     </plurals>
     <string name="settings_hide_nav_bar_in_terminal_title">Скрывать панель вкладок приложения в терминале</string>
-    <string name="settings_hide_nav_bar_in_terminal_subtitle">Скрывает нижнюю панель вкладок Haven на экране терминала. Строка состояния и панель навигации Android остаются видимыми.</string>
+    <string name="settings_hide_nav_bar_in_terminal_subtitle">Скрывает нижнюю панель вкладок Tidegate на экране терминала. Строка состояния и панель навигации Android остаются видимыми.</string>
     <string name="settings_credential_keystore_broken_title">Хранилище учётных данных недоступно</string>
-    <string name="settings_credential_keystore_broken_subtitle">Хранилище ключей этого устройства потеряло ключ учётных данных Haven. Сохранённые пароли нельзя прочитать, а новые — сохранить. Нажмите, чтобы восстановить.</string>
+    <string name="settings_credential_keystore_broken_subtitle">Хранилище ключей этого устройства потеряло ключ учётных данных Tidegate. Сохранённые пароли нельзя прочитать, а новые — сохранить. Нажмите, чтобы восстановить.</string>
     <string name="settings_credential_reset_title">Восстановить хранилище учётных данных?</string>
-    <string name="settings_credential_reset_body">Будет создан новый ключ, чтобы пароли снова можно было сохранять.\n\nВсе пароли, парольные фразы и секреты, уже сохранённые в Haven, придётся ввести заново. Они и так нечитаемы — защищавший их ключ утрачен, — поэтому это восстанавливает приложение, а не теряет что-то ещё.</string>
+    <string name="settings_credential_reset_body">Будет создан новый ключ, чтобы пароли снова можно было сохранять.\n\nВсе пароли, парольные фразы и секреты, уже сохранённые в Tidegate, придётся ввести заново. Они и так нечитаемы — защищавший их ключ утрачен, — поэтому это восстанавливает приложение, а не теряет что-то ещё.</string>
     <string name="settings_credential_reset_confirm">Восстановить</string>
     <string name="settings_credential_reset_cancel">Отмена</string>
     <string name="settings_update_check_title">Проверять обновления</string>
-    <string name="settings_update_check_subtitle">Искать новый выпуск при запуске Haven, не чаще раза в час. По умолчанию выключено.</string>
+    <string name="settings_update_check_subtitle">Искать новый выпуск при запуске Tidegate, не чаще раза в час. По умолчанию выключено.</string>
     <string name="settings_update_check_now_title">Проверить сейчас</string>
     <string name="settings_update_check_now_subtitle">Запросить у GitHub последний выпуск</string>
     <string name="settings_update_checking">Проверка…</string>
@@ -500,13 +500,13 @@
     <string name="settings_update_check_available">Нажмите, чтобы открыть страницу выпуска</string>
     <string name="settings_update_check_up_to_date">Установлена последняя версия %1$s</string>
     <string name="settings_update_check_failed">Не удалось проверить: %1$s</string>
-    <string name="settings_update_check_other_channel">Эта копия установлена не из выпуска на GitHub, поэтому загрузка с GitHub её не заменит. Обновляйтесь там, где вы установили Haven.</string>
+    <string name="settings_update_check_other_channel">Эта копия установлена не из выпуска на GitHub, поэтому загрузка с GitHub её не заменит. Обновляйтесь там, где вы установили Tidegate.</string>
     <string name="settings_sshkey_keystore_broken_title">Хранилище SSH-ключей недоступно</string>
-    <string name="settings_sshkey_keystore_broken_subtitle">Хранилище ключей этого устройства потеряло SSH-ключ Haven. Сохранённые закрытые ключи нельзя прочитать, а новые нельзя создать. Нажмите, чтобы восстановить.</string>
+    <string name="settings_sshkey_keystore_broken_subtitle">Хранилище ключей этого устройства потеряло SSH-ключ Tidegate. Сохранённые закрытые ключи нельзя прочитать, а новые нельзя создать. Нажмите, чтобы восстановить.</string>
     <string name="settings_sshkey_reset_title">Восстановить хранилище SSH-ключей?</string>
     <string name="settings_sshkey_reset_body">Это создаст новый ключ, чтобы SSH-ключи можно было создавать снова.
 
-Каждый закрытый ключ, уже сохранённый в Haven, потребуется импортировать или создать заново. Они уже нечитаемы — ключ, который их защищал, утерян, обычно потому что приложение было переустановлено из другого источника — поэтому это восстанавливает приложение, а не приводит к новым потерям.</string>
+Каждый закрытый ключ, уже сохранённый в Tidegate, потребуется импортировать или создать заново. Они уже нечитаемы — ключ, который их защищал, утерян, обычно потому что приложение было переустановлено из другого источника — поэтому это восстанавливает приложение, а не приводит к новым потерям.</string>
     <string name="settings_sshkey_reset_confirm">Восстановить</string>
 
     <!-- Inline-image consent (#583) -->

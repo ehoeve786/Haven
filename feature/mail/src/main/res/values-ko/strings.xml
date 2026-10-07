@@ -128,7 +128,7 @@
     <string name="mail_rules_history_uidreset">메일박스 재번호 지정 — 재설정됨</string>
     <string name="mail_rules_no_subject">(제목 없음)</string>
     <string name="mail_rules_pending_empty">승인 대기 중인 항목이 없습니다.</string>
-    <string name="mail_rules_pending_desc">Haven이 백그라운드에 있는 동안 대기열에 추가되었습니다. 실행하려면 승인, 버리려면 거부하세요.</string>
+    <string name="mail_rules_pending_desc">Tidegate이 백그라운드에 있는 동안 대기열에 추가되었습니다. 실행하려면 승인, 버리려면 거부하세요.</string>
     <string name="mail_rules_approve">승인</string>
     <string name="mail_rules_reject">거부</string>
     <string name="mail_rules_approve_all">모두 승인</string>

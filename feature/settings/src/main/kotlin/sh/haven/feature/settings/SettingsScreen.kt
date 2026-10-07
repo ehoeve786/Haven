@@ -2039,7 +2039,7 @@ fun SettingsScreen(
                 when (action) {
                     is BackupAction.Export -> {
                         pendingPassword = password
-                        exportLauncher.launch("haven-backup.enc")
+                        exportLauncher.launch("tidegate-backup.enc")
                     }
                     is BackupAction.Restore -> {
                         if (remember) {
@@ -2472,7 +2472,7 @@ private fun BackupPasswordDialog(
     )
 }
 
-private const val GITHUB_URL = "https://github.com/GlassOnTin/Haven"
+private const val GITHUB_URL = "https://github.com/ehoeve786/Haven"
 private const val KOFI_URL = "https://ko-fi.com/glassontin"
 
 @Composable

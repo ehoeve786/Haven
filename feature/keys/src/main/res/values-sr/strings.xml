@@ -141,7 +141,7 @@
     <string name="keys_security_key">Безбедосни кључ (YubiKey)</string>
     <string name="keys_security_key_hint">Подесите нови SSH кључ на FIDO2 кључу, или увезите кључеве који се већ налазе на њему.</string>
     <string name="keys_from_provider">Користи кључ из %1$s</string>
-    <string name="keys_from_provider_hint">Изаберите кључ који држи апликација. Он потписује у Haven-ово име — приватни кључ остаје тамо где јесте, укључујући и на хардверском жетону.</string>
+    <string name="keys_from_provider_hint">Изаберите кључ који држи апликација. Он потписује у Tidegate-ово име — приватни кључ остаје тамо где јесте, укључујући и на хардверском жетону.</string>
     <string name="keys_security_key_setup">Подеси нови кључ на њему</string>
     <string name="keys_security_key_setup_hint">Креира нови SSH кључ на безбедносном кључу (поставља PIN ако је нов). Није потребан лаптоп или ssh-keygen.</string>
     <string name="keys_security_key_import">Увези кључеве који су већ на њему</string>
@@ -191,7 +191,7 @@
     <string name="keys_fido_pin_confirm_label">Потврди PIN</string>
     <string name="keys_fido_pin_mismatch">PIN-ови се не подударају</string>
     <string name="keys_fido_waiting_title">Потребан је безбедносни кључ</string>
-    <string name="keys_fido_waiting_body">Прикључите свој безбедносни кључ преко USB, тапните га на позадину уређаја за NFC. Haven ће наставити чим се детектује.</string>
+    <string name="keys_fido_waiting_body">Прикључите свој безбедносни кључ преко USB, тапните га на позадину уређаја за NFC. Tidegate ће наставити чим се детектује.</string>
     <string name="keys_fido_touch_usb_title">Додирните свој безбедносни кључ</string>
     <string name="keys_fido_touch_usb_body">Притисните сада дугме на свом безбедносном кључу да одобрите захтев.</string>
     <string name="keys_fido_touch_nfc_title">Задржите свој безбедносни кључ</string>

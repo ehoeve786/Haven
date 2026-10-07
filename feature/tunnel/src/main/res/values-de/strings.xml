@@ -24,17 +24,17 @@
     <string name="tunnel_wireguard_help">Füge eine Konfiguration im wg-quick-Stil ein oder lade eine .conf-Datei. Es werden nur die Felder [Interface] und [Peer] gelesen; unbekannte Schlüssel (PostUp, Table, MTU) werden ignoriert. Hostname-Endpunkte und DNS-Namen werden beim Start des Tunnels aufgelöst.</string>
     <string name="tunnel_load_from_file">Aus Datei laden…</string>
     <string name="tunnel_wireguard_config">WireGuard-Konfiguration</string>
-    <string name="tunnel_tailscale_help">Erzeuge einen authkey in der Tailscale-Admin-Konsole (Einstellungen → Keys) oder in deiner Headscale-CLI (`headscale preauthkeys create`). Haven tritt beim ersten Mal deinem Tailnet bei und verwendet danach den Node-Status wieder, daher genügt ein Einmal-Schlüssel. Mit wiederverwendbaren Schlüsseln kannst du dich nach einer Neuinstallation erneut verbinden.</string>
+    <string name="tunnel_tailscale_help">Erzeuge einen authkey in der Tailscale-Admin-Konsole (Einstellungen → Keys) oder in deiner Headscale-CLI (`headscale preauthkeys create`). Tidegate tritt beim ersten Mal deinem Tailnet bei und verwendet danach den Node-Status wieder, daher genügt ein Einmal-Schlüssel. Mit wiederverwendbaren Schlüsseln kannst du dich nach einer Neuinstallation erneut verbinden.</string>
     <string name="tunnel_tailscale_authkey_label">Auth-Schlüssel (tskey-auth-…)</string>
     <string name="tunnel_tailscale_control_url_label">Control-Plane-URL (optional)</string>
     <string name="tunnel_tailscale_control_url_help">Leer lassen für Tailscales gehostete Control-Plane. Für einen selbst gehosteten Koordinationsserver auf eine Headscale-URL setzen.</string>
-    <string name="tunnel_netbird_help">Erzeuge einen Setup-Key im NetBird-Dashboard (Setup Keys → Add setup key). Haven tritt deinem Netz beim ersten Einsatz bei und übernimmt danach den Peer-Zustand, daher reicht ein einmal verwendbarer Key. Wiederverwendbare Keys erlauben die erneute Verbindung nach einer Neuinstallation.</string>
+    <string name="tunnel_netbird_help">Erzeuge einen Setup-Key im NetBird-Dashboard (Setup Keys → Add setup key). Tidegate tritt deinem Netz beim ersten Einsatz bei und übernimmt danach den Peer-Zustand, daher reicht ein einmal verwendbarer Key. Wiederverwendbare Keys erlauben die erneute Verbindung nach einer Neuinstallation.</string>
     <string name="tunnel_netbird_setup_key_label">Setup-Key</string>
     <string name="tunnel_netbird_management_url_label">Management-URL (optional)</string>
     <string name="tunnel_netbird_management_url_help">Leer lassen für NetBirds gehostetes Management. Für ein selbst gehostetes Management auf die URL deines Servers setzen.</string>
 
     <!-- Cloudflare Access SSH tunnel (#154) -->
-    <string name="cf_experimental_banner">Experimentell — Haven implementiert dasselbe WebSocket-Drahtprotokoll wie `cloudflared access ssh`. Gegen eine kleine Anzahl von Tenants getestet; bitte melde Abweichungen über GitHub #154.</string>
+    <string name="cf_experimental_banner">Experimentell — Tidegate implementiert dasselbe WebSocket-Drahtprotokoll wie `cloudflared access ssh`. Gegen eine kleine Anzahl von Tenants getestet; bitte melde Abweichungen über GitHub #154.</string>
     <string name="cf_intro_blurb">Leite SSH über einen veröffentlichten Hostnamen eines Cloudflare Tunnel — das In-App-Äquivalent zu `cloudflared access ssh --hostname &lt;host&gt;`. Öffentliche Tunnel-Routen benötigen nur einen Hostnamen. Access-geschützte Routen benötigen zusätzlich ein JWT — tippe auf Anmelden, um eines über den IdP deines Teams zu erfassen.</string>
     <string name="cf_field_hostname">Hostname (z. B. ssh.example.com)</string>
     <string name="cf_jwt_none">Kein JWT — funktioniert nur für ungeschützte Tunnel-Routen</string>

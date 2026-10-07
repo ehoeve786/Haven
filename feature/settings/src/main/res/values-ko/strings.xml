@@ -33,7 +33,7 @@
 
     <!-- Security section -->
     <string name="settings_biometric_title">화면 잠금</string>
-    <string name="settings_biometric_subtitle">Haven을 열 때 인증 요구</string>
+    <string name="settings_biometric_subtitle">Tidegate을 열 때 인증 요구</string>
     <string name="settings_lock_timeout_title">잠금 제한 시간</string>
     <string name="settings_prevent_screenshots_title">스크린샷 방지</string>
     <string name="settings_prevent_screenshots_subtitle">화면 캡처와 작업 전환기 미리보기를 차단합니다</string>
@@ -44,7 +44,7 @@
 
     <!-- Logging section -->
     <string name="settings_exclude_recents_title">최근 앱에서 숨기기</string>
-    <string name="settings_exclude_recents_subtitle">최근 앱 화면에서 Haven 카드를 숨깁니다. 세션은 계속 실행됩니다. 앱 아이콘으로 다시 여세요.</string>
+    <string name="settings_exclude_recents_subtitle">최근 앱 화면에서 Tidegate 카드를 숨깁니다. 세션은 계속 실행됩니다. 앱 아이콘으로 다시 여세요.</string>
     <string name="settings_connection_logging_title">연결 로깅</string>
     <string name="settings_connection_logging_subtitle">연결 이벤트(연결, 연결 해제, 오류)를 기록합니다. 로컬에 저장되며 기기 암호화로 보호됩니다</string>
     <string name="settings_view_connection_log_title">연결 로그 보기</string>
@@ -83,9 +83,9 @@
     <string name="settings_wayland_shell_title">Wayland 데스크톱 셸</string>
     <string name="settings_proot_idle_title">유휴 Linux 게스트 자동 종료</string>
     <string name="settings_proot_idle_off">꺼짐 — 직접 종료할 때까지 Linux 게스트가 계속 실행됩니다</string>
-    <string name="settings_proot_idle_on">Haven을 떠난 뒤 %1$d분 후 게스트를 종료합니다(실행 중인 게스트 서비스가 있으면 유지됩니다)</string>
+    <string name="settings_proot_idle_on">Tidegate을 떠난 뒤 %1$d분 후 게스트를 종료합니다(실행 중인 게스트 서비스가 있으면 유지됩니다)</string>
     <string name="settings_proot_idle_dialog_title">유휴 Linux 게스트 자동 종료</string>
-    <string name="settings_proot_idle_dialog_body">Haven이 이 시간 동안 백그라운드에 있으면 메모리를 확보하기 위해 Linux 게스트의 터미널과 데스크톱을 종료합니다. 실행 중인 게스트 서비스가 있으면 유지됩니다. 백그라운드 터미널의 장시간 작업도 종료되므로, 유휴 시 리소스 회수를 원하지 않으면 꺼 두세요.</string>
+    <string name="settings_proot_idle_dialog_body">Tidegate이 이 시간 동안 백그라운드에 있으면 메모리를 확보하기 위해 Linux 게스트의 터미널과 데스크톱을 종료합니다. 실행 중인 게스트 서비스가 있으면 유지됩니다. 백그라운드 터미널의 장시간 작업도 종료되므로, 유휴 시 리소스 회수를 원하지 않으면 꺼 두세요.</string>
     <string name="settings_proot_idle_off_label">꺼짐</string>
     <string name="settings_shizuku_title">Shizuku 통합</string>
     <string name="settings_shizuku_enabled">활성화됨 — 자동 배터리 예외, Wayland 소켓 공유</string>
@@ -121,7 +121,7 @@
     <string name="settings_backup_working">작업 중…</string>
 
     <!-- About section -->
-    <string name="settings_about_title">Haven 정보</string>
+    <string name="settings_about_title">Tidegate 정보</string>
     <string name="settings_support_title">Haven 지원</string>
     <string name="settings_support_subtitle">개발자에게 커피 후원</string>
     <string name="settings_version_unknown">알 수 없음</string>
@@ -157,8 +157,8 @@
     <string name="settings_backup_restore_button">복원</string>
 
     <!-- About dialog -->
-    <string name="settings_about_dialog_title">Haven 정보</string>
-    <string name="settings_about_app_name">Haven</string>
+    <string name="settings_about_dialog_title">Tidegate 정보</string>
+    <string name="settings_about_app_name">Tidegate SSH</string>
     <string name="settings_about_description">Android용 오픈 소스 SSH, VNC, RDP 및 클라우드 스토리지 클라이언트</string>
     <string name="settings_about_version">버전 %1$s(빌드 %2$d)</string>
     <string name="settings_about_android">Android %1$s(API %2$d)</string>
@@ -442,7 +442,7 @@
     <string name="settings_terminal_locale_label">LANG</string>
     <string name="settings_terminal_opacity_title">배경 불투명도</string>
     <string name="settings_terminal_opacity_value">%1$d%%</string>
-    <string name="settings_terminal_opacity_hint" formatted="false">100% 미만이면 Haven이 반투명해지고 모든 화면(터미널, 목록, 설정) 뒤로 기기 배경화면이 표시됩니다. 연결별 재정의는 해당 터미널에만 적용됩니다.</string>
+    <string name="settings_terminal_opacity_hint" formatted="false">100% 미만이면 Tidegate이 반투명해지고 모든 화면(터미널, 목록, 설정) 뒤로 기기 배경화면이 표시됩니다. 연결별 재정의는 해당 터미널에만 적용됩니다.</string>
     <string name="settings_section_mcp">AI 에이전트 (MCP)</string>
     <string name="settings_audio_bridge_title">Proot 오디오 (실험적)</string>
     <string name="settings_audio_bridge_subtitle">게스트 내 PulseAudio 브리지를 통해 Linux 앱의 소리를 기기 스피커로 재생합니다. 출력 전용. 켜져 있는 동안 계속 스트리밍되므로 사용하지 않을 때는 끄세요.</string>
@@ -471,8 +471,8 @@
     <string name="settings_rdp_desktop_size_width">너비</string>
     <string name="settings_rdp_desktop_size_height">높이</string>
     <string name="settings_native_crash_title">앱 비정상 종료</string>
-    <string name="settings_native_crash_subtitle">Haven이 예기치 않게 종료되었습니다. 아래 보고서에 발생 위치가 있습니다 — 버그 신고에 첨부해 주세요.</string>
-    <string name="settings_native_crash_subtitle_no_trace">Haven이 예기치 않게 종료되었습니다. 이런 경우 Android가 상세 보고서를 남기지 않아 시각과 시그널만 알 수 있습니다 — 시그널만으로도 원인을 좁힐 수 있으니 버그 신고에 함께 첨부해 주세요.</string>
+    <string name="settings_native_crash_subtitle">Tidegate이 예기치 않게 종료되었습니다. 아래 보고서에 발생 위치가 있습니다 — 버그 신고에 첨부해 주세요.</string>
+    <string name="settings_native_crash_subtitle_no_trace">Tidegate이 예기치 않게 종료되었습니다. 이런 경우 Android가 상세 보고서를 남기지 않아 시각과 시그널만 알 수 있습니다 — 시그널만으로도 원인을 좁힐 수 있으니 버그 신고에 함께 첨부해 주세요.</string>
     <string name="settings_native_crash_no_trace">이 비정상 종료에 대한 상세 보고서가 없습니다.</string>
     <string name="settings_native_crash_copy">보고서 복사</string>
     <string name="settings_native_crash_copied">비정상 종료 보고서가 복사됨</string>
@@ -481,15 +481,15 @@
         <item quantity="other">%1$d분</item>
     </plurals>
     <string name="settings_hide_nav_bar_in_terminal_title">터미널에서 앱 탭 바 숨기기</string>
-    <string name="settings_hide_nav_bar_in_terminal_subtitle">터미널 화면에서 Haven의 하단 탭 바를 숨깁니다. Android 상태 표시줄과 내비게이션 바는 계속 표시됩니다.</string>
+    <string name="settings_hide_nav_bar_in_terminal_subtitle">터미널 화면에서 Tidegate의 하단 탭 바를 숨깁니다. Android 상태 표시줄과 내비게이션 바는 계속 표시됩니다.</string>
     <string name="settings_credential_keystore_broken_title">자격 증명 저장소를 사용할 수 없음</string>
-    <string name="settings_credential_keystore_broken_subtitle">이 기기의 키스토어가 Haven의 자격 증명 키를 잃었습니다. 저장된 비밀번호를 읽을 수 없고 새로 저장할 수도 없습니다. 복구하려면 탭하세요.</string>
+    <string name="settings_credential_keystore_broken_subtitle">이 기기의 키스토어가 Tidegate의 자격 증명 키를 잃었습니다. 저장된 비밀번호를 읽을 수 없고 새로 저장할 수도 없습니다. 복구하려면 탭하세요.</string>
     <string name="settings_credential_reset_title">자격 증명 저장소를 복구할까요?</string>
-    <string name="settings_credential_reset_body">새 자격 증명 키를 만들어 비밀번호를 다시 저장할 수 있게 합니다.\n\nHaven에 이미 저장된 모든 비밀번호, 암호 구문, 비밀은 다시 입력해야 합니다. 이미 읽을 수 없는 상태이며(보호하던 키가 사라졌습니다), 따라서 이 작업은 무언가를 더 잃는 것이 아니라 앱을 복구하는 것입니다.</string>
+    <string name="settings_credential_reset_body">새 자격 증명 키를 만들어 비밀번호를 다시 저장할 수 있게 합니다.\n\nTidegate에 이미 저장된 모든 비밀번호, 암호 구문, 비밀은 다시 입력해야 합니다. 이미 읽을 수 없는 상태이며(보호하던 키가 사라졌습니다), 따라서 이 작업은 무언가를 더 잃는 것이 아니라 앱을 복구하는 것입니다.</string>
     <string name="settings_credential_reset_confirm">복구</string>
     <string name="settings_credential_reset_cancel">취소</string>
     <string name="settings_update_check_title">업데이트 확인</string>
-    <string name="settings_update_check_subtitle">Haven 시작 시 새 릴리스를 확인합니다. 시간에 한 번까지. 기본값은 꺼짐.</string>
+    <string name="settings_update_check_subtitle">Tidegate 시작 시 새 릴리스를 확인합니다. 시간에 한 번까지. 기본값은 꺼짐.</string>
     <string name="settings_update_check_now_title">지금 확인</string>
     <string name="settings_update_check_now_subtitle">GitHub에 최신 릴리스를 요청합니다</string>
     <string name="settings_update_checking">확인 중…</string>
@@ -497,13 +497,13 @@
     <string name="settings_update_check_available">릴리스 페이지를 열려면 누르세요</string>
     <string name="settings_update_check_up_to_date">최신 버전입니다 (%1$s)</string>
     <string name="settings_update_check_failed">확인 실패: %1$s</string>
-    <string name="settings_update_check_other_channel">이 사본은 GitHub 릴리스에서 설치된 것이 아니므로 릴리스 다운로드로 대체할 수 없습니다. Haven을 설치한 곳에서 업데이트하세요.</string>
+    <string name="settings_update_check_other_channel">이 사본은 GitHub 릴리스에서 설치된 것이 아니므로 릴리스 다운로드로 대체할 수 없습니다. Tidegate을 설치한 곳에서 업데이트하세요.</string>
     <string name="settings_sshkey_keystore_broken_title">SSH 키 저장소를 사용할 수 없음</string>
-    <string name="settings_sshkey_keystore_broken_subtitle">이 기기의 키스토어가 Haven의 SSH 키를 잃어버렸습니다. 저장된 개인 키를 읽을 수 없으며 새 키도 생성할 수 없습니다. 탭하여 복구합니다.</string>
+    <string name="settings_sshkey_keystore_broken_subtitle">이 기기의 키스토어가 Tidegate의 SSH 키를 잃어버렸습니다. 저장된 개인 키를 읽을 수 없으며 새 키도 생성할 수 없습니다. 탭하여 복구합니다.</string>
     <string name="settings_sshkey_reset_title">SSH 키 저장소를 복구할까요?</string>
     <string name="settings_sshkey_reset_body">이렇게 하면 새 키가 생성되어 SSH 키를 다시 생성할 수 있습니다.
 
-Haven에 이미 저장된 모든 개인 키는 다시 가져오거나 생성해야 합니다. 이미 읽을 수 없는 상태입니다 — 이들을 보호하던 키가 사라졌으며, 보통 앱을 다른 소스에서 다시 설치했기 때문입니다 — 따라서 이것은 추가로 무엇가를 잃는 것이 아니라 앱을 복구합니다.</string>
+Tidegate에 이미 저장된 모든 개인 키는 다시 가져오거나 생성해야 합니다. 이미 읽을 수 없는 상태입니다 — 이들을 보호하던 키가 사라졌으며, 보통 앱을 다른 소스에서 다시 설치했기 때문입니다 — 따라서 이것은 추가로 무엇가를 잃는 것이 아니라 앱을 복구합니다.</string>
     <string name="settings_sshkey_reset_confirm">복구</string>
 
     <!-- Inline-image consent (#583) -->

@@ -17,17 +17,17 @@
     <string name="tunnel_wireguard_help">Cole uma configuração no estilo wg-quick ou carregue um arquivo .conf. Apenas os campos [Interface] e [Peer] são lidos; chaves desconhecidas (PostUp, Table, MTU) são ignoradas. Endpoints de nome de host e nomes DNS são resolvidos ao iniciar o túnel.</string>
     <string name="tunnel_load_from_file">Carregar do arquivo…</string>
     <string name="tunnel_wireguard_config">Configuração WireGuard</string>
-    <string name="tunnel_tailscale_help">Gere uma authkey no console de administração do Tailscale (Settings → Keys) ou na sua CLI do Headscale (`headscale preauthkeys create`). O Haven entra na sua tailnet no primeiro uso e reutiliza o estado do nó depois disso, então uma chave de uso único é suficiente. Chaves reutilizáveis permitem reconectar após a reinstalação.</string>
+    <string name="tunnel_tailscale_help">Gere uma authkey no console de administração do Tailscale (Settings → Keys) ou na sua CLI do Headscale (`headscale preauthkeys create`). O Tidegate entra na sua tailnet no primeiro uso e reutiliza o estado do nó depois disso, então uma chave de uso único é suficiente. Chaves reutilizáveis permitem reconectar após a reinstalação.</string>
     <string name="tunnel_tailscale_authkey_label">Chave de autenticação (tskey-auth-…)</string>
     <string name="tunnel_tailscale_control_url_label">URL do plano de controle (opcional)</string>
     <string name="tunnel_tailscale_control_url_help">Deixe em branco para o controlplane hospedado do Tailscale. Defina uma URL do Headscale para um servidor de coordenação auto-hospedado.</string>
-    <string name="tunnel_netbird_help">Gere uma setup key no painel do NetBird (Setup Keys → Adicionar setup key). O Haven entra na sua rede no primeiro uso e reutiliza o estado do par depois disso, então uma chave de uso único serve. Chaves reutilizáveis permitem reconectar após reinstalar.</string>
+    <string name="tunnel_netbird_help">Gere uma setup key no painel do NetBird (Setup Keys → Adicionar setup key). O Tidegate entra na sua rede no primeiro uso e reutiliza o estado do par depois disso, então uma chave de uso único serve. Chaves reutilizáveis permitem reconectar após reinstalar.</string>
     <string name="tunnel_netbird_setup_key_label">Chave de configuração (setup key)</string>
     <string name="tunnel_netbird_management_url_label">URL de gerenciamento (opcional)</string>
     <string name="tunnel_netbird_management_url_help">Deixe em branco para o gerenciamento hospedado do NetBird. Defina a URL do seu servidor para um serviço de gerenciamento auto-hospedado.</string>
 
     <!-- Cloudflare Access SSH tunnel -->
-    <string name="cf_experimental_banner">Experimental — o Haven implementa o mesmo protocolo de fio WebSocket que `cloudflared access ssh`. Testado com um pequeno conjunto de tenants; relate divergências via GitHub #154.</string>
+    <string name="cf_experimental_banner">Experimental — o Tidegate implementa o mesmo protocolo de fio WebSocket que `cloudflared access ssh`. Testado com um pequeno conjunto de tenants; relate divergências via GitHub #154.</string>
     <string name="cf_intro_blurb">Roteie SSH por um nome de host publicado de um Cloudflare Tunnel — o equivalente no app de `cloudflared access ssh --hostname &lt;host&gt;`. Rotas de Tunnel públicas precisam apenas de um nome de host. Rotas protegidas por Access exigem também um JWT — toque em Entrar para capturar um pelo IdP da sua equipe.</string>
     <string name="cf_field_hostname">Nome de host (ex. ssh.example.com)</string>
     <string name="cf_jwt_none">Sem JWT — funciona apenas em rotas de Tunnel desprotegidas</string>

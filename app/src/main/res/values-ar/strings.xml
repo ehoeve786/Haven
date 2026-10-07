@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">Haven</string>
+    <string name="app_name">Tidegate SSH</string>
 
 
     <!-- Common strings shared across modules -->
@@ -35,7 +35,7 @@
 
     <!-- Battery optimization -->
     <string name="battery_title">إبقاء الاتصالات نشطة؟</string>
-    <string name="battery_message">قد يغلق Android اتصالات SSH في الخلفية لتوفير البطارية. تعطيل تحسين البطارية لـ Haven يمنع ذلك.</string>
+    <string name="battery_message">قد يغلق Android اتصالات SSH في الخلفية لتوفير البطارية. تعطيل تحسين البطارية لـ Tidegate يمنع ذلك.</string>
 
     <!-- Workspace profiles -->
     <string name="workspace_section_title">مساحات العمل</string>
@@ -67,7 +67,7 @@
     <string name="agent_deny">رفض</string>
 
     <!-- i18n sweep #210 -->
-    <string name="app_biometric_locked_title">Haven مقفل</string>
+    <string name="app_biometric_locked_title">Tidegate مقفل</string>
     <string name="app_biometric_authenticate_prompt">المصادقة للمتابعة</string>
     <string name="app_biometric_open_device_settings">فتح إعدادات الجهاز</string>
     <string name="app_desktop_app_windows_title">نوافذ التطبيقات</string>
@@ -116,7 +116,7 @@
     <string name="app_desktop_custom_cmd_unset">عيّن أمر الجلسة أولًا</string>
     <string name="app_desktop_custom_cmd_edit">تحرير أمر الجلسة</string>
     <string name="app_desktop_custom_cmd_title">أمر جلسة مخصّص</string>
-    <string name="app_desktop_custom_cmd_description">يعمل على خادم X الخاص بـ Haven داخل التوزيعة النشطة — بنمط termux-x11، مثل dbus-launch startxfce4. ثبّت حزم سطح المكتب في التوزيعة أولًا. تستخدم أسطح مكتب X11 العرض البرمجي: أسطح المكتب التي تتطلب مُركِّب GL (GNOME Shell وKWin) لن تعمل.</string>
+    <string name="app_desktop_custom_cmd_description">يعمل على خادم X الخاص بـ Tidegate داخل التوزيعة النشطة — بنمط termux-x11، مثل dbus-launch startxfce4. ثبّت حزم سطح المكتب في التوزيعة أولًا. تستخدم أسطح مكتب X11 العرض البرمجي: أسطح المكتب التي تتطلب مُركِّب GL (GNOME Shell وKWin) لن تعمل.</string>
     <string name="app_desktop_custom_cmd_label">أمر الجلسة</string>
     <string name="app_desktop_custom_cmd_save_start">حفظ وتشغيل</string>
     <string name="app_desktop_de_with_size">%1$s (%2$s)</string>
@@ -138,7 +138,7 @@
     <string name="app_agent_action_requested">إجراء وكيل مطلوب</string>
     <string name="app_agent_from_client">من: %1$s</string>
     <string name="app_agent_tool">الأداة: %1$s</string>
-    <string name="app_agent_bypass_label">السماح لجميع طلبات MCP من \'%1$s\' حتى إعادة تشغيل Haven</string>
+    <string name="app_agent_bypass_label">السماح لجميع طلبات MCP من \'%1$s\' حتى إعادة تشغيل Tidegate</string>
     <string name="app_agent_bypass_description">يشمل العمليات التدميرية (إدخال الطرفية، كتابة/حذف الملفات، تثبيت APK). يُمسح عند إغلاق التطبيق.</string>
     <string name="app_agent_auto_allow_window">نافذة السماح التلقائي:</string>
     <string name="app_agent_minutes">%1$d د</string>
@@ -153,10 +153,10 @@
     <string name="app_present_preparing_audio">جارٍ تحضير الصوت…</string>
 
     <!-- i18n sweep #210 (follow-up batch) -->
-    <string name="app_biometric_blocked_no_activity_title">Haven مقفل</string>
+    <string name="app_biometric_blocked_no_activity_title">Tidegate مقفل</string>
     <string name="app_biometric_blocked_no_activity_body">يتعذّر عرض مطالبة المصادقة في هذا السياق.</string>
     <string name="app_biometric_not_enrolled_title">إعداد قفل الشاشة</string>
-    <string name="app_biometric_not_enrolled_body">قفل تطبيق Haven مفعّل، لكن هذا الجهاز ليس به قفل شاشة أو بصمة مسجّلة. أعدّ واحدًا في إعدادات الجهاز للإلغاء.</string>
+    <string name="app_biometric_not_enrolled_body">قفل تطبيق Tidegate مفعّل، لكن هذا الجهاز ليس به قفل شاشة أو بصمة مسجّلة. أعدّ واحدًا في إعدادات الجهاز للإلغاء.</string>
     <string name="app_biometric_no_hardware_title">المصادقة غير متاحة</string>
     <string name="app_biometric_no_hardware_body">يتعذّر على هذا الجهاز إجراء المصادقة (لا توجد أجهزة قياسات حيوية ولا بيانات اعتماد للجهاز). أعدّ رمز PIN أو كلمة مرور في الإعدادات للإلغاء.</string>
     <string name="app_present_minimize">تصغير</string>
@@ -164,7 +164,7 @@
 
     <!-- Local Linux desktop manager -->
     <string name="app_desktop_manager_title">سطح مكتب Linux محلي</string>
-    <string name="app_desktop_manager_description">شغّل سطح مكتب Linux كاملاً داخل Haven. اختر توزيعة، وثبّت بيئة سطح مكتب (Xfce4 أو Openbox أو Sway)، ثم اضغط تشغيل — دون الحاجة إلى خادم أو اتصال منفصل.</string>
+    <string name="app_desktop_manager_description">شغّل سطح مكتب Linux كاملاً داخل Tidegate. اختر توزيعة، وثبّت بيئة سطح مكتب (Xfce4 أو Openbox أو Sway)، ثم اضغط تشغيل — دون الحاجة إلى خادم أو اتصال منفصل.</string>
 
     <!-- App windows / installed-app launcher (#250) -->
     <string name="app_desktop_app_window_pin_home_cd">إضافة %1$s إلى الشاشة الرئيسية</string>
@@ -287,11 +287,11 @@
     <string name="app_desktop_open_terminal_cd">فتح طرفية في %1$s</string>
     <string name="app_present_fullscreen">ملء الشاشة</string>
     <string name="app_present_exit_fullscreen">الخروج من ملء الشاشة</string>
-    <string name="tasker_plugin_name">تشغيل أمر على خادم Haven</string>
-    <string name="tasker_edit_title">تشغيل أمر shell على اتصال SSH محفوظ في Haven.</string>
+    <string name="tasker_plugin_name">تشغيل أمر على خادم Tidegate</string>
+    <string name="tasker_edit_title">تشغيل أمر shell على اتصال SSH محفوظ في Tidegate.</string>
     <string name="tasker_loading">جارٍ تحميل الاتصالات…</string>
-    <string name="tasker_no_ssh_profiles">لا توجد اتصالات SSH محفوظة. أضِف واحدًا في Haven أولاً.</string>
-    <string name="tasker_field_server">خادم Haven</string>
+    <string name="tasker_no_ssh_profiles">لا توجد اتصالات SSH محفوظة. أضِف واحدًا في Tidegate أولاً.</string>
+    <string name="tasker_field_server">خادم Tidegate</string>
     <string name="tasker_field_command">الأمر</string>
     <string name="tasker_field_command_help">يعمل في صدفة تسجيل الدخول. تُستبدل متغيرات Tasker/MacroDroid قبل تشغيله.</string>
     <string name="tasker_toggle_overlay">عرض الأمر في طرفية مباشرة</string>
@@ -319,7 +319,7 @@
     <string name="backup_pull_toast_success">تمت استعادة النسخة الاحتياطية</string>
     <string name="backup_pull_toast_failure">فشل سحب النسخة الاحتياطية: %1$s</string>
     <string name="backup_pull_started">جارٍ سحب النسخة الاحتياطية في الخلفية…</string>
-    <string name="backup_pull_no_password">لا توجد كلمة مرور محفوظة. يتم فتح Haven…</string>
+    <string name="backup_pull_no_password">لا توجد كلمة مرور محفوظة. يتم فتح Tidegate…</string>
     <plurals name="app_agent_more_pending">
         <item quantity="zero">＋لا توجد طلبات أخرى في الانتظار</item>
         <item quantity="one">＋طلب واحد آخر في الانتظار خلف هذا — سيظهر بعده</item>
@@ -353,6 +353,6 @@
         <item quantity="other">%1$d موقع بعيد</item>
     </plurals>
     <string name="update_notification_channel">تحديثات التطبيق</string>
-    <string name="update_notification_title">Haven %1$s متاح</string>
+    <string name="update_notification_title">Tidegate %1$s متاح</string>
     <string name="update_notification_text">اضغط لفتح صفحة الإصدار.</string>
 </resources>

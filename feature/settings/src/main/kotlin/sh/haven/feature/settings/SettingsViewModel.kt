@@ -378,7 +378,7 @@ class SettingsViewModel @Inject constructor(
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), null)
 
     val backupSyncPath: StateFlow<String> = preferencesRepository.backupSyncPath
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), "haven-backup.enc")
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), "tidegate-backup.enc")
 
     fun setBackupSyncDestination(profileId: String?, path: String) {
         viewModelScope.launch { preferencesRepository.setBackupSyncDestination(profileId, path) }

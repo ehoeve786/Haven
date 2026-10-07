@@ -33,14 +33,14 @@
 
     <!-- Security section -->
     <string name="settings_biometric_title">屏幕锁定</string>
-    <string name="settings_biometric_subtitle">需要身份验证才能打开 Haven</string>
+    <string name="settings_biometric_subtitle">需要身份验证才能打开 Tidegate</string>
     <string name="settings_lock_timeout_title">锁定超时</string>
     <string name="settings_prevent_screenshots_title">阻止截图</string>
     <string name="settings_prevent_screenshots_subtitle">阻止屏幕截图和任务切换器预览</string>
 
     <!-- Logging section -->
     <string name="settings_exclude_recents_title">从最近任务中隐藏</string>
-    <string name="settings_exclude_recents_subtitle">在最近任务列表中隐藏 Haven 卡片；会话继续运行。从应用图标重新打开。</string>
+    <string name="settings_exclude_recents_subtitle">在最近任务列表中隐藏 Tidegate 卡片；会话继续运行。从应用图标重新打开。</string>
     <string name="settings_connection_logging_title">连接日志</string>
     <string name="settings_connection_logging_subtitle">记录连接事件（连接、断开、错误）。存储在本地，受设备加密保护</string>
     <string name="settings_view_connection_log_title">查看连接日志</string>
@@ -76,9 +76,9 @@
     <string name="settings_wayland_shell_title">Wayland 桌面 Shell</string>
     <string name="settings_proot_idle_title">自动停止空闲的 Linux 客户机</string>
     <string name="settings_proot_idle_off">关闭 —— Linux 客户机会一直运行，直到你手动停止</string>
-    <string name="settings_proot_idle_on">离开 Haven %1$d 分钟后停止客户机（正在运行的客户机服务会使其保持运行）</string>
+    <string name="settings_proot_idle_on">离开 Tidegate %1$d 分钟后停止客户机（正在运行的客户机服务会使其保持运行）</string>
     <string name="settings_proot_idle_dialog_title">自动停止空闲的 Linux 客户机</string>
-    <string name="settings_proot_idle_dialog_body">当 Haven 在后台达到该时长后，停止 Linux 客户机的终端和桌面以释放内存。正在运行的客户机服务会使其保持运行。后台终端中的长时间任务也会被停止——除非你需要在空闲时回收资源，否则请保持关闭。</string>
+    <string name="settings_proot_idle_dialog_body">当 Tidegate 在后台达到该时长后，停止 Linux 客户机的终端和桌面以释放内存。正在运行的客户机服务会使其保持运行。后台终端中的长时间任务也会被停止——除非你需要在空闲时回收资源，否则请保持关闭。</string>
     <string name="settings_proot_idle_off_label">关闭</string>
     <string name="settings_shizuku_title">Shizuku 集成</string>
     <string name="settings_shizuku_enabled">已启用 — 自动电池豁免、Wayland 套接字共享</string>
@@ -109,7 +109,7 @@
     <string name="settings_backup_working">处理中…</string>
 
     <!-- About section -->
-    <string name="settings_about_title">关于 Haven</string>
+    <string name="settings_about_title">关于 Tidegate</string>
     <string name="settings_support_title">支持 Haven</string>
     <string name="settings_support_subtitle">请开发者喝杯咖啡</string>
     <string name="settings_version_unknown">未知</string>
@@ -145,8 +145,8 @@
     <string name="settings_backup_restore_button">恢复</string>
 
     <!-- About dialog -->
-    <string name="settings_about_dialog_title">关于 Haven</string>
-    <string name="settings_about_app_name">Haven</string>
+    <string name="settings_about_dialog_title">关于 Tidegate</string>
+    <string name="settings_about_app_name">Tidegate SSH</string>
     <string name="settings_about_description">Android 开源 SSH、VNC、RDP 和云存储客户端</string>
     <string name="settings_about_version">版本 %1$s（构建 %2$d）</string>
     <string name="settings_about_android">Android %1$s (API %2$d)</string>
@@ -441,7 +441,7 @@
     <string name="settings_terminal_locale_label">LANG</string>
     <string name="settings_terminal_opacity_title">背景不透明度</string>
     <string name="settings_terminal_opacity_value">%1$d%%</string>
-    <string name="settings_terminal_opacity_hint" formatted="false">低于 100% 时，Haven 将变为半透明，在所有界面（终端、列表、设置）后面显示设备壁纸。按连接的覆盖设置仅作用于该终端。</string>
+    <string name="settings_terminal_opacity_hint" formatted="false">低于 100% 时，Tidegate 将变为半透明，在所有界面（终端、列表、设置）后面显示设备壁纸。按连接的覆盖设置仅作用于该终端。</string>
     <string name="settings_section_mcp">AI 代理（MCP）</string>
     <string name="settings_audio_bridge_title">Proot 音频（实验性）</string>
     <string name="settings_audio_bridge_subtitle">通过客机内的 PulseAudio 桥接，将 Linux 应用的声音经设备扬声器播放。仅支持输出。开启期间会持续传输——不用时请关闭。</string>
@@ -470,8 +470,8 @@
     <string name="settings_rdp_desktop_size_width">宽度</string>
     <string name="settings_rdp_desktop_size_height">高度</string>
     <string name="settings_native_crash_title">应用崩溃</string>
-    <string name="settings_native_crash_subtitle">Haven 意外关闭。下面的报告指出了发生位置——请将其附到错误报告中。</string>
-    <string name="settings_native_crash_subtitle_no_trace">Haven 意外关闭。Android 未对此类崩溃保留详细报告，因此只知道时间和信号——请仍将它们附到错误报告中，信号有助于缩小排查范围。</string>
+    <string name="settings_native_crash_subtitle">Tidegate 意外关闭。下面的报告指出了发生位置——请将其附到错误报告中。</string>
+    <string name="settings_native_crash_subtitle_no_trace">Tidegate 意外关闭。Android 未对此类崩溃保留详细报告，因此只知道时间和信号——请仍将它们附到错误报告中，信号有助于缩小排查范围。</string>
     <string name="settings_native_crash_no_trace">此次崩溃没有保留详细报告。</string>
     <string name="settings_native_crash_copy">复制报告</string>
     <string name="settings_native_crash_copied">已复制崩溃报告</string>
@@ -480,15 +480,15 @@
         <item quantity="other">%1$d 分钟</item>
     </plurals>
     <string name="settings_hide_nav_bar_in_terminal_title">在终端中隐藏应用标签栏</string>
-    <string name="settings_hide_nav_bar_in_terminal_subtitle">在终端屏幕上隐藏 Haven 的底部标签栏。Android 状态栏和导航栏保持可见。</string>
+    <string name="settings_hide_nav_bar_in_terminal_subtitle">在终端屏幕上隐藏 Tidegate 的底部标签栏。Android 状态栏和导航栏保持可见。</string>
     <string name="settings_credential_keystore_broken_title">凭据存储不可用</string>
-    <string name="settings_credential_keystore_broken_subtitle">此设备的密钥库丢失了 Haven 的凭据密钥。已保存的密码无法读取,也无法保存新密码。点按以修复。</string>
+    <string name="settings_credential_keystore_broken_subtitle">此设备的密钥库丢失了 Tidegate 的凭据密钥。已保存的密码无法读取,也无法保存新密码。点按以修复。</string>
     <string name="settings_credential_reset_title">修复凭据存储?</string>
-    <string name="settings_credential_reset_body">这会创建新的凭据密钥,以便重新保存密码。\n\n已保存在 Haven 中的所有密码、口令和密钥都需要重新输入。它们已经无法读取(保护它们的密钥已丢失),因此这是在恢复应用,而不是又丢失了什么。</string>
+    <string name="settings_credential_reset_body">这会创建新的凭据密钥,以便重新保存密码。\n\n已保存在 Tidegate 中的所有密码、口令和密钥都需要重新输入。它们已经无法读取(保护它们的密钥已丢失),因此这是在恢复应用,而不是又丢失了什么。</string>
     <string name="settings_credential_reset_confirm">修复</string>
     <string name="settings_credential_reset_cancel">取消</string>
     <string name="settings_update_check_title">检查更新</string>
-    <string name="settings_update_check_subtitle">Haven 启动时查找新版本，每小时最多一次。默认关闭。</string>
+    <string name="settings_update_check_subtitle">Tidegate 启动时查找新版本，每小时最多一次。默认关闭。</string>
     <string name="settings_update_check_now_title">立即检查</string>
     <string name="settings_update_check_now_subtitle">向 GitHub 查询最新发行版</string>
     <string name="settings_update_checking">正在检查…</string>
@@ -496,13 +496,13 @@
     <string name="settings_update_check_available">点按打开发行版页面</string>
     <string name="settings_update_check_up_to_date">已是最新版本 %1$s</string>
     <string name="settings_update_check_failed">检查失败：%1$s</string>
-    <string name="settings_update_check_other_channel">这个副本不是从 GitHub 发行版安装的，发行版的下载无法覆盖安装它。请通过你安装 Haven 的渠道更新。</string>
+    <string name="settings_update_check_other_channel">这个副本不是从 GitHub 发行版安装的，发行版的下载无法覆盖安装它。请通过你安装 Tidegate 的渠道更新。</string>
     <string name="settings_sshkey_keystore_broken_title">SSH 密钥存储不可用</string>
-    <string name="settings_sshkey_keystore_broken_subtitle">此设备的密钥库丢失了 Haven 的 SSH 密钥。已存储的私钥无法读取，也无法生成新密钥。轻按以修复。</string>
+    <string name="settings_sshkey_keystore_broken_subtitle">此设备的密钥库丢失了 Tidegate 的 SSH 密钥。已存储的私钥无法读取，也无法生成新密钥。轻按以修复。</string>
     <string name="settings_sshkey_reset_title">修复 SSH 密钥存储？</string>
     <string name="settings_sshkey_reset_body">这会创建一个新密钥，以便再次生成 SSH 密钥。
 
-Haven 中已存储的每一个私钥都需要重新导入或生成。它们已经无法读取 — 保护它们的密钥已丢失，通常是因为应用程序从不同来源重新安装过 — 因此这是恢复应用程序，而不会再丢失更多。</string>
+Tidegate 中已存储的每一个私钥都需要重新导入或生成。它们已经无法读取 — 保护它们的密钥已丢失，通常是因为应用程序从不同来源重新安装过 — 因此这是恢复应用程序，而不会再丢失更多。</string>
     <string name="settings_sshkey_reset_confirm">修复</string>
 
     <!-- Inline-image consent (#583) -->

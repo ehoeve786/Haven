@@ -33,14 +33,14 @@
 
     <!-- Security section -->
     <string name="settings_biometric_title">Verrouillage de l\'écran</string>
-    <string name="settings_biometric_subtitle">Exiger une authentification pour ouvrir Haven</string>
+    <string name="settings_biometric_subtitle">Exiger une authentification pour ouvrir Tidegate</string>
     <string name="settings_lock_timeout_title">Délai de verrouillage</string>
     <string name="settings_prevent_screenshots_title">Empêcher les captures d\'écran</string>
     <string name="settings_prevent_screenshots_subtitle">Bloquer la capture d\'écran et l\'aperçu du gestionnaire de tâches</string>
 
     <!-- Logging section -->
     <string name="settings_exclude_recents_title">Masquer des applis récentes</string>
-    <string name="settings_exclude_recents_subtitle">Masque la carte de Haven dans les applis récentes ; les sessions continuent. Rouvrez via l\'icône.</string>
+    <string name="settings_exclude_recents_subtitle">Masque la carte de Tidegate dans les applis récentes ; les sessions continuent. Rouvrez via l\'icône.</string>
     <string name="settings_connection_logging_title">Journal des connexions</string>
     <string name="settings_connection_logging_subtitle">Enregistrer les événements de connexion (connexion, déconnexion, erreurs). Stocké localement, protégé par le chiffrement de l\'appareil</string>
     <string name="settings_view_connection_log_title">Voir le journal des connexions</string>
@@ -76,9 +76,9 @@
     <string name="settings_wayland_shell_title">Shell bureau Wayland</string>
     <string name="settings_proot_idle_title">Arrêter l\'invité Linux inactif</string>
     <string name="settings_proot_idle_off">Désactivé — l\'invité Linux continue de tourner jusqu\'à ce que vous l\'arrêtiez</string>
-    <string name="settings_proot_idle_on">Arrête l\'invité %1$d min après avoir quitté Haven (un service invité en cours le maintient actif)</string>
+    <string name="settings_proot_idle_on">Arrête l\'invité %1$d min après avoir quitté Tidegate (un service invité en cours le maintient actif)</string>
     <string name="settings_proot_idle_dialog_title">Arrêter l\'invité Linux inactif</string>
-    <string name="settings_proot_idle_dialog_body">Lorsque Haven est resté en arrière-plan aussi longtemps, arrête les terminaux et bureaux de l\'invité Linux pour libérer de la mémoire. Un service invité en cours le maintient actif. Une tâche longue dans un terminal en arrière-plan serait aussi arrêtée — laissez ceci désactivé sauf si vous voulez récupérer les ressources en cas d\'inactivité.</string>
+    <string name="settings_proot_idle_dialog_body">Lorsque Tidegate est resté en arrière-plan aussi longtemps, arrête les terminaux et bureaux de l\'invité Linux pour libérer de la mémoire. Un service invité en cours le maintient actif. Une tâche longue dans un terminal en arrière-plan serait aussi arrêtée — laissez ceci désactivé sauf si vous voulez récupérer les ressources en cas d\'inactivité.</string>
     <string name="settings_proot_idle_off_label">Désactivé</string>
     <string name="settings_shizuku_title">Intégration Shizuku</string>
     <string name="settings_shizuku_enabled">Activé — exemption batterie auto, partage socket Wayland</string>
@@ -109,7 +109,7 @@
     <string name="settings_backup_working">En cours…</string>
 
     <!-- About section -->
-    <string name="settings_about_title">À propos de Haven</string>
+    <string name="settings_about_title">À propos de Tidegate</string>
     <string name="settings_support_title">Soutenir Haven</string>
     <string name="settings_support_subtitle">Offrir un café au développeur</string>
     <string name="settings_version_unknown">inconnu</string>
@@ -145,8 +145,8 @@
     <string name="settings_backup_restore_button">Restaurer</string>
 
     <!-- About dialog -->
-    <string name="settings_about_dialog_title">À propos de Haven</string>
-    <string name="settings_about_app_name">Haven</string>
+    <string name="settings_about_dialog_title">À propos de Tidegate</string>
+    <string name="settings_about_app_name">Tidegate SSH</string>
     <string name="settings_about_description">Client SSH, VNC, RDP et stockage cloud open source pour Android</string>
     <string name="settings_about_version">Version %1$s (build %2$d)</string>
     <string name="settings_about_android">Android %1$s (API %2$d)</string>
@@ -442,7 +442,7 @@
     <string name="settings_terminal_locale_label">LANG</string>
     <string name="settings_terminal_opacity_title">Opacité de l\'arrière-plan</string>
     <string name="settings_terminal_opacity_value">%1$d%%</string>
-    <string name="settings_terminal_opacity_hint" formatted="false">En dessous de 100%, Haven devient translucide et affiche votre fond d\'écran derrière chaque écran (terminal, listes, paramètres). Un remplacement par connexion ne s\'applique qu\'à ce terminal.</string>
+    <string name="settings_terminal_opacity_hint" formatted="false">En dessous de 100%, Tidegate devient translucide et affiche votre fond d\'écran derrière chaque écran (terminal, listes, paramètres). Un remplacement par connexion ne s\'applique qu\'à ce terminal.</string>
     <string name="settings_section_mcp">Agent IA (MCP)</string>
     <string name="settings_audio_bridge_title">Audio proot (expérimental)</string>
     <string name="settings_audio_bridge_subtitle">Diffuse le son des applis Linux sur le haut-parleur de l\'appareil via un pont PulseAudio dans le guest. Sortie uniquement. Diffuse en continu tant que c\'est activé — désactivez quand vous ne l\'utilisez pas.</string>
@@ -471,8 +471,8 @@
     <string name="settings_rdp_desktop_size_width">Largeur</string>
     <string name="settings_rdp_desktop_size_height">Hauteur</string>
     <string name="settings_native_crash_title">Plantages de l’application</string>
-    <string name="settings_native_crash_subtitle">Haven s’est fermé de façon inattendue. Le rapport ci-dessous indique où — joignez-le à un rapport de bug.</string>
-    <string name="settings_native_crash_subtitle_no_trace">Haven s’est fermé de façon inattendue. Android n’a conservé aucun rapport détaillé pour ceux-ci : seuls l’heure et le signal sont connus — joignez-les tout de même à un rapport de bug, le signal aide à cibler la cause.</string>
+    <string name="settings_native_crash_subtitle">Tidegate s’est fermé de façon inattendue. Le rapport ci-dessous indique où — joignez-le à un rapport de bug.</string>
+    <string name="settings_native_crash_subtitle_no_trace">Tidegate s’est fermé de façon inattendue. Android n’a conservé aucun rapport détaillé pour ceux-ci : seuls l’heure et le signal sont connus — joignez-les tout de même à un rapport de bug, le signal aide à cibler la cause.</string>
     <string name="settings_native_crash_no_trace">Aucun rapport détaillé n’a été conservé pour ce plantage.</string>
     <string name="settings_native_crash_copy">Copier le rapport</string>
     <string name="settings_native_crash_copied">Rapport de plantage copié</string>
@@ -482,15 +482,15 @@
         <item quantity="other">%1$d minutes</item>
     </plurals>
     <string name="settings_hide_nav_bar_in_terminal_title">Masquer la barre d\'onglets de l\'appli dans le terminal</string>
-    <string name="settings_hide_nav_bar_in_terminal_subtitle">Masque la barre d\'onglets inférieure de Haven sur l\'écran du terminal. Les barres d\'état et de navigation d\'Android restent visibles.</string>
+    <string name="settings_hide_nav_bar_in_terminal_subtitle">Masque la barre d\'onglets inférieure de Tidegate sur l\'écran du terminal. Les barres d\'état et de navigation d\'Android restent visibles.</string>
     <string name="settings_credential_keystore_broken_title">Stockage des identifiants indisponible</string>
-    <string name="settings_credential_keystore_broken_subtitle">Le magasin de clés de cet appareil a perdu la clé d\'identifiants de Haven. Les mots de passe enregistrés sont illisibles et aucun nouveau ne peut être enregistré. Touchez pour réparer.</string>
+    <string name="settings_credential_keystore_broken_subtitle">Le magasin de clés de cet appareil a perdu la clé d\'identifiants de Tidegate. Les mots de passe enregistrés sont illisibles et aucun nouveau ne peut être enregistré. Touchez pour réparer.</string>
     <string name="settings_credential_reset_title">Réparer le stockage des identifiants ?</string>
-    <string name="settings_credential_reset_body">Cela crée une nouvelle clé d\'identifiants afin de pouvoir enregistrer à nouveau des mots de passe.\n\nTous les mots de passe, phrases secrètes et secrets déjà enregistrés dans Haven devront être saisis à nouveau. Ils sont déjà illisibles — la clé qui les protégeait a disparu — cela restaure donc l\'application au lieu de perdre autre chose.</string>
+    <string name="settings_credential_reset_body">Cela crée une nouvelle clé d\'identifiants afin de pouvoir enregistrer à nouveau des mots de passe.\n\nTous les mots de passe, phrases secrètes et secrets déjà enregistrés dans Tidegate devront être saisis à nouveau. Ils sont déjà illisibles — la clé qui les protégeait a disparu — cela restaure donc l\'application au lieu de perdre autre chose.</string>
     <string name="settings_credential_reset_confirm">Réparer</string>
     <string name="settings_credential_reset_cancel">Annuler</string>
     <string name="settings_update_check_title">Rechercher des mises à jour</string>
-    <string name="settings_update_check_subtitle">Cherche une version plus récente au démarrage de Haven, une fois par heure au maximum. Désactivé par défaut.</string>
+    <string name="settings_update_check_subtitle">Cherche une version plus récente au démarrage de Tidegate, une fois par heure au maximum. Désactivé par défaut.</string>
     <string name="settings_update_check_now_title">Vérifier maintenant</string>
     <string name="settings_update_check_now_subtitle">Demander la dernière version à GitHub</string>
     <string name="settings_update_checking">Vérification…</string>
@@ -498,13 +498,13 @@
     <string name="settings_update_check_available">Appuyez pour ouvrir la page de la version</string>
     <string name="settings_update_check_up_to_date">À jour en %1$s</string>
     <string name="settings_update_check_failed">Échec de la vérification : %1$s</string>
-    <string name="settings_update_check_other_channel">Cette copie n\'a pas été installée depuis une version GitHub ; un téléchargement depuis GitHub ne peut donc pas la remplacer. Mettez à jour là où vous avez installé Haven.</string>
+    <string name="settings_update_check_other_channel">Cette copie n\'a pas été installée depuis une version GitHub ; un téléchargement depuis GitHub ne peut donc pas la remplacer. Mettez à jour là où vous avez installé Tidegate.</string>
     <string name="settings_sshkey_keystore_broken_title">Stockage des clés SSH indisponible</string>
-    <string name="settings_sshkey_keystore_broken_subtitle">Le trousseau de cet appareil a perdu la clé SSH de Haven. Les clés privées stockées ne peuvent pas être lues et de nouvelles ne peuvent pas être générées. Touchez pour réparer.</string>
+    <string name="settings_sshkey_keystore_broken_subtitle">Le trousseau de cet appareil a perdu la clé SSH de Tidegate. Les clés privées stockées ne peuvent pas être lues et de nouvelles ne peuvent pas être générées. Touchez pour réparer.</string>
     <string name="settings_sshkey_reset_title">Réparer le stockage des clés SSH  ?</string>
     <string name="settings_sshkey_reset_body">Cela crée une nouvelle clé afin que des clés SSH puissent être générées à nouveau.
 
-Chaque clé privée déjà stockée dans Haven devra être importée ou générée à nouveau. Elles sont déjà illisibles — la clé qui les protégeait est perdue, généralement parce que l’application a été réinstallée depuis une source différente — cela répare donc l’application au lieu de perdre davantage.</string>
+Chaque clé privée déjà stockée dans Tidegate devra être importée ou générée à nouveau. Elles sont déjà illisibles — la clé qui les protégeait est perdue, généralement parce que l’application a été réinstallée depuis une source différente — cela répare donc l’application au lieu de perdre davantage.</string>
     <string name="settings_sshkey_reset_confirm">Réparer</string>
 
     <!-- Inline-image consent (#583) -->

@@ -128,7 +128,7 @@
     <string name="mail_rules_history_uidreset">Postfach neu nummeriert — zurückgesetzt</string>
     <string name="mail_rules_no_subject">(kein Betreff)</string>
     <string name="mail_rules_pending_empty">Nichts wartet auf Genehmigung.</string>
-    <string name="mail_rules_pending_desc">In die Warteschlange gestellt, während Haven im Hintergrund war. Genehmigen zum Ausführen oder ablehnen zum Verwerfen.</string>
+    <string name="mail_rules_pending_desc">In die Warteschlange gestellt, während Tidegate im Hintergrund war. Genehmigen zum Ausführen oder ablehnen zum Verwerfen.</string>
     <string name="mail_rules_approve">Genehmigen</string>
     <string name="mail_rules_reject">Ablehnen</string>
     <string name="mail_rules_approve_all">Alle genehmigen</string>
