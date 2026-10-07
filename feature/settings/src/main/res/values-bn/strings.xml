@@ -513,4 +513,6 @@ Haven-এ ইম্মদ্য সংরক্ষিত প্রত্যে�
     <string name="settings_inline_images_off">বন্ধ</string>
     <string name="settings_inline_images_ask">জিজ্ঞাসা করুন</string>
     <string name="settings_inline_images_always">সবসময়</string>
+    <string name="settings_mcp_claude_connector_title">Claude কানেক্টর</string>
+    <string name="settings_mcp_claude_connector_subtitle">আপনার Tailscale টানেলের Funnel দিয়ে এই এন্ডপয়েন্ট প্রকাশ করুন, যাতে claude.ai এটিকে কাস্টম কানেক্টর হিসেবে যোগ করতে পারে</string>
 </resources>

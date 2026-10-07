@@ -211,6 +211,12 @@ class HavenApp : Application(), Configuration.Provider {
             .onEach { mcpServer.setWireguardEnabled(it) }
             .launchIn(appScope)
 
+        preferencesRepository.mcpClaudeConnectorEnabled
+            .drop(1)
+            .distinctUntilChanged()
+            .onEach { mcpServer.setClaudeConnectorEnabled(it) }
+            .launchIn(appScope)
+
         // Bind/unbind the MCP Wi-Fi/LAN listener when the user toggles it
         // while the server is running. drop(1): start() reads the initial
         // value itself, so this only reacts to later changes.

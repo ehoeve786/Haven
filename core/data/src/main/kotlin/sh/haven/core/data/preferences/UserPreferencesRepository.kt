@@ -206,6 +206,7 @@ class UserPreferencesRepository @Inject constructor(
     // across roams — no reverse forward). Off by default: a WG-reachable
     // listener is a wider surface than the loopback bind. See McpServer (#176).
     private val mcpWireguardEnabledKey = booleanPreferencesKey("mcp_wireguard_enabled")
+    private val mcpClaudeConnectorEnabledKey = booleanPreferencesKey("mcp_claude_connector_enabled")
     // Bind the MCP listener on the device's Wi-Fi/LAN address too, so a
     // same-network client reaches it directly (no WG, no reverse forward).
     // Off by default — a LAN-reachable listener is a wider surface than
@@ -1173,6 +1174,21 @@ class UserPreferencesRepository @Inject constructor(
     suspend fun setMcpWireguardEnabled(enabled: Boolean) {
         dataStore.edit { prefs ->
             prefs[mcpWireguardEnabledKey] = enabled
+        }
+    }
+
+    /**
+     * Whether the MCP server is published on the public internet through the
+     * in-app Tailscale tunnel's Funnel, for use as a claude.ai connector.
+     * Default off; every request still needs an OAuth-issued pairing token.
+     */
+    val mcpClaudeConnectorEnabled: Flow<Boolean> = dataStore.data.map { prefs ->
+        prefs[mcpClaudeConnectorEnabledKey] ?: false
+    }
+
+    suspend fun setMcpClaudeConnectorEnabled(enabled: Boolean) {
+        dataStore.edit { prefs ->
+            prefs[mcpClaudeConnectorEnabledKey] = enabled
         }
     }
 

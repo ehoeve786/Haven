@@ -75,6 +75,28 @@ class TailscaleTunnel internal constructor(
         }
     }
 
+    override fun listenPublic(): TunneledServerSocket {
+        val ln = try {
+            native.listenFunnel()
+        } catch (e: Exception) {
+            throw IOException("Tailscale Funnel failed: ${e.message}", e)
+        }
+        return object : TunneledServerSocket {
+            override fun accept(): TunneledConnection = try {
+                TailscaleConnection(ln.accept())
+            } catch (e: Exception) {
+                throw IOException("Funnel accept failed: ${e.message}", e)
+            }
+
+            override fun close() {
+                runCatching { ln.close() }
+            }
+        }
+    }
+
+    override fun publicUrl(): String? =
+        runCatching { native.funnelURL() }.getOrNull()?.takeIf { it.isNotBlank() }
+
     override fun close() {
         try {
             native.close()

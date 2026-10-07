@@ -443,4 +443,6 @@
     <string name="settings_inline_images_off">Искључено</string>
     <string name="settings_inline_images_ask">Питај</string>
     <string name="settings_inline_images_always">Увек</string>
+    <string name="settings_mcp_claude_connector_title">Claude конектор</string>
+    <string name="settings_mcp_claude_connector_subtitle">Објави ову крајњу тачку преко Funnel-а твог Tailscale тунела да би је claude.ai могао додати као прилагођени конектор</string>
 </resources>

@@ -104,7 +104,7 @@ private const val MAX_CONCURRENT_CONNECTIONS = 64
  *   device-trusted and always runs the full pairing + consent gate.
  * - [LAN] / [WIREGUARD] — networked peers; always the full gate.
  */
-internal enum class McpOrigin { DEVICE, TUNNELED, LAN, WIREGUARD }
+internal enum class McpOrigin { DEVICE, TUNNELED, LAN, WIREGUARD, FUNNEL }
 
 /** The one MCP resources/read resource: a live snapshot of Haven's own rendered UI.
  *  The file-shaped sibling of the `capture_haven_ui` tool — an agent reads it to
@@ -407,6 +407,20 @@ class McpServer @Inject constructor(
 
     /** Synthetic profile id under which the MCP listener holds a WG tunnel. */
     private val wireguardProfileId = "mcp-wg-listener"
+
+    // Claude connector: public listener on the in-app Tailscale tunnel's Funnel.
+    private var funnelJob: Job? = null
+    @Volatile private var funnelListener: sh.haven.core.tunnel.TunneledServerSocket? = null
+    @Volatile private var funnelBase: String? = null
+    private val funnelProfileId = "mcp-funnel"
+    private val oauth = McpOAuth(
+        approve = {
+            runBlocking { consentManager.requestClientPairing(McpOAuth.CLIENT_NAME, "connector") } ==
+                ConsentDecision.ALLOW
+        },
+        mintToken = { pairClient(McpOAuth.CLIENT_NAME) },
+    )
+
     /**
      * Synthetic profile id under which the MCP server actively keeps the
      * configured carrier WG tunnel UP (distinct from [wireguardProfileId],
@@ -588,6 +602,9 @@ class McpServer @Inject constructor(
         // same-network reach.
         if (runBlocking { preferencesRepository.mcpLanBindEnabled.first() }) {
             startLanBinderLocked()
+        }
+        if (runBlocking { preferencesRepository.mcpClaudeConnectorEnabled.first() }) {
+            startFunnelBinderLocked()
         }
     }
 
@@ -846,6 +863,71 @@ class McpServer @Inject constructor(
         }
     }
 
+    /** Publish/unpublish the Claude connector at runtime (`mcpClaudeConnectorEnabled`). */
+    fun setClaudeConnectorEnabled(enabled: Boolean) = synchronized(lifecycleLock) {
+        if (!isRunning) return@synchronized
+        if (enabled) startFunnelBinderLocked() else stopFunnelBinderLocked()
+    }
+
+    /**
+     * Must hold [lifecycleLock]. Idempotent. Brings up the first Tailscale
+     * tunnel config and serves MCP on its public Funnel URL, retrying while
+     * the tunnel or Funnel is unavailable (the reason goes to
+     * [McpStatusHolder.connectorStatus]).
+     */
+    private fun startFunnelBinderLocked() {
+        if (funnelJob?.isActive == true) return
+        funnelJob = scope.launch {
+            while (isActive) {
+                val ln = try {
+                    val id = tunnelConfigRepository.getAll().firstOrNull { it.type == "TAILSCALE" }?.id
+                        ?: throw IOException("add a Tailscale tunnel first")
+                    val tunnel = tunnelManager.acquire(id, funnelProfileId)
+                        ?: throw IOException("Tailscale tunnel isn't up")
+                    funnelBase = tunnel.publicUrl() ?: throw IOException("turn on HTTPS for your tailnet")
+                    tunnel.listenPublic() ?: throw IOException("Funnel unavailable")
+                } catch (e: Exception) {
+                    mcpStatusHolder.setConnectorStatus("Not connected: ${e.message}")
+                    delay(WG_RETRY_MS)
+                    continue
+                }
+                funnelListener = ln
+                mcpStatusHolder.setConnectorStatus("$funnelBase/mcp")
+                try {
+                    while (isActive) {
+                        val conn = ln.accept()
+                        scope.launch {
+                            try {
+                                serveHttpConnection(conn.inputStream, conn.outputStream, maxRequests = 1) { req ->
+                                    dispatchHttpRequest(req, McpOrigin.FUNNEL)
+                                }
+                            } catch (e: Throwable) {
+                                Log.w(TAG, "Funnel worker crashed: ${e.message}")
+                            } finally {
+                                try { conn.close() } catch (_: Exception) {}
+                            }
+                        }
+                    }
+                } catch (e: Exception) {
+                    Log.i(TAG, "Funnel accept loop ended: ${e.message}")
+                } finally {
+                    funnelListener = null
+                }
+                if (isActive) delay(WG_RETRY_MS)
+            }
+        }
+    }
+
+    /** Must hold [lifecycleLock]. Idempotent. */
+    private fun stopFunnelBinderLocked() {
+        funnelJob?.cancel()
+        funnelJob = null
+        try { funnelListener?.close() } catch (_: Exception) {}
+        funnelListener = null
+        mcpStatusHolder.setConnectorStatus(null)
+        scope.launch { tunnelManager.release(funnelProfileId) }
+    }
+
     /**
      * Best-effort: a warning when an active system VPN (another app's
      * [NetworkCapabilities.TRANSPORT_VPN] network) holds [address] — the same
@@ -923,6 +1005,7 @@ class McpServer @Inject constructor(
         trustSyncJob = null
         stopWireguardBinderLocked()
         stopLanBinderLocked()
+        stopFunnelBinderLocked()
         try { serverSocket?.close() } catch (_: Exception) {}
         serverSocket = null
         serverThread = null
@@ -1067,6 +1150,10 @@ class McpServer @Inject constructor(
     private fun dispatchHttpRequest(req: ParsedHttpRequest, origin: McpOrigin): HttpResponse {
         val method = req.method
         val path = req.path
+        if (origin == McpOrigin.FUNNEL) {
+            val base = funnelBase ?: return textResponse(503, "Service Unavailable")
+            oauth.handle(req, base)?.let { return it }
+        }
         return when {
             method == "POST" && (path == "/mcp" || path == "/") -> {
                 // DNS-rebinding / CSRF guard (#mcp-backbone Stage 0): a browser
@@ -1074,7 +1161,9 @@ class McpServer @Inject constructor(
                 // POST that carries a cross-origin `Origin`; non-browser MCP
                 // clients send no Origin and pass through.
                 val httpOrigin = req.headers["origin"]
-                if (httpOrigin != null && !isLoopbackOrigin(httpOrigin)) {
+                // Funnel requests must carry a bearer token instead (below),
+                // which a cross-site page can't attach, so no Origin check.
+                if (httpOrigin != null && !isLoopbackOrigin(httpOrigin) && origin != McpOrigin.FUNNEL) {
                     return textResponse(403, "Forbidden")
                 }
                 val sessionId = req.headers["mcp-session-id"]?.takeIf { it.isNotEmpty() }
@@ -1082,6 +1171,9 @@ class McpServer @Inject constructor(
                 val bearer = req.headers["authorization"]
                     ?.takeIf { it.startsWith("Bearer ", ignoreCase = true) }
                     ?.substring("Bearer ".length)?.trim()?.takeIf { it.isNotEmpty() }
+                if (origin == McpOrigin.FUNNEL && bearer?.let(this::resolveBearer) == null) {
+                    return McpOAuth.unauthorized(funnelBase.orEmpty())
+                }
                 val outcome = handleJsonRpc(req.body, sessionId, origin, bearer)
                 if (outcome.httpStatus == 404) {
                     // Streamable-HTTP signal: presented session id is unknown.
@@ -1179,6 +1271,24 @@ class McpServer @Inject constructor(
         java.security.MessageDigest.getInstance("SHA-256")
             .digest(s.toByteArray(Charsets.UTF_8))
             .joinToString("") { "%02x".format(it) }
+
+    /**
+     * Pair [clientName]: mint its pairing token, persist the hash and allowlist
+     * entry, and return the token (shown once; only the hash is kept). Re-pairing
+     * replaces the previous token.
+     */
+    private fun pairClient(clientName: String): String {
+        val token = mintPairingToken()
+        val hash = sha256Hex(token)
+        runBlocking {
+            preferencesRepository.addMcpAllowedClient(clientName)
+            preferencesRepository.setMcpClientTokenHash(clientName, hash)
+        }
+        allowedClients = allowedClients + clientName
+        clientTokenHashes = (clientTokenHashes ?: emptyMap()) + (clientName to hash)
+        Log.i(TAG, "MCP client '$clientName' paired with Haven; pairing token minted (allowlist size=${allowedClients.size})")
+        return token
+    }
 
     /** A fresh 256-bit pairing token, minted on pairing approval. */
     private fun mintPairingToken(): String {
@@ -1461,18 +1571,7 @@ class McpServer @Inject constructor(
         }
         Log.i(TAG, "MCP initialize: pairing decision for '$clientName' = $decision")
         return when (decision) {
-            ConsentDecision.ALLOW -> {
-                val token = mintPairingToken()
-                val hash = sha256Hex(token)
-                runBlocking {
-                    preferencesRepository.addMcpAllowedClient(clientName)
-                    preferencesRepository.setMcpClientTokenHash(clientName, hash)
-                }
-                allowedClients = allowedClients + clientName
-                clientTokenHashes = (clientTokenHashes ?: emptyMap()) + (clientName to hash)
-                Log.i(TAG, "MCP client '$clientName' paired with Haven; pairing token minted (allowlist size=${allowedClients.size})")
-                initializeResult(pairingToken = token)
-            }
+            ConsentDecision.ALLOW -> initializeResult(pairingToken = pairClient(clientName))
             ConsentDecision.DENY -> {
                 throw McpError(
                     -32001,

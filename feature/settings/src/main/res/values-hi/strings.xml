@@ -513,4 +513,6 @@ Haven में पहले से संग्रहीत प्रत्य�
     <string name="settings_inline_images_off">बंद</string>
     <string name="settings_inline_images_ask">पूछें</string>
     <string name="settings_inline_images_always">हमेशा</string>
+    <string name="settings_mcp_claude_connector_title">Claude कनेक्टर</string>
+    <string name="settings_mcp_claude_connector_subtitle">इस एंडपॉइंट को अपनी Tailscale टनल के Funnel से प्रकाशित करें ताकि claude.ai इसे कस्टम कनेक्टर के रूप में जोड़ सके</string>
 </resources>

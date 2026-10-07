@@ -456,6 +456,58 @@ func (t *TunnelHandle) StartSocksListener() (int, error) {
 	return ln.Addr().(*net.TCPAddr).Port, nil
 }
 
+// Listener accepts inbound connections. Returned by [TunnelHandle.ListenFunnel].
+type Listener struct {
+	ln net.Listener
+}
+
+// ListenFunnel publishes :443 on the public internet via Tailscale Funnel
+// (TLS terminated here with the node's ts.net cert) so a remote client such
+// as a claude.ai connector can reach an on-device server. The tailnet must
+// have HTTPS enabled and grant this node the `funnel` attribute; tsnet's
+// error says which is missing.
+func (t *TunnelHandle) ListenFunnel() (*Listener, error) {
+	t.mu.Lock()
+	srv := t.srv
+	t.mu.Unlock()
+	if srv == nil {
+		return nil, errors.New("tunnel closed")
+	}
+	ln, err := srv.ListenFunnel("tcp", ":443")
+	if err != nil {
+		return nil, fmt.Errorf("tsnet ListenFunnel: %w", err)
+	}
+	return &Listener{ln: ln}, nil
+}
+
+// FunnelURL is the public https:// origin [ListenFunnel] serves, or "".
+func (t *TunnelHandle) FunnelURL() string {
+	t.mu.Lock()
+	srv := t.srv
+	t.mu.Unlock()
+	if srv == nil {
+		return ""
+	}
+	if d := srv.CertDomains(); len(d) > 0 {
+		return "https://" + d[0]
+	}
+	return ""
+}
+
+// Accept blocks until a client connects. An error means the listener closed.
+func (l *Listener) Accept() (*Conn, error) {
+	c, err := l.ln.Accept()
+	if err != nil {
+		return nil, err
+	}
+	return &Conn{c: c}, nil
+}
+
+// Close stops accepting. Idempotent.
+func (l *Listener) Close() error {
+	return l.ln.Close()
+}
+
 // Close tears down the tailnet connection. The state directory is kept
 // intact so a subsequent StartTunnel picks up without re-auth.
 func (t *TunnelHandle) Close() {
