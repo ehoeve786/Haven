@@ -33,14 +33,14 @@
 
     <!-- Security section -->
     <string name="settings_biometric_title">স্ক্রিন লক</string>
-    <string name="settings_biometric_subtitle">Haven খুলতে প্রমাণীকরণ প্রয়োজন</string>
+    <string name="settings_biometric_subtitle">Tidegate খুলতে প্রমাণীকরণ প্রয়োজন</string>
     <string name="settings_lock_timeout_title">লক টাইমআউট</string>
     <string name="settings_prevent_screenshots_title">স্ক্রিনশট প্রতিরোধ</string>
     <string name="settings_prevent_screenshots_subtitle">স্ক্রিন ক্যাপচার ও টাস্ক সুইচার প্রিভিউ ব্লক করুন</string>
 
     <!-- Logging section -->
     <string name="settings_exclude_recents_title">সাম্প্রতিক অ্যাপ থেকে লুকান</string>
-    <string name="settings_exclude_recents_subtitle">সাম্প্রতিক স্ক্রিনে Haven-এর কার্ড লুকায়; সেশন চলতে থাকে। অ্যাপ আইকন থেকে আবার খুলুন।</string>
+    <string name="settings_exclude_recents_subtitle">সাম্প্রতিক স্ক্রিনে Tidegate-এর কার্ড লুকায়; সেশন চলতে থাকে। অ্যাপ আইকন থেকে আবার খুলুন।</string>
     <string name="settings_connection_logging_title">সংযোগ লগিং</string>
     <string name="settings_connection_logging_subtitle">সংযোগ ইভেন্ট রেকর্ড করুন (সংযোগ, বিচ্ছিন্ন, ত্রুটি)। স্থানীয়ভাবে সংরক্ষিত, ডিভাইস এনক্রিপশন দ্বারা সুরক্ষিত</string>
     <string name="settings_view_connection_log_title">সংযোগ লগ দেখুন</string>
@@ -76,9 +76,9 @@
     <string name="settings_wayland_shell_title">Wayland ডেস্কটপ শেল</string>
     <string name="settings_proot_idle_title">নিষ্ক্রিয় Linux গেস্ট স্বয়ংক্রিয়ভাবে বন্ধ করুন</string>
     <string name="settings_proot_idle_off">বন্ধ — আপনি না থামানো পর্যন্ত Linux গেস্ট চলতে থাকে</string>
-    <string name="settings_proot_idle_on">Haven ছাড়ার %1$d মিনিট পরে গেস্ট বন্ধ করে (চালু থাকা কোনো গেস্ট সার্ভিস এটি চালু রাখে)</string>
+    <string name="settings_proot_idle_on">Tidegate ছাড়ার %1$d মিনিট পরে গেস্ট বন্ধ করে (চালু থাকা কোনো গেস্ট সার্ভিস এটি চালু রাখে)</string>
     <string name="settings_proot_idle_dialog_title">নিষ্ক্রিয় Linux গেস্ট স্বয়ংক্রিয়ভাবে বন্ধ করুন</string>
-    <string name="settings_proot_idle_dialog_body">Haven এত সময় ব্যাকগ্রাউন্ডে থাকলে, মেমরি খালি করতে Linux গেস্টের টার্মিনাল ও ডেস্কটপ বন্ধ করুন। চালু থাকা কোনো গেস্ট সার্ভিস এটি চালু রাখে। ব্যাকগ্রাউন্ড টার্মিনালে চলা দীর্ঘ কাজও বন্ধ হবে — নিষ্ক্রিয় অবস্থায় রিসোর্স ফেরত না চাইলে এটি বন্ধ রাখুন।</string>
+    <string name="settings_proot_idle_dialog_body">Tidegate এত সময় ব্যাকগ্রাউন্ডে থাকলে, মেমরি খালি করতে Linux গেস্টের টার্মিনাল ও ডেস্কটপ বন্ধ করুন। চালু থাকা কোনো গেস্ট সার্ভিস এটি চালু রাখে। ব্যাকগ্রাউন্ড টার্মিনালে চলা দীর্ঘ কাজও বন্ধ হবে — নিষ্ক্রিয় অবস্থায় রিসোর্স ফেরত না চাইলে এটি বন্ধ রাখুন।</string>
     <string name="settings_proot_idle_off_label">বন্ধ</string>
     <string name="settings_shizuku_title">Shizuku ইন্টিগ্রেশন</string>
     <string name="settings_shizuku_enabled">সক্রিয় — স্বয়ংক্রিয় ব্যাটারি ছাড়, Wayland সকেট শেয়ারিং</string>
@@ -109,7 +109,7 @@
     <string name="settings_backup_working">কাজ চলছে…</string>
 
     <!-- About section -->
-    <string name="settings_about_title">Haven সম্পর্কে</string>
+    <string name="settings_about_title">Tidegate সম্পর্কে</string>
     <string name="settings_support_title">Haven সাপোর্ট</string>
     <string name="settings_support_subtitle">ডেভেলপারকে একটি কফি কিনুন</string>
     <string name="settings_version_unknown">অজানা</string>
@@ -145,8 +145,8 @@
     <string name="settings_backup_restore_button">পুনরুদ্ধার</string>
 
     <!-- About dialog -->
-    <string name="settings_about_dialog_title">Haven সম্পর্কে</string>
-    <string name="settings_about_app_name">Haven</string>
+    <string name="settings_about_dialog_title">Tidegate সম্পর্কে</string>
+    <string name="settings_about_app_name">Tidegate SSH</string>
     <string name="settings_about_description">Android-এর জন্য ওপেন সোর্স SSH, VNC, RDP ও ক্লাউড স্টোরেজ ক্লায়েন্ট</string>
     <string name="settings_about_version">সংস্করণ %1$s (বিল্ড %2$d)</string>
     <string name="settings_about_android">Android %1$s (API %2$d)</string>
@@ -442,7 +442,7 @@
     <string name="settings_terminal_locale_label">LANG</string>
     <string name="settings_terminal_opacity_title">ব্যাকগ্রাউন্ড অস্বচ্ছতা</string>
     <string name="settings_terminal_opacity_value">%1$d%%</string>
-    <string name="settings_terminal_opacity_hint" formatted="false">100%-এর নিচে Haven স্বচ্ছপ্রায় হয়ে যায় এবং প্রতিটি স্ক্রিনের (টার্মিনাল, তালিকা, সেটিংস) পিছনে আপনার ডিভাইসের ওয়ালপেপার দেখায়। প্রতি-সংযোগ ওভাররাইড কেবল সেই টার্মিনালে প্রযোজ্য।</string>
+    <string name="settings_terminal_opacity_hint" formatted="false">100%-এর নিচে Tidegate স্বচ্ছপ্রায় হয়ে যায় এবং প্রতিটি স্ক্রিনের (টার্মিনাল, তালিকা, সেটিংস) পিছনে আপনার ডিভাইসের ওয়ালপেপার দেখায়। প্রতি-সংযোগ ওভাররাইড কেবল সেই টার্মিনালে প্রযোজ্য।</string>
     <string name="settings_section_mcp">AI এজেন্ট (MCP)</string>
     <string name="settings_audio_bridge_title">Proot অডিও (পরীক্ষামূলক)</string>
     <string name="settings_audio_bridge_subtitle">গেস্টের ভিতরের PulseAudio ব্রিজের মাধ্যমে Linux অ্যাপের শব্দ ডিভাইসের স্পিকারে বাজান। শুধু আউটপুট। চালু থাকলে অবিরাম স্ট্রিম হয় — ব্যবহার না করলে বন্ধ করুন।</string>
@@ -471,8 +471,8 @@
     <string name="settings_rdp_desktop_size_width">প্রস্থ</string>
     <string name="settings_rdp_desktop_size_height">উচ্চতা</string>
     <string name="settings_native_crash_title">অ্যাপ ক্র্যাশ</string>
-    <string name="settings_native_crash_subtitle">Haven অপ্রত্যাশিতভাবে বন্ধ হয়ে গেছে। নিচের রিপোর্টে কোথায় হয়েছে তা রয়েছে — অনুগ্রহ করে বাগ রিপোর্টে এটি যুক্ত করুন।</string>
-    <string name="settings_native_crash_subtitle_no_trace">Haven অপ্রত্যাশিতভাবে বন্ধ হয়ে গেছে। এগুলির জন্য Android কোনো বিস্তারিত রিপোর্ট রাখেনি, তাই কেবল সময় ও সিগন্যাল জানা আছে — তবুও বাগ রিপোর্টে সেগুলি যুক্ত করুন, কারণ সিগন্যাল অনুসন্ধান সংকুচিত করে।</string>
+    <string name="settings_native_crash_subtitle">Tidegate অপ্রত্যাশিতভাবে বন্ধ হয়ে গেছে। নিচের রিপোর্টে কোথায় হয়েছে তা রয়েছে — অনুগ্রহ করে বাগ রিপোর্টে এটি যুক্ত করুন।</string>
+    <string name="settings_native_crash_subtitle_no_trace">Tidegate অপ্রত্যাশিতভাবে বন্ধ হয়ে গেছে। এগুলির জন্য Android কোনো বিস্তারিত রিপোর্ট রাখেনি, তাই কেবল সময় ও সিগন্যাল জানা আছে — তবুও বাগ রিপোর্টে সেগুলি যুক্ত করুন, কারণ সিগন্যাল অনুসন্ধান সংকুচিত করে।</string>
     <string name="settings_native_crash_no_trace">এই ক্র্যাশের জন্য কোনো বিস্তারিত রিপোর্ট রাখা হয়নি।</string>
     <string name="settings_native_crash_copy">রিপোর্ট কপি করুন</string>
     <string name="settings_native_crash_copied">ক্র্যাশ রিপোর্ট কপি হয়েছে</string>
@@ -482,15 +482,15 @@
         <item quantity="other">%1$d মিনিট</item>
     </plurals>
     <string name="settings_hide_nav_bar_in_terminal_title">টার্মিনালে অ্যাপ ট্যাব বার লুকান</string>
-    <string name="settings_hide_nav_bar_in_terminal_subtitle">টার্মিনাল স্ক্রিনে Haven-এর নিচের ট্যাব বার লুকায়। Android-এর স্ট্যাটাস ও নেভিগেশন বার দৃশ্যমান থাকে।</string>
+    <string name="settings_hide_nav_bar_in_terminal_subtitle">টার্মিনাল স্ক্রিনে Tidegate-এর নিচের ট্যাব বার লুকায়। Android-এর স্ট্যাটাস ও নেভিগেশন বার দৃশ্যমান থাকে।</string>
     <string name="settings_credential_keystore_broken_title">ক্রেডেনশিয়াল স্টোরেজ অনুপলব্ধ</string>
-    <string name="settings_credential_keystore_broken_subtitle">এই ডিভাইসের কীস্টোর Haven-এর ক্রেডেনশিয়াল কী হারিয়েছে। সংরক্ষিত পাসওয়ার্ড পড়া যাবে না এবং নতুন সংরক্ষণ করা যাবে না। মেরামত করতে ট্যাপ করুন।</string>
+    <string name="settings_credential_keystore_broken_subtitle">এই ডিভাইসের কীস্টোর Tidegate-এর ক্রেডেনশিয়াল কী হারিয়েছে। সংরক্ষিত পাসওয়ার্ড পড়া যাবে না এবং নতুন সংরক্ষণ করা যাবে না। মেরামত করতে ট্যাপ করুন।</string>
     <string name="settings_credential_reset_title">ক্রেডেনশিয়াল স্টোরেজ মেরামত করবেন?</string>
-    <string name="settings_credential_reset_body">এটি একটি নতুন ক্রেডেনশিয়াল কী তৈরি করে যাতে পাসওয়ার্ড আবার সংরক্ষণ করা যায়।\n\nHaven-এ ইতিমধ্যে সংরক্ষিত সব পাসওয়ার্ড, পাসফ্রেজ ও সিক্রেট আবার লিখতে হবে। সেগুলি এমনিতেই অপঠনীয় — যে কী সেগুলি রক্ষা করত তা হারিয়ে গেছে — তাই এটি অ্যাপ পুনরুদ্ধার করে, বাড়তি কিছু হারায় না।</string>
+    <string name="settings_credential_reset_body">এটি একটি নতুন ক্রেডেনশিয়াল কী তৈরি করে যাতে পাসওয়ার্ড আবার সংরক্ষণ করা যায়।\n\nTidegate-এ ইতিমধ্যে সংরক্ষিত সব পাসওয়ার্ড, পাসফ্রেজ ও সিক্রেট আবার লিখতে হবে। সেগুলি এমনিতেই অপঠনীয় — যে কী সেগুলি রক্ষা করত তা হারিয়ে গেছে — তাই এটি অ্যাপ পুনরুদ্ধার করে, বাড়তি কিছু হারায় না।</string>
     <string name="settings_credential_reset_confirm">মেরামত</string>
     <string name="settings_credential_reset_cancel">বাতিল</string>
     <string name="settings_update_check_title">আপডেট দেখুন</string>
-    <string name="settings_update_check_subtitle">Haven চালু হলে নতুন রিলিজ খোঁজে, ঘণ্টায় সর্বোচ্চ একবার। ডিফল্টে বন্ধ।</string>
+    <string name="settings_update_check_subtitle">Tidegate চালু হলে নতুন রিলিজ খোঁজে, ঘণ্টায় সর্বোচ্চ একবার। ডিফল্টে বন্ধ।</string>
     <string name="settings_update_check_now_title">এখনই দেখুন</string>
     <string name="settings_update_check_now_subtitle">GitHub-এ সর্বশেষ রিলিজ জিজ্ঞাসা করুন</string>
     <string name="settings_update_checking">দেখা হচ্ছে…</string>
@@ -498,13 +498,13 @@
     <string name="settings_update_check_available">রিলিজ পেজ খুলতে ট্যাপ করুন</string>
     <string name="settings_update_check_up_to_date">%1$s-এ হালনাগাদ</string>
     <string name="settings_update_check_failed">যাচাই ব্যর্থ: %1$s</string>
-    <string name="settings_update_check_other_channel">এই কপিটি GitHub রিলিজ থেকে ইনস্টল হয়নি, তাই রিলিজ ডাউনলোড এটি প্রতিস্থাপন করতে পারবে না। যেখান থেকে Haven ইনস্টল করেছিলেন সেখান থেকেই আপডেট করুন।</string>
+    <string name="settings_update_check_other_channel">এই কপিটি GitHub রিলিজ থেকে ইনস্টল হয়নি, তাই রিলিজ ডাউনলোড এটি প্রতিস্থাপন করতে পারবে না। যেখান থেকে Tidegate ইনস্টল করেছিলেন সেখান থেকেই আপডেট করুন।</string>
     <string name="settings_sshkey_keystore_broken_title">SSH কী সংরক্ষণ অুপলব্য নয়</string>
-    <string name="settings_sshkey_keystore_broken_subtitle">এই ডিভাইসের কিস্টোর Haven-এর SSH কী হারিয়েছে। সংরক্ষিত ব্যক্তিগত কীসমূহ পড়া জায় না এবং নতুন তৈরি করা যায় না। মারামতে ট্যাপ করুন।</string>
+    <string name="settings_sshkey_keystore_broken_subtitle">এই ডিভাইসের কিস্টোর Tidegate-এর SSH কী হারিয়েছে। সংরক্ষিত ব্যক্তিগত কীসমূহ পড়া জায় না এবং নতুন তৈরি করা যায় না। মারামতে ট্যাপ করুন।</string>
     <string name="settings_sshkey_reset_title">SSH কী সংরক্ষণ মারামত করবেন?</string>
     <string name="settings_sshkey_reset_body">এটি একটি নতুন কী তৈরি করে যাতে SSH কীসমূহ আবার তৈরি করা যায়।
 
-Haven-এ ইম্মদ্য সংরক্ষিত প্রত্যেক ব্যক্তিগত কী আবার আমদানি করা বা তৈরি করতে হবে। এগুলো ইম্মদ্য পড়া যাচ্ছে — যে কী তাদের রক্ষা করত তা হারিয়েছে, সাধারণত কারণ অ্যাটি অন্য উৎস থেকে পুনরায় ইনস্টোল করা হয়েছিল — তাই এটি আরও কিছু হারানোর পরিবর্তে অ্যাটি পুনরুদ্ধার করে।</string>
+Tidegate-এ ইম্মদ্য সংরক্ষিত প্রত্যেক ব্যক্তিগত কী আবার আমদানি করা বা তৈরি করতে হবে। এগুলো ইম্মদ্য পড়া যাচ্ছে — যে কী তাদের রক্ষা করত তা হারিয়েছে, সাধারণত কারণ অ্যাটি অন্য উৎস থেকে পুনরায় ইনস্টোল করা হয়েছিল — তাই এটি আরও কিছু হারানোর পরিবর্তে অ্যাটি পুনরুদ্ধার করে।</string>
     <string name="settings_sshkey_reset_confirm">মারামত</string>
 
     <!-- Inline-image consent (#583) -->

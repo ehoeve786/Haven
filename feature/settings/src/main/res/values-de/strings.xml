@@ -33,14 +33,14 @@
 
     <!-- Security section -->
     <string name="settings_biometric_title">Bildschirmsperre</string>
-    <string name="settings_biometric_subtitle">Authentifizierung zum Öffnen von Haven verlangen</string>
+    <string name="settings_biometric_subtitle">Authentifizierung zum Öffnen von Tidegate verlangen</string>
     <string name="settings_lock_timeout_title">Sperrzeitüberschreitung</string>
     <string name="settings_prevent_screenshots_title">Screenshots verhindern</string>
     <string name="settings_prevent_screenshots_subtitle">Bildschirmaufnahme und Task-Switcher-Vorschau blockieren</string>
 
     <!-- Logging section -->
     <string name="settings_exclude_recents_title">Aus letzten Apps ausblenden</string>
-    <string name="settings_exclude_recents_subtitle">Blendet Havens Karte in der Übersicht aus; Sitzungen laufen weiter. Über das App-Symbol wieder öffnen.</string>
+    <string name="settings_exclude_recents_subtitle">Blendet Tidegates Karte in der Übersicht aus; Sitzungen laufen weiter. Über das App-Symbol wieder öffnen.</string>
     <string name="settings_connection_logging_title">Verbindungsprotokoll</string>
     <string name="settings_connection_logging_subtitle">Verbindungsereignisse aufzeichnen (Verbinden, Trennen, Fehler). Lokal gespeichert, durch Geräteverschlüsselung geschützt</string>
     <string name="settings_view_connection_log_title">Verbindungsprotokoll anzeigen</string>
@@ -76,9 +76,9 @@
     <string name="settings_wayland_shell_title">Wayland-Desktop-Shell</string>
     <string name="settings_proot_idle_title">Inaktiven Linux-Gast automatisch stoppen</string>
     <string name="settings_proot_idle_off">Aus — der Linux-Gast läuft, bis du ihn stoppst</string>
-    <string name="settings_proot_idle_on">Stoppt den Gast %1$d Min. nachdem du Haven verlässt (ein laufender Gast-Dienst hält ihn aktiv)</string>
+    <string name="settings_proot_idle_on">Stoppt den Gast %1$d Min. nachdem du Tidegate verlässt (ein laufender Gast-Dienst hält ihn aktiv)</string>
     <string name="settings_proot_idle_dialog_title">Inaktiven Linux-Gast automatisch stoppen</string>
-    <string name="settings_proot_idle_dialog_body">Wenn Haven so lange im Hintergrund war, werden Terminals und Desktops des Linux-Gasts gestoppt, um Speicher freizugeben. Ein laufender Gast-Dienst hält ihn aktiv. Ein langer Auftrag in einem Hintergrund-Terminal würde ebenfalls gestoppt — lass dies aus, außer du willst Ressourcen bei Inaktivität freigeben.</string>
+    <string name="settings_proot_idle_dialog_body">Wenn Tidegate so lange im Hintergrund war, werden Terminals und Desktops des Linux-Gasts gestoppt, um Speicher freizugeben. Ein laufender Gast-Dienst hält ihn aktiv. Ein langer Auftrag in einem Hintergrund-Terminal würde ebenfalls gestoppt — lass dies aus, außer du willst Ressourcen bei Inaktivität freigeben.</string>
     <string name="settings_proot_idle_off_label">Aus</string>
     <string name="settings_shizuku_title">Shizuku-Integration</string>
     <string name="settings_shizuku_enabled">Aktiviert — automatische Akkuausnahme, Wayland-Socket-Freigabe</string>
@@ -109,7 +109,7 @@
     <string name="settings_backup_working">Wird verarbeitet…</string>
 
     <!-- About section -->
-    <string name="settings_about_title">Über Haven</string>
+    <string name="settings_about_title">Über Tidegate</string>
     <string name="settings_support_title">Haven unterstützen</string>
     <string name="settings_support_subtitle">Dem Entwickler einen Kaffee spendieren</string>
     <string name="settings_version_unknown">unbekannt</string>
@@ -145,8 +145,8 @@
     <string name="settings_backup_restore_button">Wiederherstellen</string>
 
     <!-- About dialog -->
-    <string name="settings_about_dialog_title">Über Haven</string>
-    <string name="settings_about_app_name">Haven</string>
+    <string name="settings_about_dialog_title">Über Tidegate</string>
+    <string name="settings_about_app_name">Tidegate SSH</string>
     <string name="settings_about_description">Open-Source SSH-, VNC-, RDP- &amp; Cloud-Speicher-Client für Android</string>
     <string name="settings_about_version">Version %1$s (Build %2$d)</string>
     <string name="settings_about_android">Android %1$s (API %2$d)</string>
@@ -442,7 +442,7 @@
     <string name="settings_terminal_locale_label">LANG</string>
     <string name="settings_terminal_opacity_title">Hintergrund-Deckkraft</string>
     <string name="settings_terminal_opacity_value">%1$d%%</string>
-    <string name="settings_terminal_opacity_hint" formatted="false">Unter 100% wird Haven durchscheinend und zeigt dein Hintergrundbild hinter jedem Bildschirm (Terminal, Listen, Einstellungen). Eine Überschreibung pro Verbindung gilt nur für dieses Terminal.</string>
+    <string name="settings_terminal_opacity_hint" formatted="false">Unter 100% wird Tidegate durchscheinend und zeigt dein Hintergrundbild hinter jedem Bildschirm (Terminal, Listen, Einstellungen). Eine Überschreibung pro Verbindung gilt nur für dieses Terminal.</string>
     <string name="settings_section_mcp">KI-Agent (MCP)</string>
     <string name="settings_audio_bridge_title">Proot-Audio (experimentell)</string>
     <string name="settings_audio_bridge_subtitle">Gibt Ton aus Linux-Apps über den Gerätelautsprecher aus, per PulseAudio-Brücke im Gast. Nur Ausgabe. Streamt dauerhaft, solange aktiviert — bei Nichtgebrauch ausschalten.</string>
@@ -471,8 +471,8 @@
     <string name="settings_rdp_desktop_size_width">Breite</string>
     <string name="settings_rdp_desktop_size_height">Höhe</string>
     <string name="settings_native_crash_title">App-Abstürze</string>
-    <string name="settings_native_crash_subtitle">Haven wurde unerwartet beendet. Der Bericht unten zeigt, wo — bitte hänge ihn an einen Fehlerbericht an.</string>
-    <string name="settings_native_crash_subtitle_no_trace">Haven wurde unerwartet beendet. Android hat dafür keinen ausführlichen Bericht gespeichert, bekannt sind nur Zeitpunkt und Signal — hänge sie trotzdem an einen Fehlerbericht an, das Signal grenzt die Ursache ein.</string>
+    <string name="settings_native_crash_subtitle">Tidegate wurde unerwartet beendet. Der Bericht unten zeigt, wo — bitte hänge ihn an einen Fehlerbericht an.</string>
+    <string name="settings_native_crash_subtitle_no_trace">Tidegate wurde unerwartet beendet. Android hat dafür keinen ausführlichen Bericht gespeichert, bekannt sind nur Zeitpunkt und Signal — hänge sie trotzdem an einen Fehlerbericht an, das Signal grenzt die Ursache ein.</string>
     <string name="settings_native_crash_no_trace">Für diesen Absturz wurde kein ausführlicher Bericht gespeichert.</string>
     <string name="settings_native_crash_copy">Bericht kopieren</string>
     <string name="settings_native_crash_copied">Absturzbericht kopiert</string>
@@ -482,15 +482,15 @@
         <item quantity="other">%1$d Minuten</item>
     </plurals>
     <string name="settings_hide_nav_bar_in_terminal_title">App-Tableiste im Terminal ausblenden</string>
-    <string name="settings_hide_nav_bar_in_terminal_subtitle">Blendet Havens untere Tableiste auf dem Terminal-Bildschirm aus. Status- und Navigationsleiste von Android bleiben sichtbar.</string>
+    <string name="settings_hide_nav_bar_in_terminal_subtitle">Blendet Tidegates untere Tableiste auf dem Terminal-Bildschirm aus. Status- und Navigationsleiste von Android bleiben sichtbar.</string>
     <string name="settings_credential_keystore_broken_title">Anmeldedaten-Speicher nicht verfügbar</string>
-    <string name="settings_credential_keystore_broken_subtitle">Der Schlüsselspeicher dieses Geräts hat Havens Anmeldeschlüssel verloren. Gespeicherte Passwörter können nicht gelesen und neue nicht gespeichert werden. Zum Reparieren tippen.</string>
+    <string name="settings_credential_keystore_broken_subtitle">Der Schlüsselspeicher dieses Geräts hat Tidegates Anmeldeschlüssel verloren. Gespeicherte Passwörter können nicht gelesen und neue nicht gespeichert werden. Zum Reparieren tippen.</string>
     <string name="settings_credential_reset_title">Anmeldedaten-Speicher reparieren?</string>
-    <string name="settings_credential_reset_body">Dies erzeugt einen neuen Anmeldeschlüssel, damit Passwörter wieder gespeichert werden können.\n\nJedes bereits in Haven gespeicherte Passwort, jede Passphrase und jedes Geheimnis muss erneut eingegeben werden. Sie sind bereits unlesbar — der Schlüssel, der sie schützte, ist weg — dies stellt also die App wieder her, statt weiteres zu verlieren.</string>
+    <string name="settings_credential_reset_body">Dies erzeugt einen neuen Anmeldeschlüssel, damit Passwörter wieder gespeichert werden können.\n\nJedes bereits in Tidegate gespeicherte Passwort, jede Passphrase und jedes Geheimnis muss erneut eingegeben werden. Sie sind bereits unlesbar — der Schlüssel, der sie schützte, ist weg — dies stellt also die App wieder her, statt weiteres zu verlieren.</string>
     <string name="settings_credential_reset_confirm">Reparieren</string>
     <string name="settings_credential_reset_cancel">Abbrechen</string>
     <string name="settings_update_check_title">Nach Updates suchen</string>
-    <string name="settings_update_check_subtitle">Beim Start von Haven nach einer neueren Version suchen, höchstens einmal pro Stunde. Standardmäßig aus.</string>
+    <string name="settings_update_check_subtitle">Beim Start von Tidegate nach einer neueren Version suchen, höchstens einmal pro Stunde. Standardmäßig aus.</string>
     <string name="settings_update_check_now_title">Jetzt prüfen</string>
     <string name="settings_update_check_now_subtitle">GitHub nach der neuesten Version fragen</string>
     <string name="settings_update_checking">Wird geprüft…</string>
@@ -498,13 +498,13 @@
     <string name="settings_update_check_available">Zum Öffnen der Release-Seite tippen</string>
     <string name="settings_update_check_up_to_date">Aktuell auf %1$s</string>
     <string name="settings_update_check_failed">Prüfung fehlgeschlagen: %1$s</string>
-    <string name="settings_update_check_other_channel">Diese Kopie wurde nicht aus einem GitHub-Release installiert, daher kann ein Release-Download sie nicht ersetzen. Aktualisiere dort, wo du Haven installiert hast.</string>
+    <string name="settings_update_check_other_channel">Diese Kopie wurde nicht aus einem GitHub-Release installiert, daher kann ein Release-Download sie nicht ersetzen. Aktualisiere dort, wo du Tidegate installiert hast.</string>
     <string name="settings_sshkey_keystore_broken_title">SSH-Key-Speicher nicht verfügbar</string>
-    <string name="settings_sshkey_keystore_broken_subtitle">Der Schlüsselbund dieses Geräts hat Havens SSH-Schlüssel verloren. Gespeicherte private Schlüssel können nicht gelesen und keine neuen erzeugt werden. Zum Reparieren tippen.</string>
+    <string name="settings_sshkey_keystore_broken_subtitle">Der Schlüsselbund dieses Geräts hat Tidegates SSH-Schlüssel verloren. Gespeicherte private Schlüssel können nicht gelesen und keine neuen erzeugt werden. Zum Reparieren tippen.</string>
     <string name="settings_sshkey_reset_title">SSH-Key-Speicher reparieren?</string>
     <string name="settings_sshkey_reset_body">Dies erzeugt einen neuen Schlüssel, damit SSH-Schlüssel wieder erzeugt werden können.
 
-Jeder bereits in Haven gespeicherte private Schlüssel muss erneut importiert oder erzeugt werden. Sie sind bereits unlesbar — der Schlüssel, der sie schützte, ist weg, meist weil die App aus einer anderen Quelle neu installiert wurde — dies stellt also die App wieder her, statt weiteres zu verlieren.</string>
+Jeder bereits in Tidegate gespeicherte private Schlüssel muss erneut importiert oder erzeugt werden. Sie sind bereits unlesbar — der Schlüssel, der sie schützte, ist weg, meist weil die App aus einer anderen Quelle neu installiert wurde — dies stellt also die App wieder her, statt weiteres zu verlieren.</string>
     <string name="settings_sshkey_reset_confirm">Reparieren</string>
 
     <!-- Inline-image consent (#583) -->

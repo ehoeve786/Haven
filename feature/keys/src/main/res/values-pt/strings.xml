@@ -151,7 +151,7 @@
     <string name="keys_fido_pin_help">Digite o PIN configurado na sua chave de segurança para continuar.</string>
     <string name="keys_fido_pin_wrong">PIN incorreto. %1$d tentativas restantes antes de a chave bloquear.</string>
     <string name="keys_fido_waiting_title">Chave de segurança necessária</string>
-    <string name="keys_fido_waiting_body">Conecte sua chave de segurança via USB ou toque-a na parte de trás do dispositivo para NFC. O Haven continuará automaticamente assim que ela for detectada.</string>
+    <string name="keys_fido_waiting_body">Conecte sua chave de segurança via USB ou toque-a na parte de trás do dispositivo para NFC. O Tidegate continuará automaticamente assim que ela for detectada.</string>
     <string name="keys_fido_touch_usb_title">Toque sua chave de segurança</string>
     <string name="keys_fido_touch_usb_body">Pressione o botão da sua chave de segurança agora para autorizar a solicitação.</string>
     <string name="keys_fido_touch_nfc_title">Segure sua chave de segurança</string>
@@ -240,7 +240,7 @@
     <string name="keys_section_collapse">Recolher %1$s</string>
     <string name="keys_section_expand">Expandir %1$s</string>
     <string name="keys_from_provider">Usar uma chave do %1$s</string>
-    <string name="keys_from_provider_hint">Escolha uma chave que esse app mantém. Ele assina em nome do Haven — a chave privada permanece onde está, inclusive em um token de hardware.</string>
+    <string name="keys_from_provider_hint">Escolha uma chave que esse app mantém. Ele assina em nome do Tidegate — a chave privada permanece onde está, inclusive em um token de hardware.</string>
     <string name="keys_totp_code_copied">Código copiado</string>
     <plurals name="keys_selected_count">
         <item quantity="one">%1$d selecionada</item>

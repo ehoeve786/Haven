@@ -35,7 +35,7 @@
 
     <!-- Battery optimization -->
     <string name="battery_title">সংযোগ সক্রিয় রাখবেন?</string>
-    <string name="battery_message">Android ব্যাটারি সাশ্রয়ের জন্য ব্যাকগ্রাউন্ড SSH সংযোগ বন্ধ করতে পারে। Haven-এর জন্য ব্যাটারি অপ্টিমাইজেশন নিষ্ক্রিয় করলে এটি প্রতিরোধ করা যায়।</string>
+    <string name="battery_message">Android ব্যাটারি সাশ্রয়ের জন্য ব্যাকগ্রাউন্ড SSH সংযোগ বন্ধ করতে পারে। Tidegate-এর জন্য ব্যাটারি অপ্টিমাইজেশন নিষ্ক্রিয় করলে এটি প্রতিরোধ করা যায়।</string>
 
     <!-- Workspace profiles -->
     <string name="workspace_section_title">কর্মক্ষেত্র</string>
@@ -67,7 +67,7 @@
     <string name="agent_deny">অস্বীকার করুন</string>
 
     <!-- i18n sweep #210 -->
-    <string name="app_biometric_locked_title">Haven লক করা আছে</string>
+    <string name="app_biometric_locked_title">Tidegate লক করা আছে</string>
     <string name="app_biometric_authenticate_prompt">চালিয়ে যেতে প্রমাণীকরণ করুন</string>
     <string name="app_biometric_open_device_settings">ডিভাইস সেটিংস খুলুন</string>
     <string name="app_desktop_app_windows_title">অ্যাপ্লিকেশন উইন্ডো</string>
@@ -116,7 +116,7 @@
     <string name="app_desktop_custom_cmd_unset">আগে সেশন কমান্ড সেট করুন</string>
     <string name="app_desktop_custom_cmd_edit">সেশন কমান্ড সম্পাদনা</string>
     <string name="app_desktop_custom_cmd_title">কাস্টম সেশন কমান্ড</string>
-    <string name="app_desktop_custom_cmd_description">সক্রিয় ডিস্ট্রোর ভেতরে Haven-এর X সার্ভারে চলে — termux-x11 প্যাটার্ন, যেমন dbus-launch startxfce4। আগে ডিস্ট্রোতে ডেস্কটপের প্যাকেজ ইনস্টল করুন। X11 ডেস্কটপ সফটওয়্যার রেন্ডারিং ব্যবহার করে: যেসব ডেস্কটপে GL কম্পোজিটর লাগে (GNOME Shell, KWin) সেগুলো চালু হবে না।</string>
+    <string name="app_desktop_custom_cmd_description">সক্রিয় ডিস্ট্রোর ভেতরে Tidegate-এর X সার্ভারে চলে — termux-x11 প্যাটার্ন, যেমন dbus-launch startxfce4। আগে ডিস্ট্রোতে ডেস্কটপের প্যাকেজ ইনস্টল করুন। X11 ডেস্কটপ সফটওয়্যার রেন্ডারিং ব্যবহার করে: যেসব ডেস্কটপে GL কম্পোজিটর লাগে (GNOME Shell, KWin) সেগুলো চালু হবে না।</string>
     <string name="app_desktop_custom_cmd_label">সেশন কমান্ড</string>
     <string name="app_desktop_custom_cmd_save_start">সংরক্ষণ করে চালু করুন</string>
     <string name="app_desktop_de_with_size">%1$s (%2$s)</string>
@@ -138,7 +138,7 @@
     <string name="app_agent_action_requested">Agent কার্য অনুরোধ করা হয়েছে</string>
     <string name="app_agent_from_client">প্রেরক: %1$s</string>
     <string name="app_agent_tool">Tool: %1$s</string>
-    <string name="app_agent_bypass_label">\'%1$s\' থেকে সব MCP অনুরোধ Haven পুনরায় চালু না হওয়া পর্যন্ত অনুমোদন করুন</string>
+    <string name="app_agent_bypass_label">\'%1$s\' থেকে সব MCP অনুরোধ Tidegate পুনরায় চালু না হওয়া পর্যন্ত অনুমোদন করুন</string>
     <string name="app_agent_bypass_description">ধ্বংসাত্মক অপারেশন অন্তর্ভুক্ত (টার্মিনাল ইনপুট, ফাইল লেখা/মোছা, APK ইনস্টল)। অ্যাপ বন্ধ হলে সাফ হয়।</string>
     <string name="app_agent_auto_allow_window">স্বয়ংক্রিয়-অনুমোদন উইন্ডো:</string>
     <string name="app_agent_minutes">%1$dm</string>
@@ -153,10 +153,10 @@
     <string name="app_present_preparing_audio">অডিও প্রস্তুত হচ্ছে…</string>
 
     <!-- i18n sweep #210 (follow-up batch) -->
-    <string name="app_biometric_blocked_no_activity_title">Haven লক করা আছে</string>
+    <string name="app_biometric_blocked_no_activity_title">Tidegate লক করা আছে</string>
     <string name="app_biometric_blocked_no_activity_body">এই প্রসঙ্গে authentication prompt দেখানো যাচ্ছে না।</string>
     <string name="app_biometric_not_enrolled_title">একটি screen lock সেট আপ করুন</string>
-    <string name="app_biometric_not_enrolled_body">Haven app-lock চালু আছে, কিন্তু এই ডিভাইসে কোনো screen lock বা biometric নথিভুক্ত নেই। আনলক করতে ডিভাইস Settings-এ একটি সেট আপ করুন।</string>
+    <string name="app_biometric_not_enrolled_body">Tidegate app-lock চালু আছে, কিন্তু এই ডিভাইসে কোনো screen lock বা biometric নথিভুক্ত নেই। আনলক করতে ডিভাইস Settings-এ একটি সেট আপ করুন।</string>
     <string name="app_biometric_no_hardware_title">Authentication উপলব্ধ নয়</string>
     <string name="app_biometric_no_hardware_body">এই ডিভাইস authenticate করতে পারে না (কোনো biometric hardware বা device credential নেই)। আনলক করতে Settings-এ একটি PIN বা পাসওয়ার্ড সেট আপ করুন।</string>
     <string name="app_present_minimize">ছোট করুন</string>
@@ -164,7 +164,7 @@
 
     <!-- Local Linux desktop manager -->
     <string name="app_desktop_manager_title">স্থানীয় Linux ডেস্কটপ</string>
-    <string name="app_desktop_manager_description">Haven-এর ভিতরে একটি সম্পূর্ণ Linux ডেস্কটপ চালান। একটি ডিস্ট্রো বেছে নিন, একটি ডেস্কটপ পরিবেশ (Xfce4, Openbox, বা Sway) ইনস্টল করুন, তারপর চালু করুন — কোনো আলাদা সার্ভার বা সংযোগের প্রয়োজন নেই।</string>
+    <string name="app_desktop_manager_description">Tidegate-এর ভিতরে একটি সম্পূর্ণ Linux ডেস্কটপ চালান। একটি ডিস্ট্রো বেছে নিন, একটি ডেস্কটপ পরিবেশ (Xfce4, Openbox, বা Sway) ইনস্টল করুন, তারপর চালু করুন — কোনো আলাদা সার্ভার বা সংযোগের প্রয়োজন নেই।</string>
 
     <!-- App windows / installed-app launcher (#250) -->
     <string name="app_desktop_app_window_pin_home_cd">%1$s হোম স্ক্রিনে যোগ করুন</string>
@@ -287,11 +287,11 @@
     <string name="app_desktop_open_terminal_cd">%1$s-এ টার্মিনাল খুলুন</string>
     <string name="app_present_fullscreen">পূর্ণ স্ক্রিন</string>
     <string name="app_present_exit_fullscreen">পূর্ণ স্ক্রিন থেকে বের হন</string>
-    <string name="tasker_plugin_name">Haven সার্ভারে কমান্ড চালান</string>
-    <string name="tasker_edit_title">একটি সংরক্ষিত Haven SSH সংযোগে শেল কমান্ড চালান।</string>
+    <string name="tasker_plugin_name">Tidegate সার্ভারে কমান্ড চালান</string>
+    <string name="tasker_edit_title">একটি সংরক্ষিত Tidegate SSH সংযোগে শেল কমান্ড চালান।</string>
     <string name="tasker_loading">সংযোগ লোড হচ্ছে…</string>
-    <string name="tasker_no_ssh_profiles">কোনো SSH সংযোগ সংরক্ষিত নেই। প্রথমে Haven-এ একটি যোগ করুন।</string>
-    <string name="tasker_field_server">Haven সার্ভার</string>
+    <string name="tasker_no_ssh_profiles">কোনো SSH সংযোগ সংরক্ষিত নেই। প্রথমে Tidegate-এ একটি যোগ করুন।</string>
+    <string name="tasker_field_server">Tidegate সার্ভার</string>
     <string name="tasker_field_command">কমান্ড</string>
     <string name="tasker_field_command_help">লগইন শেলে চলে। চালানোর আগে Tasker/MacroDroid ভেরিয়েবল প্রতিস্থাপিত হয়।</string>
     <string name="tasker_toggle_overlay">কমান্ডটি একটি লাইভ টার্মিনালে দেখান</string>
@@ -319,7 +319,7 @@
     <string name="backup_pull_toast_success">ব্যাকআপ পুনরুদ্ধার হয়েছে</string>
     <string name="backup_pull_toast_failure">ব্যাকআপ টানা ব্যর্থ: %1$s</string>
     <string name="backup_pull_started">ব্যাকগ্রাউন্ডে ব্যাকআপ আনা হচ্ছে…</string>
-    <string name="backup_pull_no_password">কোনো পাসওয়ার্ড সংরক্ষিত নেই। Haven খোলা হচ্ছে…</string>
+    <string name="backup_pull_no_password">কোনো পাসওয়ার্ড সংরক্ষিত নেই। Tidegate খোলা হচ্ছে…</string>
     <plurals name="app_agent_more_pending">
         <item quantity="one">＋আরও %1$dটি অনুরোধ এর পেছনে অপেক্ষায় — এটির পরে সেটি দেখবেন</item>
         <item quantity="other">＋আরও %1$dটি অনুরোধ এর পেছনে অপেক্ষায় — এটির পরে সেগুলি দেখবেন</item>
@@ -337,6 +337,6 @@
         <item quantity="other">%1$dটি রিমোট</item>
     </plurals>
     <string name="update_notification_channel">অ্যাপ আপডেট</string>
-    <string name="update_notification_title">Haven %1$s পাওয়া যাচ্ছে</string>
+    <string name="update_notification_title">Tidegate %1$s পাওয়া যাচ্ছে</string>
     <string name="update_notification_text">রিলিজ পেজ খুলতে ট্যাপ করুন।</string>
 </resources>

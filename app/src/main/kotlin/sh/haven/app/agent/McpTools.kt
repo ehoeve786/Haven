@@ -5295,7 +5295,7 @@ internal class McpTools(
                 )
                 val notif = NotificationCompat.Builder(context, INSTALL_NOTIFICATION_CHANNEL_ID)
                     .setSmallIcon(android.R.drawable.stat_sys_download_done)
-                    .setContentTitle("Haven update ready")
+                    .setContentTitle("Tidegate update ready")
                     .setContentText(
                         versionName?.let { "Tap to install Haven $it" }
                             ?: "Tap to install the staged update",

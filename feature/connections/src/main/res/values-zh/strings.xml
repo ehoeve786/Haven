@@ -70,10 +70,10 @@
 
     <!-- Battery optimization dialog -->
     <string name="connections_battery_title">保持连接？</string>
-    <string name="connections_battery_message">Android 可能会为省电而关闭后台 SSH 连接。为 Haven 禁用电池优化可以防止此情况。</string>
-    <string name="connections_battery_redropped_message">Haven 的电池优化豁免已被关闭 — 这通常是应用更新的副作用。没有它，Android 可能会再次关闭后台 SSH 连接。重新允许？</string>
+    <string name="connections_battery_message">Android 可能会为省电而关闭后台 SSH 连接。为 Tidegate 禁用电池优化可以防止此情况。</string>
+    <string name="connections_battery_redropped_message">Tidegate 的电池优化豁免已被关闭 — 这通常是应用更新的副作用。没有它，Android 可能会再次关闭后台 SSH 连接。重新允许？</string>
     <string name="connections_battery_dont_ask_again">不再询问</string>
-    <string name="connections_process_killed_banner">Android 在 %1$s 终止了 Haven（%2$s）— 后台会话随之丢失。</string>
+    <string name="connections_process_killed_banner">Android 在 %1$s 终止了 Tidegate（%2$s）— 后台会话随之丢失。</string>
     <string name="process_exit_cause_debug_app">“选择调试应用”开发者选项</string>
     <string name="process_exit_cause_force_stop">强制停止</string>
     <string name="process_exit_cause_memory">内存不足</string>
@@ -282,7 +282,7 @@
     <string name="connections_fido_pin_help">此 SSH 密钥需要验证。请输入安全密钥上设置的 PIN 码以继续。</string>
     <string name="connections_fido_pin_wrong">PIN 码错误。安全密钥锁定前还有 %1$d 次尝试机会。</string>
     <string name="connections_fido_waiting_title">需要安全密钥</string>
-    <string name="connections_fido_waiting_body">通过 USB 插入安全密钥，或将其贴在设备背面以使用 NFC。检测到密钥后 Haven 会自动继续。</string>
+    <string name="connections_fido_waiting_body">通过 USB 插入安全密钥，或将其贴在设备背面以使用 NFC。检测到密钥后 Tidegate 会自动继续。</string>
     <string name="connections_fido_touch_usb_title">触摸您的安全密钥</string>
     <string name="connections_fido_touch_usb_body">现在按下安全密钥上的按钮以授权 SSH 签名。密钥可能会闪烁提示等待操作。</string>
     <string name="connections_fido_touch_nfc_title">贴住您的安全密钥</string>
@@ -314,7 +314,7 @@
     <string name="connections_vm_step_open_port_body">在终端应用的设置中，将 8022 端口添加到监听端口列表。</string>
     <string name="connections_vm_step_password_body">在终端应用中运行。系统会提示为 droid 用户设置密码。</string>
     <string name="connections_vm_step_password_hint">然后通过 droid@localhost:8022 连接</string>
-    <string name="connections_vm_step_vnc_body">用于通过 Haven 的桌面标签页进行远程桌面访问。</string>
+    <string name="connections_vm_step_vnc_body">用于通过 Tidegate 的桌面标签页进行远程桌面访问。</string>
     <string name="connections_vm_step_desktop_body">Xfce4 轻量且通过 VNC 表现良好。</string>
     <string name="connections_vm_step_apps_body">文件管理器、文本编辑器、图片查看器、浏览器、计算器。</string>
 
@@ -359,8 +359,8 @@
     <string name="connections_section_embedded_vnc">嵌入式 VNC</string>
     <string name="connections_section_reticulum">Reticulum</string>
     <string name="connections_section_routing">路由</string>
-    <string name="connections_toggle_mcp_tunnel">公开 Haven 的 MCP 服务器</string>
-    <string name="connections_helper_mcp_tunnel">将 Haven 的 MCP 开放给此连接的每个会话——它们可访问 http://127.0.0.1:8730/mcp，并（通过环回）跳过配对与同意。连接时生效。如需在不打开会话的情况下常驻访问，请在 设置 → 代理端点 中将其设为常驻 MCP 连接。</string>
+    <string name="connections_toggle_mcp_tunnel">公开 Tidegate 的 MCP 服务器</string>
+    <string name="connections_helper_mcp_tunnel">将 Tidegate 的 MCP 开放给此连接的每个会话——它们可访问 http://127.0.0.1:8730/mcp，并（通过环回）跳过配对与同意。连接时生效。如需在不打开会话的情况下常驻访问，请在 设置 → 代理端点 中将其设为常驻 MCP 连接。</string>
     <string name="connections_section_reconnect">重新连接</string>
     <string name="connections_local_shell_android_desc">运行原生 Android shell (/system/bin/sh)。可访问 Android 命令、文件系统和 root（如果可用）。</string>
     <string name="connections_local_shell_proot_desc">通过 PRoot 在本地运行 Alpine Linux shell。首次使用时下载最小 rootfs（约 4MB）。无需 root 或网络连接。</string>
@@ -392,7 +392,7 @@
     <string name="connections_helper_vnc_host_via_ssh">VNC 服务器从 SSH 服务器可访问的位置 — 如果是同一台机器，通常为 127.0.0.1（wayvnc 等仅绑定回环地址）。</string>
     <string name="connections_helper_vnc_auth">经典 VncAuth（8 字符密码）请将用户名留空。VeNCrypt（wayvnc、TigerVNC）请填写用户名 — 支持更长的密码和 TLS 加密。</string>
     <string name="connections_helper_rdp_host_via_ssh">RDP 服务器从 SSH 服务器可访问的位置 — 如果是同一台机器，通常为 127.0.0.1。</string>
-    <string name="connections_helper_rdp_nla">默认开启。如果服务器拒绝 Haven 的 NLA，请关闭（某些 Windows Server 2025 配置 — 服务器必须禁用\"Require NLA\"才能仅通过 SSL 连接）。</string>
+    <string name="connections_helper_rdp_nla">默认开启。如果服务器拒绝 Tidegate 的 NLA，请关闭（某些 Windows Server 2025 配置 — 服务器必须禁用\"Require NLA\"才能仅通过 SSL 连接）。</string>
     <string name="connections_action_manage_tunnels">管理隧道…</string>
     <string name="connections_helper_cloudflare_routing">通过 Cloudflare Tunnel 连接器路由。上面的主机用作隧道主机名；端口不适用（连接器决定上游 SSH 目标）。</string>
     <string name="connections_vnc_depth_24">24 位色彩（最佳质量）</string>
@@ -600,7 +600,7 @@
     <string name="connections_identity_help">所有 Reticulum 连接共用。将你加入白名单的服务器以此哈希为准。</string>
     <string name="connections_identity_import">导入身份文件…</string>
     <string name="connections_identity_imported">已导入身份：%1$s</string>
-    <string name="connections_identity_imported_restart">已导入身份：%1$s。重启 Haven 后连接才会使用它。</string>
+    <string name="connections_identity_imported_restart">已导入身份：%1$s。重启 Tidegate 后连接才会使用它。</string>
     <string name="connections_identity_not_an_identity">该文件不是 Reticulum 身份。未做任何更改。</string>
     <string name="connections_identity_install_failed">无法安装该身份：%1$s。原有身份仍然保留。</string>
     <string name="connections_identity_unreadable">无法读取该文件。</string>

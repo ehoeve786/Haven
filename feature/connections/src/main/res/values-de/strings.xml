@@ -70,10 +70,10 @@
 
     <!-- Battery optimization dialog -->
     <string name="connections_battery_title">Verbindungen aufrechterhalten?</string>
-    <string name="connections_battery_message">Android kann SSH-Hintergrundverbindungen zur Akkuschonung beenden. Das Deaktivieren der Akkuoptimierung für Haven verhindert dies.</string>
-    <string name="connections_battery_redropped_message">Die Akku-Ausnahme für Haven wurde deaktiviert — oft eine Nebenwirkung eines App-Updates. Ohne sie kann Android SSH-Hintergrundverbindungen wieder beenden. Erneut erlauben?</string>
+    <string name="connections_battery_message">Android kann SSH-Hintergrundverbindungen zur Akkuschonung beenden. Das Deaktivieren der Akkuoptimierung für Tidegate verhindert dies.</string>
+    <string name="connections_battery_redropped_message">Die Akku-Ausnahme für Tidegate wurde deaktiviert — oft eine Nebenwirkung eines App-Updates. Ohne sie kann Android SSH-Hintergrundverbindungen wieder beenden. Erneut erlauben?</string>
     <string name="connections_battery_dont_ask_again">Nicht mehr fragen</string>
-    <string name="connections_process_killed_banner">Android hat Haven um %1$s beendet (%2$s) — Hintergrundsitzungen gingen damit verloren.</string>
+    <string name="connections_process_killed_banner">Android hat Tidegate um %1$s beendet (%2$s) — Hintergrundsitzungen gingen damit verloren.</string>
     <string name="process_exit_cause_debug_app">die Entwickleroption „Debug-App auswählen“</string>
     <string name="process_exit_cause_force_stop">Beenden erzwungen</string>
     <string name="process_exit_cause_memory">wenig Speicher</string>
@@ -238,7 +238,7 @@
     <string name="connections_fido_pin_help">Dieser SSH-Schlüssel wurde mit verify-required registriert. Gib zum Fortfahren die auf deinem Sicherheitsschlüssel eingerichtete PIN ein.</string>
     <string name="connections_fido_pin_wrong">Falsche PIN. Noch %1$d Versuche, bevor der Schlüssel gesperrt wird.</string>
     <string name="connections_fido_waiting_title">Sicherheitsschlüssel erforderlich</string>
-    <string name="connections_fido_waiting_body">Schließe deinen Sicherheitsschlüssel per USB an oder halte ihn für NFC an die Rückseite des Geräts. Haven fährt automatisch fort, sobald er erkannt wird.</string>
+    <string name="connections_fido_waiting_body">Schließe deinen Sicherheitsschlüssel per USB an oder halte ihn für NFC an die Rückseite des Geräts. Tidegate fährt automatisch fort, sobald er erkannt wird.</string>
     <string name="connections_fido_touch_usb_title">Sicherheitsschlüssel berühren</string>
     <string name="connections_fido_touch_usb_body">Drücke jetzt die Taste auf deinem Sicherheitsschlüssel, um die SSH-Signatur zu bestätigen. Der Schlüssel blinkt möglicherweise, während er wartet.</string>
     <string name="connections_fido_touch_nfc_title">Sicherheitsschlüssel auflegen</string>
@@ -255,7 +255,7 @@
     <string name="connections_vm_step_open_port_body">Füge in den Einstellungen der Terminal-App Port 8022 zur Liste der überwachten Ports hinzu.</string>
     <string name="connections_vm_step_password_body">In der Terminal-App ausführen. Du wirst aufgefordert, ein Passwort für den Benutzer droid zu setzen.</string>
     <string name="connections_vm_step_password_hint">Dann verbinden mit: droid@localhost:8022</string>
-    <string name="connections_vm_step_vnc_body">Für den Fernzugriff auf den Desktop über Havens Desktop-Tab.</string>
+    <string name="connections_vm_step_vnc_body">Für den Fernzugriff auf den Desktop über Tidegates Desktop-Tab.</string>
     <string name="connections_vm_step_desktop_body">Xfce4 ist ressourcenschonend und funktioniert gut über VNC.</string>
     <string name="connections_vm_step_apps_body">Dateimanager, Texteditor, Bildbetrachter, Browser, Taschenrechner.</string>
 
@@ -361,8 +361,8 @@
     <string name="connections_section_embedded_vnc">Eingebettetes VNC</string>
     <string name="connections_section_reticulum">Reticulum</string>
     <string name="connections_section_routing">Routing</string>
-    <string name="connections_toggle_mcp_tunnel">Havens MCP-Server bereitstellen</string>
-    <string name="connections_helper_mcp_tunnel">Stellt Havens MCP jeder Sitzung dieser Verbindung bereit — sie erreichen http://127.0.0.1:8730/mcp und überspringen (über Loopback) Kopplung und Zustimmung. Wird beim Verbinden angewendet. Für dauerhaften Zugriff ohne offene Sitzung diese unter Einstellungen → Agent-Endpunkt als Dauerhafte MCP-Verbindung festlegen.</string>
+    <string name="connections_toggle_mcp_tunnel">Tidegates MCP-Server bereitstellen</string>
+    <string name="connections_helper_mcp_tunnel">Stellt Tidegates MCP jeder Sitzung dieser Verbindung bereit — sie erreichen http://127.0.0.1:8730/mcp und überspringen (über Loopback) Kopplung und Zustimmung. Wird beim Verbinden angewendet. Für dauerhaften Zugriff ohne offene Sitzung diese unter Einstellungen → Agent-Endpunkt als Dauerhafte MCP-Verbindung festlegen.</string>
     <string name="connections_section_reconnect">Neu verbinden</string>
     <string name="connections_local_shell_android_desc">Führt die native Android-Shell (/system/bin/sh) aus. Zugriff auf Android-Befehle, Dateisystem und Root (falls verfügbar).</string>
     <string name="connections_local_shell_proot_desc">Führt eine Alpine-Linux-Shell lokal über PRoot aus. Lädt bei der ersten Verwendung ein minimales rootfs (~4 MB) herunter. Kein Root oder keine Netzwerkverbindung erforderlich.</string>
@@ -394,7 +394,7 @@
     <string name="connections_helper_vnc_host_via_ssh">Wo der VNC-Server vom SSH-Server aus erreichbar ist — normalerweise 127.0.0.1, wenn es dieselbe Maschine ist (wayvnc usw. binden nur an Loopback).</string>
     <string name="connections_helper_vnc_auth">Benutzername für klassisches VncAuth (8-Zeichen-Passwort) leer lassen. Benutzername für VeNCrypt (wayvnc, TigerVNC) ausfüllen — unterstützt längere Passwörter und TLS-Verschlüsselung.</string>
     <string name="connections_helper_rdp_host_via_ssh">Wo der RDP-Server vom SSH-Server aus erreichbar ist — normalerweise 127.0.0.1, wenn es dieselbe Maschine ist.</string>
-    <string name="connections_helper_rdp_nla">Standardmäßig ein. Ausschalten, wenn der Server Havens NLA ablehnt (einige Windows Server 2025-Setups — auf dem Server muss \"Require NLA\" deaktiviert sein, damit eine reine SSL-Verbindung möglich ist).</string>
+    <string name="connections_helper_rdp_nla">Standardmäßig ein. Ausschalten, wenn der Server Tidegates NLA ablehnt (einige Windows Server 2025-Setups — auf dem Server muss \"Require NLA\" deaktiviert sein, damit eine reine SSL-Verbindung möglich ist).</string>
     <string name="connections_action_manage_tunnels">Tunnel verwalten…</string>
     <string name="connections_helper_cloudflare_routing">Routing über einen Cloudflare-Tunnel-Connector. Der Host oben wird als Tunnel-Hostname verwendet; der Port ist nicht relevant (der Connector bestimmt das Upstream-SSH-Ziel).</string>
     <string name="connections_vnc_depth_24">24-Bit-Farbe (beste Qualität)</string>
@@ -602,7 +602,7 @@
     <string name="connections_identity_help">Von allen Reticulum-Verbindungen gemeinsam genutzt. Ein Server, der dich freischaltet, geht nach diesem Hash.</string>
     <string name="connections_identity_import">Identitätsdatei importieren…</string>
     <string name="connections_identity_imported">Identität importiert: %1$s</string>
-    <string name="connections_identity_imported_restart">Identität importiert: %1$s. Starte Haven neu, damit Verbindungen sie verwenden.</string>
+    <string name="connections_identity_imported_restart">Identität importiert: %1$s. Starte Tidegate neu, damit Verbindungen sie verwenden.</string>
     <string name="connections_identity_not_an_identity">Diese Datei ist keine Reticulum-Identität. Es wurde nichts geändert.</string>
     <string name="connections_identity_install_failed">Identität konnte nicht installiert werden: %1$s. Die vorherige bleibt bestehen.</string>
     <string name="connections_identity_unreadable">Diese Datei konnte nicht gelesen werden.</string>

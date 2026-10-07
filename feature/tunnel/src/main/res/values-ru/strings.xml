@@ -24,17 +24,17 @@
     <string name="tunnel_wireguard_help">Вставьте конфигурацию в стиле wg-quick или загрузите файл .conf. Читаются только поля [Interface] и [Peer]; неизвестные ключи (PostUp, Table, MTU) игнорируются. Конечные точки по имени хоста и DNS-имена разрешаются при запуске туннеля.</string>
     <string name="tunnel_load_from_file">Загрузить из файла…</string>
     <string name="tunnel_wireguard_config">Конфигурация WireGuard</string>
-    <string name="tunnel_tailscale_help">Создайте authkey в админ-консоли Tailscale (Settings → Keys) или в CLI Headscale (`headscale preauthkeys create`). Haven присоединяется к вашему tailnet при первом использовании и затем повторно использует состояние узла, поэтому одноразового ключа достаточно. Многоразовые ключи позволяют переподключаться после переустановки.</string>
+    <string name="tunnel_tailscale_help">Создайте authkey в админ-консоли Tailscale (Settings → Keys) или в CLI Headscale (`headscale preauthkeys create`). Tidegate присоединяется к вашему tailnet при первом использовании и затем повторно использует состояние узла, поэтому одноразового ключа достаточно. Многоразовые ключи позволяют переподключаться после переустановки.</string>
     <string name="tunnel_tailscale_authkey_label">Ключ аутентификации (tskey-auth-…)</string>
     <string name="tunnel_tailscale_control_url_label">URL управляющего сервера (необязательно)</string>
     <string name="tunnel_tailscale_control_url_help">Оставьте пустым для размещённого управляющего сервера Tailscale. Укажите URL Headscale для самостоятельно размещённого сервера координации.</string>
-    <string name="tunnel_netbird_help">Создайте ключ настройки в панели NetBird (Setup Keys → Add setup key). Haven присоединяется к вашей сети при первом использовании и затем переиспользует состояние узла, поэтому достаточно одноразового ключа. Многоразовые ключи позволяют переподключиться после переустановки.</string>
+    <string name="tunnel_netbird_help">Создайте ключ настройки в панели NetBird (Setup Keys → Add setup key). Tidegate присоединяется к вашей сети при первом использовании и затем переиспользует состояние узла, поэтому достаточно одноразового ключа. Многоразовые ключи позволяют переподключиться после переустановки.</string>
     <string name="tunnel_netbird_setup_key_label">Ключ настройки</string>
     <string name="tunnel_netbird_management_url_label">URL управления (необязательно)</string>
     <string name="tunnel_netbird_management_url_help">Оставьте пустым для размещённого управления NetBird. Укажите URL вашего сервера для самостоятельно размещённой службы управления.</string>
 
     <!-- Cloudflare Access SSH tunnel (#154) -->
-    <string name="cf_experimental_banner">Экспериментально — Haven реализует тот же сетевой протокол WebSocket, что и `cloudflared access ssh`. Протестировано на небольшом наборе тенантов; сообщайте о несоответствиях через GitHub #154.</string>
+    <string name="cf_experimental_banner">Экспериментально — Tidegate реализует тот же сетевой протокол WebSocket, что и `cloudflared access ssh`. Протестировано на небольшом наборе тенантов; сообщайте о несоответствиях через GitHub #154.</string>
     <string name="cf_intro_blurb">Направьте SSH через опубликованное имя хоста Cloudflare Tunnel — внутриприложенческий эквивалент `cloudflared access ssh --hostname &lt;host&gt;`. Для публичных маршрутов Tunnel нужно только имя хоста. Маршрутам, защищённым Access, дополнительно требуется JWT — нажмите «Войти», чтобы получить его через IdP вашей команды.</string>
     <string name="cf_field_hostname">Имя хоста (напр. ssh.example.com)</string>
     <string name="cf_jwt_none">Без JWT — работает только для незащищённых маршрутов Tunnel</string>

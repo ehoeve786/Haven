@@ -153,7 +153,7 @@
     <string name="keys_fido_pin_help">계속하려면 보안 키에 설정된 PIN을 입력하세요.</string>
     <string name="keys_fido_pin_wrong">PIN이 잘못되었습니다. 키가 잠기기까지 %1$d회 남았습니다.</string>
     <string name="keys_fido_waiting_title">보안 키 필요</string>
-    <string name="keys_fido_waiting_body">보안 키를 USB로 연결하거나 NFC의 경우 기기 뒷면에 탭하세요. 감지되면 Haven이 자동으로 계속됩니다.</string>
+    <string name="keys_fido_waiting_body">보안 키를 USB로 연결하거나 NFC의 경우 기기 뒷면에 탭하세요. 감지되면 Tidegate이 자동으로 계속됩니다.</string>
     <string name="keys_fido_touch_usb_title">보안 키를 터치하세요</string>
     <string name="keys_fido_touch_usb_body">요청을 승인하려면 지금 보안 키의 버튼을 누르세요.</string>
     <string name="keys_fido_touch_nfc_title">보안 키를 대고 계세요</string>
@@ -241,7 +241,7 @@
     <string name="keys_section_collapse">%1$s 접기</string>
     <string name="keys_section_expand">%1$s 펼치기</string>
     <string name="keys_from_provider">%1$s의 키 사용</string>
-    <string name="keys_from_provider_hint">해당 앱이 보관 중인 키를 선택하세요. Haven을 대신해 서명하며, 개인 키는 하드웨어 토큰을 포함해 있던 자리에 그대로 남습니다.</string>
+    <string name="keys_from_provider_hint">해당 앱이 보관 중인 키를 선택하세요. Tidegate을 대신해 서명하며, 개인 키는 하드웨어 토큰을 포함해 있던 자리에 그대로 남습니다.</string>
     <string name="keys_totp_code_copied">코드가 복사됨</string>
     <plurals name="keys_selected_count">
         <item quantity="other">%1$d개 선택됨</item>

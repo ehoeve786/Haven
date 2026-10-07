@@ -70,10 +70,10 @@
 
     <!-- Battery optimization dialog -->
     <string name="connections_battery_title">Поддерживать соединения?</string>
-    <string name="connections_battery_message">Android может закрывать фоновые SSH-подключения для экономии батареи. Отключение оптимизации батареи для Haven предотвращает это.</string>
-    <string name="connections_battery_redropped_message">Исключение Haven из оптимизации батареи было отключено — часто это побочный эффект обновления приложения. Без него Android может снова закрывать фоновые SSH-подключения. Разрешить снова?</string>
+    <string name="connections_battery_message">Android может закрывать фоновые SSH-подключения для экономии батареи. Отключение оптимизации батареи для Tidegate предотвращает это.</string>
+    <string name="connections_battery_redropped_message">Исключение Tidegate из оптимизации батареи было отключено — часто это побочный эффект обновления приложения. Без него Android может снова закрывать фоновые SSH-подключения. Разрешить снова?</string>
     <string name="connections_battery_dont_ask_again">Больше не спрашивать</string>
-    <string name="connections_process_killed_banner">Android завершил Haven в %1$s (%2$s) — фоновые сессии были потеряны.</string>
+    <string name="connections_process_killed_banner">Android завершил Tidegate в %1$s (%2$s) — фоновые сессии были потеряны.</string>
     <string name="process_exit_cause_debug_app">параметр разработчика «Выбрать приложение для отладки»</string>
     <string name="process_exit_cause_force_stop">принудительная остановка</string>
     <string name="process_exit_cause_memory">нехватка памяти</string>
@@ -238,7 +238,7 @@
     <string name="connections_fido_pin_help">Этот ключ SSH зарегистрирован с verify-required. Введите PIN, заданный на аппаратном ключе, чтобы продолжить.</string>
     <string name="connections_fido_pin_wrong">Неверный PIN. Осталось попыток до блокировки ключа: %1$d.</string>
     <string name="connections_fido_waiting_title">Требуется аппаратный ключ</string>
-    <string name="connections_fido_waiting_body">Подключите аппаратный ключ по USB или приложите его к задней панели для NFC. Haven продолжит автоматически, как только обнаружит ключ.</string>
+    <string name="connections_fido_waiting_body">Подключите аппаратный ключ по USB или приложите его к задней панели для NFC. Tidegate продолжит автоматически, как только обнаружит ключ.</string>
     <string name="connections_fido_touch_usb_title">Коснитесь аппаратного ключа</string>
     <string name="connections_fido_touch_usb_body">Нажмите кнопку на аппаратном ключе, чтобы разрешить подпись SSH. Ключ может мигать, показывая ожидание.</string>
     <string name="connections_fido_touch_nfc_title">Держите аппаратный ключ</string>
@@ -255,7 +255,7 @@
     <string name="connections_vm_step_open_port_body">В настройках приложения «Терминал» добавьте порт 8022 в список прослушиваемых портов.</string>
     <string name="connections_vm_step_password_body">Выполните в приложении «Терминал». Вам предложат задать пароль для пользователя droid.</string>
     <string name="connections_vm_step_password_hint">Затем подключитесь: droid@localhost:8022</string>
-    <string name="connections_vm_step_vnc_body">Для доступа к удалённому рабочему столу через вкладку Desktop в Haven.</string>
+    <string name="connections_vm_step_vnc_body">Для доступа к удалённому рабочему столу через вкладку Desktop в Tidegate.</string>
     <string name="connections_vm_step_desktop_body">Xfce4 лёгкий и хорошо работает через VNC.</string>
     <string name="connections_vm_step_apps_body">Файловый менеджер, текстовый редактор, просмотрщик изображений, браузер, калькулятор.</string>
 
@@ -361,8 +361,8 @@
     <string name="connections_section_embedded_vnc">Встроенный VNC</string>
     <string name="connections_section_reticulum">Reticulum</string>
     <string name="connections_section_routing">Маршрутизация</string>
-    <string name="connections_toggle_mcp_tunnel">Открыть доступ к MCP-серверу Haven</string>
-    <string name="connections_helper_mcp_tunnel">Открывает MCP Haven для каждого сеанса этого подключения — они обращаются к http://127.0.0.1:8730/mcp и (через loopback) пропускают сопряжение и согласие. Применяется при подключении. Для постоянного доступа без открытого сеанса назначьте его как Постоянное MCP-подключение в Настройки → Конечная точка агента.</string>
+    <string name="connections_toggle_mcp_tunnel">Открыть доступ к MCP-серверу Tidegate</string>
+    <string name="connections_helper_mcp_tunnel">Открывает MCP Tidegate для каждого сеанса этого подключения — они обращаются к http://127.0.0.1:8730/mcp и (через loopback) пропускают сопряжение и согласие. Применяется при подключении. Для постоянного доступа без открытого сеанса назначьте его как Постоянное MCP-подключение в Настройки → Конечная точка агента.</string>
     <string name="connections_section_reconnect">Переподключение</string>
     <string name="connections_local_shell_android_desc">Запускает встроенную оболочку Android (/system/bin/sh). Доступ к командам Android, файловой системе и root (если доступен).</string>
     <string name="connections_local_shell_proot_desc">Запускает оболочку Alpine Linux локально через PRoot. При первом использовании загружает минимальный rootfs (~4 МБ). Root и сетевое подключение не нужны.</string>
@@ -394,7 +394,7 @@
     <string name="connections_helper_vnc_host_via_ssh">Где VNC-сервер доступен с SSH-сервера — обычно 127.0.0.1, если это одна машина (wayvnc и т.п. привязываются только к loopback).</string>
     <string name="connections_helper_vnc_auth">Оставьте имя пользователя пустым для классического VncAuth (8-символьный пароль). Заполните имя пользователя для VeNCrypt (wayvnc, TigerVNC) — поддерживает более длинные пароли и TLS-шифрование.</string>
     <string name="connections_helper_rdp_host_via_ssh">Где RDP-сервер доступен с SSH-сервера — обычно 127.0.0.1, если это одна машина.</string>
-    <string name="connections_helper_rdp_nla">Включено по умолчанию. Отключите, если сервер отклоняет NLA от Haven (некоторые конфигурации Windows Server 2025 — на сервере должно быть отключено \"Require NLA\" для подключения только по SSL).</string>
+    <string name="connections_helper_rdp_nla">Включено по умолчанию. Отключите, если сервер отклоняет NLA от Tidegate (некоторые конфигурации Windows Server 2025 — на сервере должно быть отключено \"Require NLA\" для подключения только по SSL).</string>
     <string name="connections_action_manage_tunnels">Управление туннелями…</string>
     <string name="connections_helper_cloudflare_routing">Маршрутизация через коннектор Cloudflare Tunnel. Хост выше используется как имя хоста туннеля; порт не применяется (коннектор сам определяет вышестоящую цель SSH).</string>
     <string name="connections_vnc_depth_24">24-битный цвет (наилучшее качество)</string>
@@ -602,7 +602,7 @@
     <string name="connections_identity_help">Общая для всех подключений Reticulum. Сервер, добавляющий вас в белый список, опирается на этот хеш.</string>
     <string name="connections_identity_import">Импортировать файл идентичности…</string>
     <string name="connections_identity_imported">Идентичность импортирована: %1$s</string>
-    <string name="connections_identity_imported_restart">Идентичность импортирована: %1$s. Перезапустите Haven, чтобы подключения её использовали.</string>
+    <string name="connections_identity_imported_restart">Идентичность импортирована: %1$s. Перезапустите Tidegate, чтобы подключения её использовали.</string>
     <string name="connections_identity_not_an_identity">Этот файл не является идентичностью Reticulum. Ничего не изменено.</string>
     <string name="connections_identity_install_failed">Не удалось установить идентичность: %1$s. Прежняя осталась на месте.</string>
     <string name="connections_identity_unreadable">Не удалось прочитать этот файл.</string>

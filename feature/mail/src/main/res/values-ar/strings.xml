@@ -128,7 +128,7 @@
     <string name="mail_rules_history_uidreset">أُعيد ترقيم صندوق البريد — تمت إعادة الضبط</string>
     <string name="mail_rules_no_subject">(بلا موضوع)</string>
     <string name="mail_rules_pending_empty">لا شيء بانتظار الموافقة.</string>
-    <string name="mail_rules_pending_desc">وُضعت في قائمة الانتظار بينما كان Haven في الخلفية. وافق للتنفيذ، أو ارفض للتجاهل.</string>
+    <string name="mail_rules_pending_desc">وُضعت في قائمة الانتظار بينما كان Tidegate في الخلفية. وافق للتنفيذ، أو ارفض للتجاهل.</string>
     <string name="mail_rules_approve">موافقة</string>
     <string name="mail_rules_reject">رفض</string>
     <string name="mail_rules_approve_all">الموافقة على الكل</string>

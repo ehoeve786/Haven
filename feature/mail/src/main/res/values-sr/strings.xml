@@ -117,7 +117,7 @@
     <string name="mail_rules_history_uidreset">Сандуче је поново нумерисано — ресет</string>
     <string name="mail_rules_no_subject">(без теме)</string>
     <string name="mail_rules_pending_empty">Ништа не чека на одобрење.</string>
-    <string name="mail_rules_pending_desc">Стављено у ред док је Haven био у позадини. Одобрите да се покрене, или одбијте да се одбаци.</string>
+    <string name="mail_rules_pending_desc">Стављено у ред док је Tidegate био у позадини. Одобрите да се покрене, или одбијте да се одбаци.</string>
     <string name="mail_rules_approve">Одобри</string>
     <string name="mail_rules_reject">Одбиј</string>
     <string name="mail_rules_approve_all">Одобри све</string>

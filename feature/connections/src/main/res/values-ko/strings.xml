@@ -72,10 +72,10 @@
 
     <!-- Battery optimization dialog -->
     <string name="connections_battery_title">연결을 계속 유지할까요?</string>
-    <string name="connections_battery_message">Android는 배터리 절약을 위해 백그라운드 SSH 연결을 종료할 수 있습니다. Haven의 배터리 최적화를 해제하면 이를 방지할 수 있습니다.</string>
-    <string name="connections_battery_redropped_message">Haven의 배터리 최적화 예외가 해제되었습니다 — 앱 업데이트의 부작용으로 자주 발생합니다. 예외가 없으면 Android가 백그라운드 SSH 연결을 다시 종료할 수 있습니다. 다시 허용하시겠습니까?</string>
+    <string name="connections_battery_message">Android는 배터리 절약을 위해 백그라운드 SSH 연결을 종료할 수 있습니다. Tidegate의 배터리 최적화를 해제하면 이를 방지할 수 있습니다.</string>
+    <string name="connections_battery_redropped_message">Tidegate의 배터리 최적화 예외가 해제되었습니다 — 앱 업데이트의 부작용으로 자주 발생합니다. 예외가 없으면 Android가 백그라운드 SSH 연결을 다시 종료할 수 있습니다. 다시 허용하시겠습니까?</string>
     <string name="connections_battery_dont_ask_again">다시 묻지 않기</string>
-    <string name="connections_process_killed_banner">Android가 %1$s에 Haven을 종료했습니다(%2$s) — 백그라운드 세션도 함께 종료되었습니다.</string>
+    <string name="connections_process_killed_banner">Android가 %1$s에 Tidegate을 종료했습니다(%2$s) — 백그라운드 세션도 함께 종료되었습니다.</string>
     <string name="process_exit_cause_debug_app">개발자 옵션 “디버그 앱 선택”</string>
     <string name="process_exit_cause_force_stop">강제 종료</string>
     <string name="process_exit_cause_memory">메모리 부족</string>
@@ -261,7 +261,7 @@
     <string name="connections_fido_touch_nfc_title">보안 키를 대고 있으세요</string>
     <string name="connections_fido_touch_usb_body">지금 보안 키의 버튼을 눌러 SSH 서명을 승인하세요. 키가 대기 중임을 알리기 위해 깜박일 수 있습니다.</string>
     <string name="connections_fido_touch_usb_title">보안 키를 터치하세요</string>
-    <string name="connections_fido_waiting_body">보안 키를 USB로 연결하거나, NFC라면 기기 뒷면에 태그하세요. 감지되면 Haven이 자동으로 계속 진행합니다.</string>
+    <string name="connections_fido_waiting_body">보안 키를 USB로 연결하거나, NFC라면 기기 뒷면에 태그하세요. 감지되면 Tidegate이 자동으로 계속 진행합니다.</string>
     <string name="connections_fido_waiting_title">보안 키 대기 중</string>
     <string name="connections_hostkey_accept_new">수락 후 연결</string>
     <string name="connections_hostkey_changed_body">%1$s의 호스트 키가 변경되었습니다. 서버를 재설치했거나 중간자 공격일 수 있습니다.</string>
@@ -319,7 +319,7 @@
     <string name="connections_vm_step_start">1. Linux VM 시작</string>
     <string name="connections_vm_step_start_body">Android Terminal 앱을 열어 VM을 부팅하세요.</string>
     <string name="connections_vm_step_vnc">4. VNC 서버 설치 (선택)</string>
-    <string name="connections_vm_step_vnc_body">Haven 데스크톱 탭을 통한 원격 데스크톱 접근용.</string>
+    <string name="connections_vm_step_vnc_body">Tidegate 데스크톱 탭을 통한 원격 데스크톱 접근용.</string>
     <string name="connections_vm_title">Linux VM</string>
     <string name="connections_vm_view_script">스크립트 보기</string>
     <string name="connections_vnc_password_title">VNC 비밀번호</string>
@@ -353,8 +353,8 @@
     <string name="connections_section_embedded_vnc">내장 VNC</string>
     <string name="connections_section_reticulum">Reticulum</string>
     <string name="connections_section_routing">라우팅</string>
-    <string name="connections_toggle_mcp_tunnel">Haven의 MCP 서버 노출</string>
-    <string name="connections_helper_mcp_tunnel">Haven의 MCP를 이 연결의 모든 세션에 노출합니다. 각 세션은 http://127.0.0.1:8730/mcp에 접속하며 (루프백을 통해) 페어링과 동의를 건너뜁니다. 연결 시 적용됩니다. 세션을 열지 않고 상시 접근하려면 설정 → 에이전트 엔드포인트에서 상시 연결 MCP 연결로 지정하세요.</string>
+    <string name="connections_toggle_mcp_tunnel">Tidegate의 MCP 서버 노출</string>
+    <string name="connections_helper_mcp_tunnel">Tidegate의 MCP를 이 연결의 모든 세션에 노출합니다. 각 세션은 http://127.0.0.1:8730/mcp에 접속하며 (루프백을 통해) 페어링과 동의를 건너뜁니다. 연결 시 적용됩니다. 세션을 열지 않고 상시 접근하려면 설정 → 에이전트 엔드포인트에서 상시 연결 MCP 연결로 지정하세요.</string>
     <string name="connections_section_reconnect">재연결</string>
     <string name="connections_local_shell_android_desc">네이티브 Android 셸(/system/bin/sh)을 실행합니다. Android 명령, 파일 시스템, root(사용 가능한 경우)에 접근합니다.</string>
     <string name="connections_local_shell_proot_desc">PRoot를 통해 Alpine Linux 셸을 로컬에서 실행합니다. 처음 사용할 때 최소 rootfs(~4MB)를 다운로드합니다. root나 네트워크 연결이 필요하지 않습니다.</string>
@@ -386,7 +386,7 @@
     <string name="connections_helper_vnc_host_via_ssh">SSH 서버에서 VNC 서버에 도달할 수 있는 위치 — 같은 머신이면 보통 127.0.0.1입니다(wayvnc 등은 루프백에만 바인딩됩니다).</string>
     <string name="connections_helper_vnc_auth">기본 VncAuth(8자 비밀번호)는 사용자 이름을 비워 두세요. VeNCrypt(wayvnc, TigerVNC)는 사용자 이름을 입력하세요 — 더 긴 비밀번호와 TLS 암호화를 지원합니다.</string>
     <string name="connections_helper_rdp_host_via_ssh">SSH 서버에서 RDP 서버에 도달할 수 있는 위치 — 같은 머신이면 보통 127.0.0.1입니다.</string>
-    <string name="connections_helper_rdp_nla">기본적으로 켜져 있습니다. 서버가 Haven의 NLA를 거부하면 끄세요(일부 Windows Server 2025 설정 — SSL 전용으로 연결하려면 서버에서 \"Require NLA\"를 비활성화해야 합니다).</string>
+    <string name="connections_helper_rdp_nla">기본적으로 켜져 있습니다. 서버가 Tidegate의 NLA를 거부하면 끄세요(일부 Windows Server 2025 설정 — SSL 전용으로 연결하려면 서버에서 \"Require NLA\"를 비활성화해야 합니다).</string>
     <string name="connections_action_manage_tunnels">터널 관리…</string>
     <string name="connections_helper_cloudflare_routing">Cloudflare Tunnel 커넥터를 통한 라우팅. 위의 호스트가 터널 호스트 이름으로 사용됩니다. 포트는 적용되지 않습니다(커넥터가 업스트림 SSH 대상을 결정합니다).</string>
     <string name="connections_vnc_depth_24">24비트 색상(최고 품질)</string>
@@ -594,7 +594,7 @@
     <string name="connections_identity_help">모든 Reticulum 연결이 공유합니다. 허용 목록에 등록하는 서버는 이 해시를 기준으로 삼습니다.</string>
     <string name="connections_identity_import">아이덴티티 파일 가져오기…</string>
     <string name="connections_identity_imported">아이덴티티를 가져왔습니다: %1$s</string>
-    <string name="connections_identity_imported_restart">아이덴티티를 가져왔습니다: %1$s. 연결에 적용하려면 Haven을 다시 시작하세요.</string>
+    <string name="connections_identity_imported_restart">아이덴티티를 가져왔습니다: %1$s. 연결에 적용하려면 Tidegate을 다시 시작하세요.</string>
     <string name="connections_identity_not_an_identity">이 파일은 Reticulum 아이덴티티가 아닙니다. 아무것도 변경되지 않았습니다.</string>
     <string name="connections_identity_install_failed">아이덴티티를 설치하지 못했습니다: %1$s. 이전 것이 그대로 유지됩니다.</string>
     <string name="connections_identity_unreadable">이 파일을 읽을 수 없습니다.</string>

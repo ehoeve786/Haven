@@ -2026,7 +2026,7 @@ fun SettingsScreen(
                 when (action) {
                     is BackupAction.Export -> {
                         pendingPassword = password
-                        exportLauncher.launch("haven-backup.enc")
+                        exportLauncher.launch("tidegate-backup.enc")
                     }
                     is BackupAction.Restore -> {
                         if (remember) {

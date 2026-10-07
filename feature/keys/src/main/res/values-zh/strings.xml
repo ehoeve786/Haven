@@ -153,7 +153,7 @@
     <string name="keys_fido_pin_help">输入在安全密钥上设置的 PIN 以继续。</string>
     <string name="keys_fido_pin_wrong">PIN 错误。密钥锁定前还剩 %1$d 次尝试。</string>
     <string name="keys_fido_waiting_title">需要安全密钥</string>
-    <string name="keys_fido_waiting_body">通过 USB 插入安全密钥，或将其轻触设备背面以使用 NFC。检测到后 Haven 将自动继续。</string>
+    <string name="keys_fido_waiting_body">通过 USB 插入安全密钥，或将其轻触设备背面以使用 NFC。检测到后 Tidegate 将自动继续。</string>
     <string name="keys_fido_touch_usb_title">触摸您的安全密钥</string>
     <string name="keys_fido_touch_usb_body">现在按下安全密钥上的按钮以授权该请求。</string>
     <string name="keys_fido_touch_nfc_title">按住您的安全密钥</string>
@@ -241,7 +241,7 @@
     <string name="keys_section_collapse">折叠 %1$s</string>
     <string name="keys_section_expand">展开 %1$s</string>
     <string name="keys_from_provider">使用来自 %1$s 的密钥</string>
-    <string name="keys_from_provider_hint">选择该应用持有的密钥。它代表 Haven 签名——私钥保持原位，包括存放在硬件令牌上时。</string>
+    <string name="keys_from_provider_hint">选择该应用持有的密钥。它代表 Tidegate 签名——私钥保持原位，包括存放在硬件令牌上时。</string>
     <string name="keys_totp_code_copied">已复制验证码</string>
     <plurals name="keys_selected_count">
         <item quantity="other">已选择 %1$d 个</item>

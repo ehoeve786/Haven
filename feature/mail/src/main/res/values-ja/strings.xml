@@ -128,7 +128,7 @@
     <string name="mail_rules_history_uidreset">メールボックスが再採番 — リセットしました</string>
     <string name="mail_rules_no_subject">（件名なし）</string>
     <string name="mail_rules_pending_empty">承認待ちはありません。</string>
-    <string name="mail_rules_pending_desc">Haven がバックグラウンドの間にキューに入れられました。実行するには承認、破棄するには拒否してください。</string>
+    <string name="mail_rules_pending_desc">Tidegate がバックグラウンドの間にキューに入れられました。実行するには承認、破棄するには拒否してください。</string>
     <string name="mail_rules_approve">承認</string>
     <string name="mail_rules_reject">拒否</string>
     <string name="mail_rules_approve_all">すべて承認</string>

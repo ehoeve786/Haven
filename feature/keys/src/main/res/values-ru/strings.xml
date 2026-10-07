@@ -151,7 +151,7 @@
     <string name="keys_fido_pin_help">Введите PIN, настроенный на вашем ключе безопасности, чтобы продолжить.</string>
     <string name="keys_fido_pin_wrong">Неверный PIN. Осталось %1$d попыток до блокировки ключа.</string>
     <string name="keys_fido_waiting_title">Требуется ключ безопасности</string>
-    <string name="keys_fido_waiting_body">Подключите ключ безопасности через USB или поднесите его к задней панели устройства для NFC. Haven продолжит автоматически, как только обнаружит его.</string>
+    <string name="keys_fido_waiting_body">Подключите ключ безопасности через USB или поднесите его к задней панели устройства для NFC. Tidegate продолжит автоматически, как только обнаружит его.</string>
     <string name="keys_fido_touch_usb_title">Коснитесь ключа безопасности</string>
     <string name="keys_fido_touch_usb_body">Нажмите кнопку на ключе безопасности сейчас, чтобы авторизовать запрос.</string>
     <string name="keys_fido_touch_nfc_title">Удерживайте ключ безопасности</string>
@@ -242,7 +242,7 @@
     <string name="keys_section_collapse">Свернуть %1$s</string>
     <string name="keys_section_expand">Развернуть %1$s</string>
     <string name="keys_from_provider">Использовать ключ из %1$s</string>
-    <string name="keys_from_provider_hint">Выберите ключ, который хранит это приложение. Оно подписывает от имени Haven — закрытый ключ остаётся на месте, в том числе на аппаратном токене.</string>
+    <string name="keys_from_provider_hint">Выберите ключ, который хранит это приложение. Оно подписывает от имени Tidegate — закрытый ключ остаётся на месте, в том числе на аппаратном токене.</string>
     <string name="keys_totp_code_copied">Код скопирован</string>
     <plurals name="keys_selected_count">
         <item quantity="one">Выбран %1$d</item>

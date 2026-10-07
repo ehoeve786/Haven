@@ -35,7 +35,7 @@
 
     <!-- Battery optimization -->
     <string name="battery_title">保持连接？</string>
-    <string name="battery_message">Android 可能会为省电而关闭后台 SSH 连接。为 Haven 禁用电池优化可以防止此情况。</string>
+    <string name="battery_message">Android 可能会为省电而关闭后台 SSH 连接。为 Tidegate 禁用电池优化可以防止此情况。</string>
 
     <!-- Workspace profiles -->
     <string name="workspace_section_title">工作区</string>
@@ -67,7 +67,7 @@
     <string name="agent_deny">拒绝</string>
 
     <!-- i18n sweep #210 -->
-    <string name="app_biometric_locked_title">Haven 已锁定</string>
+    <string name="app_biometric_locked_title">Tidegate 已锁定</string>
     <string name="app_biometric_authenticate_prompt">验证身份以继续</string>
     <string name="app_biometric_open_device_settings">打开设备设置</string>
     <string name="app_desktop_app_windows_title">应用窗口</string>
@@ -116,7 +116,7 @@
     <string name="app_desktop_custom_cmd_unset">请先设置会话启动命令</string>
     <string name="app_desktop_custom_cmd_edit">编辑会话命令</string>
     <string name="app_desktop_custom_cmd_title">自定义会话命令</string>
-    <string name="app_desktop_custom_cmd_description">在当前发行版内、针对 Haven 的 X 服务器运行——即 termux-x11 的用法，例如 dbus-launch startxfce4。请先在发行版里安装对应桌面的软件包。X11 桌面为软件渲染：依赖 GL 合成器的桌面（GNOME Shell、KWin）无法启动。</string>
+    <string name="app_desktop_custom_cmd_description">在当前发行版内、针对 Tidegate 的 X 服务器运行——即 termux-x11 的用法，例如 dbus-launch startxfce4。请先在发行版里安装对应桌面的软件包。X11 桌面为软件渲染：依赖 GL 合成器的桌面（GNOME Shell、KWin）无法启动。</string>
     <string name="app_desktop_custom_cmd_label">会话命令</string>
     <string name="app_desktop_custom_cmd_save_start">保存并启动</string>
     <string name="app_desktop_de_with_size">%1$s（%2$s）</string>
@@ -138,7 +138,7 @@
     <string name="app_agent_action_requested">代理操作请求</string>
     <string name="app_agent_from_client">来自：%1$s</string>
     <string name="app_agent_tool">工具：%1$s</string>
-    <string name="app_agent_bypass_label">在 Haven 重启前允许来自 \'%1$s\' 的所有 MCP 请求</string>
+    <string name="app_agent_bypass_label">在 Tidegate 重启前允许来自 \'%1$s\' 的所有 MCP 请求</string>
     <string name="app_agent_bypass_description">包括破坏性操作（终端输入、文件写入/删除、APK 安装）。应用退出后清除。</string>
     <string name="app_agent_auto_allow_window">自动允许窗口：</string>
     <string name="app_agent_minutes">%1$d 分钟</string>
@@ -153,10 +153,10 @@
     <string name="app_present_preparing_audio">正在准备音频…</string>
 
     <!-- i18n sweep #210 (follow-up batch) -->
-    <string name="app_biometric_blocked_no_activity_title">Haven 已锁定</string>
+    <string name="app_biometric_blocked_no_activity_title">Tidegate 已锁定</string>
     <string name="app_biometric_blocked_no_activity_body">无法在此情境下显示身份验证提示。</string>
     <string name="app_biometric_not_enrolled_title">设置屏幕锁定</string>
-    <string name="app_biometric_not_enrolled_body">Haven 应用锁已启用，但此设备未设置屏幕锁定或录入生物识别。请在设备“设置”中设置一项以解锁。</string>
+    <string name="app_biometric_not_enrolled_body">Tidegate 应用锁已启用，但此设备未设置屏幕锁定或录入生物识别。请在设备“设置”中设置一项以解锁。</string>
     <string name="app_biometric_no_hardware_title">无法进行身份验证</string>
     <string name="app_biometric_no_hardware_body">此设备无法进行身份验证（无生物识别硬件且无设备凭据）。请在“设置”中设置 PIN 码或密码以解锁。</string>
     <string name="app_present_minimize">最小化</string>
@@ -164,7 +164,7 @@
 
     <!-- Local Linux desktop manager -->
     <string name="app_desktop_manager_title">本地 Linux 桌面</string>
-    <string name="app_desktop_manager_description">在 Haven 内运行完整的 Linux 桌面。选择发行版，安装桌面环境（Xfce4、Openbox 或 Sway），然后点击启动——无需单独的服务器或连接。</string>
+    <string name="app_desktop_manager_description">在 Tidegate 内运行完整的 Linux 桌面。选择发行版，安装桌面环境（Xfce4、Openbox 或 Sway），然后点击启动——无需单独的服务器或连接。</string>
 
     <!-- App windows / installed-app launcher (#250) -->
     <string name="app_desktop_app_window_pin_home_cd">将 %1$s 添加到主屏幕</string>
@@ -287,11 +287,11 @@
     <string name="app_desktop_open_terminal_cd">在 %1$s 中打开终端</string>
     <string name="app_present_fullscreen">全屏</string>
     <string name="app_present_exit_fullscreen">退出全屏</string>
-    <string name="tasker_plugin_name">在 Haven 服务器上运行命令</string>
-    <string name="tasker_edit_title">在已保存的 Haven SSH 连接上运行 shell 命令。</string>
+    <string name="tasker_plugin_name">在 Tidegate 服务器上运行命令</string>
+    <string name="tasker_edit_title">在已保存的 Tidegate SSH 连接上运行 shell 命令。</string>
     <string name="tasker_loading">正在加载连接…</string>
-    <string name="tasker_no_ssh_profiles">没有已保存的 SSH 连接。请先在 Haven 中添加一个。</string>
-    <string name="tasker_field_server">Haven 服务器</string>
+    <string name="tasker_no_ssh_profiles">没有已保存的 SSH 连接。请先在 Tidegate 中添加一个。</string>
+    <string name="tasker_field_server">Tidegate 服务器</string>
     <string name="tasker_field_command">命令</string>
     <string name="tasker_field_command_help">在登录 shell 中运行。Tasker/MacroDroid 变量会在运行前被替换。</string>
     <string name="tasker_toggle_overlay">在实时终端中显示命令</string>
@@ -319,7 +319,7 @@
     <string name="backup_pull_toast_success">备份已恢复</string>
     <string name="backup_pull_toast_failure">拉取备份失败：%1$s</string>
     <string name="backup_pull_started">正在后台拉取备份…</string>
-    <string name="backup_pull_no_password">未保存密码。正在打开 Haven…</string>
+    <string name="backup_pull_no_password">未保存密码。正在打开 Tidegate…</string>
     <plurals name="app_agent_more_pending">
         <item quantity="other">＋此请求后面还有 %1$d 个请求在等待——稍后会显示</item>
     </plurals>
@@ -333,6 +333,6 @@
         <item quantity="other">%1$d 个远程存储</item>
     </plurals>
     <string name="update_notification_channel">应用更新</string>
-    <string name="update_notification_title">Haven %1$s 可用</string>
+    <string name="update_notification_title">Tidegate %1$s 可用</string>
     <string name="update_notification_text">点按打开发行版页面。</string>
 </resources>

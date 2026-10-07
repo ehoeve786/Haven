@@ -151,7 +151,7 @@
     <string name="keys_fido_pin_help">أدخل رمز PIN المضبوط على مفتاح الأمان للمتابعة.</string>
     <string name="keys_fido_pin_wrong">رمز PIN خاطئ. تبقى %1$d محاولات قبل قفل المفتاح.</string>
     <string name="keys_fido_waiting_title">مفتاح الأمان مطلوب</string>
-    <string name="keys_fido_waiting_body">وصّل مفتاح الأمان عبر USB، أو المسه بظهر الجهاز لـ NFC. سيتابع Haven تلقائيًا بمجرد اكتشافه.</string>
+    <string name="keys_fido_waiting_body">وصّل مفتاح الأمان عبر USB، أو المسه بظهر الجهاز لـ NFC. سيتابع Tidegate تلقائيًا بمجرد اكتشافه.</string>
     <string name="keys_fido_touch_usb_title">المس مفتاح الأمان</string>
     <string name="keys_fido_touch_usb_body">اضغط الزر على مفتاح الأمان الآن للموافقة على الطلب.</string>
     <string name="keys_fido_touch_nfc_title">أمسك مفتاح الأمان</string>
@@ -244,7 +244,7 @@
     <string name="keys_section_collapse">طيّ %1$s</string>
     <string name="keys_section_expand">توسيع %1$s</string>
     <string name="keys_from_provider">استخدام مفتاح من %1$s</string>
-    <string name="keys_from_provider_hint">اختر مفتاحًا يحتفظ به ذلك التطبيق. سيوقّع نيابةً عن Haven — ويبقى المفتاح الخاص في مكانه، بما في ذلك على رمز أمان مادي.</string>
+    <string name="keys_from_provider_hint">اختر مفتاحًا يحتفظ به ذلك التطبيق. سيوقّع نيابةً عن Tidegate — ويبقى المفتاح الخاص في مكانه، بما في ذلك على رمز أمان مادي.</string>
     <string name="keys_totp_code_copied">تم نسخ الرمز</string>
     <plurals name="keys_selected_count">
         <item quantity="zero">لم يُحدد شيء</item>

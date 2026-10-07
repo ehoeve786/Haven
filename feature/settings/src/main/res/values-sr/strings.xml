@@ -29,7 +29,7 @@
     <string name="common_unlock">Откључај</string>
     <string name="settings_title">Подешавања</string>
     <string name="settings_biometric_title">Закључавање екрана</string>
-    <string name="settings_biometric_subtitle">Потребна је провера идентитета за отварање апликације Haven</string>
+    <string name="settings_biometric_subtitle">Потребна је провера идентитета за отварање апликације Tidegate</string>
     <string name="settings_lock_timeout_title">Тајмаут закључавања</string>
     <string name="settings_prevent_screenshots_title">Спречи прављење слике екрана</string>
     <string name="settings_prevent_screenshots_subtitle">Блокира хватање екрана и прегледа пребацивача задатака</string>
@@ -40,7 +40,7 @@
     <string name="settings_show_linux_vm_title">Прикажи картицу Линукс ВМ</string>
     <string name="settings_show_linux_vm_subtitle">На екрану Везе се приказује подешавање Андроид Линукс ВМ</string>
     <string name="settings_exclude_recents_title">Сакриј из скорашњих апликација</string>
-    <string name="settings_exclude_recents_subtitle">Сакрива Haven-ову картицу из екрана скорашњих; сесије настављају са извршавањем. Поново отворите интерфејс иконом апликације.</string>
+    <string name="settings_exclude_recents_subtitle">Сакрива Tidegate-ову картицу из екрана скорашњих; сесије настављају са извршавањем. Поново отворите интерфејс иконом апликације.</string>
     <string name="settings_connection_logging_title">Вођење дневника повезивања</string>
     <string name="settings_connection_logging_subtitle">Снимање догађаја повезивања (успостављање везе, прекид везе, грешке). Чува се локално, заштићено шифровањем уређаја</string>
     <string name="settings_view_connection_log_title">Прикажи дневник повезивања</string>
@@ -93,9 +93,9 @@
     <string name="settings_wayland_shell_title">Љуска за Wayland десктоп</string>
     <string name="settings_proot_idle_title">Аутоматско заустављање Линукс госта</string>
     <string name="settings_proot_idle_off">Искључено — Линукс гост се извршава све док га ви не зауставите</string>
-    <string name="settings_proot_idle_on">Гост се зауставља %1$d мин након што напустите Haven (сервис госта који се извршава наставља да га одржава активним)</string>
+    <string name="settings_proot_idle_on">Гост се зауставља %1$d мин након што напустите Tidegate (сервис госта који се извршава наставља да га одржава активним)</string>
     <string name="settings_proot_idle_dialog_title">Ауто заустављање Линукс госта</string>
-    <string name="settings_proot_idle_dialog_body">Након што Haven буде у позадини оволико дуго, заустављају се терминали и десктопи Линукс госта да би се ослободила меморија. Сервис госта који се извршава наставља да га одржава активним. Такође би се зауставио и дугачки посао у терминалу послатом у позадину — оставите ово искључено, осим ако желите ослобађање ресурса у празном ходу.</string>
+    <string name="settings_proot_idle_dialog_body">Након што Tidegate буде у позадини оволико дуго, заустављају се терминали и десктопи Линукс госта да би се ослободила меморија. Сервис госта који се извршава наставља да га одржава активним. Такође би се зауставио и дугачки посао у терминалу послатом у позадину — оставите ово искључено, осим ако желите ослобађање ресурса у празном ходу.</string>
     <string name="settings_proot_idle_off_label">Искључено</string>
     <string name="settings_shizuku_title">Shizuku интеграција</string>
     <string name="settings_shizuku_enabled">Укључено — ауто изузимање батерије, дељење Wayland сокета</string>
@@ -142,11 +142,11 @@
     <string name="settings_restore_backup_title">Враћање резервне копије</string>
     <string name="settings_restore_backup_subtitle">Увоз из фајла резервне копије</string>
     <string name="settings_backup_working">Ради се…</string>
-    <string name="settings_about_title">О апликацији Haven</string>
+    <string name="settings_about_title">О апликацији Tidegate</string>
     <string name="settings_support_title">Подржите Haven</string>
     <string name="settings_support_subtitle">Купите кафу програмеру</string>
     <string name="settings_update_check_title">Провера ажурирања</string>
-    <string name="settings_update_check_subtitle">Проверава постојање новијег издања када се Haven отвара, највише једном у сату. Подразумевано је искључено.</string>
+    <string name="settings_update_check_subtitle">Проверава постојање новијег издања када се Tidegate отвара, највише једном у сату. Подразумевано је искључено.</string>
     <string name="settings_update_check_now_title">Провери сада</string>
     <string name="settings_update_check_now_subtitle">Проверава на GitHub постојање најновијег издања</string>
     <string name="settings_update_checking">Проверава се…</string>
@@ -154,7 +154,7 @@
     <string name="settings_update_check_available">Тапните да се отвори страница издања</string>
     <string name="settings_update_check_up_to_date">Ажурно је на %1$s</string>
     <string name="settings_update_check_failed">Није успела провера: %1$s</string>
-    <string name="settings_update_check_other_channel">Ова копија није инсталирана из GitHub издања, тако да преузимање издања не може да је замени. Ажурирајте кроз извор који се користили да инсталирате апликацију Haven.</string>
+    <string name="settings_update_check_other_channel">Ова копија није инсталирана из GitHub издања, тако да преузимање издања не може да је замени. Ажурирајте кроз извор који се користили да инсталирате апликацију Tidegate.</string>
     <string name="settings_version_unknown">непознато</string>
     <string name="settings_wayland_dialog_title">Wayland десктоп љуска</string>
     <string name="settings_wayland_dialog_description">Команда љуске која се извршава унутар foot терминала Wayland десктопа. Инсталирајте додатне љуске са apk (нпр. apk add bash).</string>
@@ -178,8 +178,8 @@
     <string name="settings_backup_confirm_password_label">Потврдите лозинку</string>
     <string name="settings_backup_export_button">Извези</string>
     <string name="settings_backup_restore_button">Врати</string>
-    <string name="settings_about_dialog_title">О апликацији Haven</string>
-    <string name="settings_about_app_name">Haven</string>
+    <string name="settings_about_dialog_title">О апликацији Tidegate</string>
+    <string name="settings_about_app_name">Tidegate SSH</string>
     <string name="settings_about_description">Андроид клијент за SSH, VNC, RDP &amp; складиште у облаку отвореног кода</string>
     <string name="settings_about_version">Верзија %1$s (изградња %2$d)</string>
     <string name="settings_about_android">Андроид %1$s (API %2$d)</string>
@@ -196,7 +196,7 @@
     <string name="settings_font_size_value">%1$dsp</string>
     <string name="settings_terminal_opacity_title">Непрозирност позадине</string>
     <string name="settings_terminal_opacity_value">%1$d%%</string>
-    <string name="settings_terminal_opacity_hint" formatted="false">Испод 100% Haven постаје полупрозиран и приказује тапет уређаја иза сваког екрана (терминал, листе, подешавања). Преиначавање за сваку везу се примењује само за тај терминал.</string>
+    <string name="settings_terminal_opacity_hint" formatted="false">Испод 100% Tidegate постаје полупрозиран и приказује тапет уређаја иза сваког екрана (терминал, листе, подешавања). Преиначавање за сваку везу се примењује само за тај терминал.</string>
     <string name="settings_scrollback_rows_dialog_title">Број редова за скроловање уназад по картици</string>
     <string name="settings_scrollback_rows_dialog_body">Веће вредности скроловања уназад значе већу употребу меморије. Оквирно 2 KB по линији при типичним ширинама колоне, помножено са бројем отворених картица.</string>
     <string name="settings_scrollback_rows_value">%1$,d линија</string>
@@ -251,7 +251,7 @@
     <string name="settings_show_terminal_tab_bar_title">Прикажи линију картица терминала</string>
     <string name="settings_show_terminal_tab_bar_subtitle">Изнад терминала се приказују картице сесије</string>
     <string name="settings_hide_nav_bar_in_terminal_title">Сакриј линију картица апликације у терминалу</string>
-    <string name="settings_hide_nav_bar_in_terminal_subtitle">Скрива доњу линију картица апликације Haven на екрану терминала. Андроидова статусна линија и линија навигације остају видљиве.</string>
+    <string name="settings_hide_nav_bar_in_terminal_subtitle">Скрива доњу линију картица апликације Tidegate на екрану терминала. Андроидова статусна линија и линија навигације остају видљиве.</string>
     <string name="settings_reflow_on_keyboard_title">Промени величину терминала за тастатуру</string>
     <string name="settings_reflow_on_keyboard_subtitle">Када се отвори тастатура, терминал мења величину тако да стане изнад ње, уместо да се приказ скролује навише. Помаже апликацијама пуног екрана које на врху приказују статусну линију; оставите искључено за просте љуске.</string>
     <string name="settings_tab_titles_follow_session_title">Приказуј имена сесије у насловима картица</string>
@@ -376,8 +376,8 @@
     <string name="settings_audit_log_no_verbose">За ову ставку није вођен детаљни дневник</string>
     <string name="settings_audit_log_share_chooser">Подели дневник</string>
     <string name="settings_native_crash_title">Апликација се срушила</string>
-    <string name="settings_native_crash_subtitle">Haven се неочекивано затворио. Извештај испод указује место на којем се то десило — молимо вас да га прикачите уз извештај о багу.</string>
-    <string name="settings_native_crash_subtitle_no_trace">Haven се неочекивано затворио. Андроид није водио детаљни извештај за ово, тако да је познато само време и сигнал — молимо вас да их прикачите уз извештај о багу, јер их сигнал прецизније одређује.</string>
+    <string name="settings_native_crash_subtitle">Tidegate се неочекивано затворио. Извештај испод указује место на којем се то десило — молимо вас да га прикачите уз извештај о багу.</string>
+    <string name="settings_native_crash_subtitle_no_trace">Tidegate се неочекивано затворио. Андроид није водио детаљни извештај за ово, тако да је познато само време и сигнал — молимо вас да их прикачите уз извештај о багу, јер их сигнал прецизније одређује.</string>
     <string name="settings_native_crash_no_trace">За ово рушење није вођен детаљни извештај.</string>
     <string name="settings_native_crash_copy">Копирај извештај</string>
     <string name="settings_native_crash_copied">Копиран је извештај о рушењу</string>
@@ -424,17 +424,17 @@
     <string name="settings_paired_clients_unpair_confirm">Обриши упаривање</string>
     <string name="settings_paired_clients_unpaired_toast">Обрисано је упаривање са ‘%1$s’</string>
     <string name="settings_credential_keystore_broken_title">Складиште акредитива није доступно</string>
-    <string name="settings_credential_keystore_broken_subtitle">Складиште кључева овог уређаја је изгубило кључ акредитива апликације Haven. Сачуване лозинке не могу да се прочитају и нове не могу да се сачувају. Тапните за поправак.</string>
+    <string name="settings_credential_keystore_broken_subtitle">Складиште кључева овог уређаја је изгубило кључ акредитива апликације Tidegate. Сачуване лозинке не могу да се прочитају и нове не могу да се сачувају. Тапните за поправак.</string>
     <string name="settings_credential_reset_title">Желите ли да поправите складиште акредитива?</string>
-    <string name="settings_credential_reset_body">Ово креира нови кључ акредитива тако да лозинке поново могу да се сачувају. Свака лозинка, приступна реченица и тајна која је већ сачувана у апликацији Haven ће морати поново да се унесе. Оне већ не могу да се прочитају — кључ који их је штитио је нестао — тако да ово опоравља апликацију, а не спречава неки даљи губитак.</string>
+    <string name="settings_credential_reset_body">Ово креира нови кључ акредитива тако да лозинке поново могу да се сачувају. Свака лозинка, приступна реченица и тајна која је већ сачувана у апликацији Tidegate ће морати поново да се унесе. Оне већ не могу да се прочитају — кључ који их је штитио је нестао — тако да ово опоравља апликацију, а не спречава неки даљи губитак.</string>
     <string name="settings_credential_reset_confirm">Поправи</string>
     <string name="settings_credential_reset_cancel">Откажи</string>
     <string name="settings_sshkey_keystore_broken_title">Складиште SSH кључева недоступно</string>
-    <string name="settings_sshkey_keystore_broken_subtitle">Кејстор овог уређаја је изгубио Haven-ов SSH кључ. Сачувани приватни кључеви се не могу прочитати, а нови се не могу генерисати. Додирните за поправку.</string>
+    <string name="settings_sshkey_keystore_broken_subtitle">Кејстор овог уређаја је изгубио Tidegate-ов SSH кључ. Сачувани приватни кључеви се не могу прочитати, а нови се не могу генерисати. Додирните за поправку.</string>
     <string name="settings_sshkey_reset_title">Поправити складиште SSH кључева?</string>
     <string name="settings_sshkey_reset_body">Ово прави нови кључ како би SSH кључеви поново могли да се генеришу.
 
-Сваки приватни кључ већ сачуван у Haven-у мораће поново да се увезе или генерише. Већ су нечитљиви — кључ који их је штитио је изгубљен, обично зато што је апликација поново инсталирана из другог извора — дакле ово враћа апликацију уместо да изгуби било шта даље.</string>
+Сваки приватни кључ већ сачуван у Tidegate-у мораће поново да се увезе или генерише. Већ су нечитљиви — кључ који их је штитио је изгубљен, обично зато што је апликација поново инсталирана из другог извора — дакле ово враћа апликацију уместо да изгуби било шта даље.</string>
     <string name="settings_sshkey_reset_confirm">Поправи</string>
 
     <!-- Inline-image consent (#583) -->

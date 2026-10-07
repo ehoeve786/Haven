@@ -57,10 +57,10 @@
     <string name="connections_delete_message">Желите ли да обришете „%1$s“? Ово не може да се поништи.</string>
     <string name="connections_key_deployed">SSH кључ је успешно постављен</string>
     <string name="connections_battery_title">Желите ли да се одржава активност веза?</string>
-    <string name="connections_battery_message">Андроид може да затвори позадинске SSH везе да уштеди батерију. Искључивањем оптимизације батерије за апликацију Haven спречавате ово.</string>
-    <string name="connections_battery_redropped_message">Искључен је изузетак апликације Haven из оптимизације батерије — често као споредни ефекат ажурирања апликације. Без њега, Андроид поново може да затвори позадинске SSH везе. Желите ли да се поново укључи?</string>
+    <string name="connections_battery_message">Андроид може да затвори позадинске SSH везе да уштеди батерију. Искључивањем оптимизације батерије за апликацију Tidegate спречавате ово.</string>
+    <string name="connections_battery_redropped_message">Искључен је изузетак апликације Tidegate из оптимизације батерије — често као споредни ефекат ажурирања апликације. Без њега, Андроид поново може да затвори позадинске SSH везе. Желите ли да се поново укључи?</string>
     <string name="connections_battery_dont_ask_again">Не питај поново</string>
-    <string name="connections_process_killed_banner">Андроид је зауставио Haven у %1$s (%2$s) — позадинске сесије су такође прекинуте заједно са њим.</string>
+    <string name="connections_process_killed_banner">Андроид је зауставио Tidegate у %1$s (%2$s) — позадинске сесије су такође прекинуте заједно са њим.</string>
     <string name="process_exit_cause_debug_app">„Изаберите апликацију за отклањање грешака“ опција за програмере</string>
     <string name="process_exit_cause_force_stop">принудно заустављање</string>
     <string name="process_exit_cause_memory">мало слободне меморије</string>
@@ -263,7 +263,7 @@
     <string name="connections_fido_pin_help">Овај SSH кључ је регистрован са verify-required. Да бисте наставили, унесите PIN који је подешен на вашем безбедносном кључу.</string>
     <string name="connections_fido_pin_wrong">Неисправан PIN. Преостаје још %1$d покушаја пре него што се кључ закључа.</string>
     <string name="connections_fido_waiting_title">Потребан је безбедносни кључ</string>
-    <string name="connections_fido_waiting_body">Уметните свој безбедносни кључ у USB, или га тапните на позадину уређаја за NFC. Када се детектује, Haven ће аутоматски да настави даље.</string>
+    <string name="connections_fido_waiting_body">Уметните свој безбедносни кључ у USB, или га тапните на позадину уређаја за NFC. Када се детектује, Tidegate ће аутоматски да настави даље.</string>
     <string name="connections_fido_touch_usb_title">Додирните свој безбедносни кључ</string>
     <string name="connections_fido_touch_usb_body">Притисните сада дугме на свом безбедносном кључу да ауторизујете SSH потпис. Кључ може да трепти и тако вас обавести да чека.</string>
     <string name="connections_fido_touch_nfc_title">Држите свој безбедносни кључ</string>
@@ -296,7 +296,7 @@
     <string name="connections_vm_step_open_port_body">У подешавањима апликације Терминал, додајте порт 8022 на листу портова на којима се слуша.</string>
     <string name="connections_vm_step_password_body">Извршите у апликацији Терминал. Поставиће вам се питање да поставите лозинку за корисника droid.</string>
     <string name="connections_vm_step_password_hint">Затим успоставите везу са droid@localhost:8022</string>
-    <string name="connections_vm_step_vnc_body">За приступ удаљеном десктопу преко Десктоп картице апликације Haven.</string>
+    <string name="connections_vm_step_vnc_body">За приступ удаљеном десктопу преко Десктоп картице апликације Tidegate.</string>
     <string name="connections_vm_step_desktop_body">Xfce4 користи мало ресурса и добро ради преко VNC.</string>
     <string name="connections_vm_step_apps_body">Менаџер фајлова, текст едитор, приказивач слика, интернет прегледач, калкулатор.</string>
     <string name="connections_section_desktops">Десктопи</string>
@@ -427,8 +427,8 @@
     <string name="connections_section_embedded_vnc">Уграђени VNC</string>
     <string name="connections_section_reticulum">Reticulum</string>
     <string name="connections_section_routing">Рутирање</string>
-    <string name="connections_toggle_mcp_tunnel">Изложи уназад Haven-ов MCP овом хосту</string>
-    <string name="connections_helper_mcp_tunnel">"Тунелује уназад Haven-ов сопствени MCP сервер удаљном хосту, тако да проциси који се извршавају тамо (нпр. Claude Code који ради на серверу) могу да приступе http://127.0.0.1:8730/mcp и (преко loopback интерфејса) прескоче упаривање &amp; пристанак. Примењује се током успостављања везе. За континуирани приступ без отворене сесије, поставите ово као Увек активна MCP веза у Подешавања → Крајња тачка агента.\n"</string>
+    <string name="connections_toggle_mcp_tunnel">Изложи уназад Tidegate-ов MCP овом хосту</string>
+    <string name="connections_helper_mcp_tunnel">"Тунелује уназад Tidegate-ов сопствени MCP сервер удаљном хосту, тако да проциси који се извршавају тамо (нпр. Claude Code који ради на серверу) могу да приступе http://127.0.0.1:8730/mcp и (преко loopback интерфејса) прескоче упаривање &amp; пристанак. Примењује се током успостављања везе. За континуирани приступ без отворене сесије, поставите ово као Увек активна MCP веза у Подешавања → Крајња тачка агента.\n"</string>
     <string name="connections_section_reconnect">Повежи се поново</string>
     <string name="connections_section_mcp">AI агент (MCP)</string>
     <string name="connections_local_shell_android_desc">Покреће својствену Андроид љуску (/system/bin/sh). Приступа Андроид командама, фајл систему и root (ако је доступно).</string>
@@ -465,7 +465,7 @@
     <string name="connections_helper_vnc_auth">Оставите корисничко име празно за класични VncAuth (лозинка од 8 карактера). Попуните корисничко име за VeNCrypt (wayvnc, TigerVNC) — подржава дуже лозинке и TLS шифровање.</string>
     <string name="connections_helper_spice_auth">SPICE користи један необавезни тикет/лозинку. Оставите празно у случају сервера који не користи тикете.</string>
     <string name="connections_helper_rdp_host_via_ssh">Како се приступа RDP серверу са SSH сервера — обично 127.0.0.1 ако се налазе на истој машини.</string>
-    <string name="connections_helper_rdp_nla">Подразумевано је укључено. Искључите ако сервер одбија Haven-ов NLA (неке Windows Server 2025 конфигурације — „Require NLA” само за SSL на серверу мора бити искључено да би се успоставила веза).</string>
+    <string name="connections_helper_rdp_nla">Подразумевано је укључено. Искључите ако сервер одбија Tidegate-ов NLA (неке Windows Server 2025 конфигурације — „Require NLA” само за SSL на серверу мора бити искључено да би се успоставила веза).</string>
     <string name="connections_action_manage_tunnels">Управљање тунелима…</string>
     <string name="connections_helper_cloudflare_routing">Рутира се кроз Cloudflare Tunnel конектор. Хост изнад се користи као име хоста тунела; порт се не примењује (конектор одлучује о узводном SSH циљу).</string>
     <string name="connections_vnc_depth_24">24-битна боја (најбољи квалитет)</string>
@@ -539,7 +539,7 @@
     <string name="connections_identity_help">Дели се са сваком Reticulum везом. Сервер који вас одобрава према овом хешу.</string>
     <string name="connections_identity_import">Увоз фајла идентитета…</string>
     <string name="connections_identity_imported">Идентитет је увезен: %1$s</string>
-    <string name="connections_identity_imported_restart">Идентитет је увезен: %1$s. Поново покрените Haven да би га везе могле да га користе.</string>
+    <string name="connections_identity_imported_restart">Идентитет је увезен: %1$s. Поново покрените Tidegate да би га везе могле да га користе.</string>
     <string name="connections_identity_not_an_identity">Тај фајл није Reticulum идентитет. Ништа није измењено.</string>
     <string name="connections_identity_install_failed">Идентитет није могао да се инсталира: %1$s. Претходни је још увек на месту.</string>
     <string name="connections_identity_unreadable">Тај фајл није могао да се чита.</string>
