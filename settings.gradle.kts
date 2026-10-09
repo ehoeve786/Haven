@@ -91,8 +91,5 @@ include(":feature:tunnel")
 include(":core:prns")
 include(":core:smb")
 include(":core:openai")
-include(":core:local")
 
 include(":feature:settings")
-include(":feature:editor")
-include(":feature:imagetools")
