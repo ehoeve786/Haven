@@ -98,7 +98,6 @@ include(":core:openai")
 include(":core:fido")
 include(":core:usb")
 include(":core:local")
-include(":core:wayland")
 include(":core:scan")
 
 include(":feature:settings")
