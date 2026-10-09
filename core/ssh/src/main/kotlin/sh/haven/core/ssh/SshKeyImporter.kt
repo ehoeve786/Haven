@@ -2,6 +2,7 @@ package sh.haven.core.ssh
 
 import com.jcraft.jsch.JSch
 import com.jcraft.jsch.KeyPair
+import sh.haven.core.fido.SkKeyParser
 import java.security.MessageDigest
 import java.util.Base64
 

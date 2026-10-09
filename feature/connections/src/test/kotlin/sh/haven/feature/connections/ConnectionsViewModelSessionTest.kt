@@ -36,6 +36,11 @@ import sh.haven.core.data.repository.KeyMaterial
 import sh.haven.core.data.repository.KeyUnlockDeclinedException
 import sh.haven.core.data.repository.SshKeyRepository
 import sh.haven.core.ssh.ConnectionConfig
+import sh.haven.core.fido.FidoAuthenticator
+import sh.haven.core.local.DesktopManager
+import sh.haven.core.local.LocalSessionManager
+import sh.haven.core.local.ProotManager
+import sh.haven.core.mail.MailSessionManager
 import sh.haven.core.smb.SmbSessionManager
 import sh.haven.core.ssh.HostKeyVerifier
 import sh.haven.core.ssh.SessionManagerRegistry

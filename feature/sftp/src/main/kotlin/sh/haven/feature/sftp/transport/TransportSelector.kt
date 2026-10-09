@@ -5,6 +5,8 @@ import android.util.Log
 import dagger.hilt.android.qualifiers.ApplicationContext
 import sh.haven.core.data.db.entities.ConnectionProfile
 import sh.haven.core.data.repository.ConnectionRepository
+import sh.haven.core.rclone.RcloneClient
+import sh.haven.core.rclone.RcloneSessionManager
 import sh.haven.core.smb.SmbSessionManager
 import sh.haven.core.ssh.SshClient
 import sh.haven.core.ssh.SshSessionManager

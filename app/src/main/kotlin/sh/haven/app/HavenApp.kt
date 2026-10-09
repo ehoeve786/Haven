@@ -28,6 +28,7 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.runBlocking
 import sh.haven.core.data.preferences.UserPreferencesRepository
+import sh.haven.core.stepca.CertRenewalWorker
 import java.io.File
 import javax.inject.Inject
 
@@ -56,7 +57,8 @@ class HavenApp : Application(), Configuration.Provider {
     /**
      * Required by [Configuration.Provider] so the Hilt-aware worker
      * factory is wired before any [androidx.work.WorkManager] lookup.
-         * which require this. Other workers (e.g. ReticulumWorker) keep
+     * [CertRenewalWorker] (#133 phase 2b) needs `@AssistedInject` deps,
+     * which require this. Other workers (e.g. ReticulumWorker) keep
      * working unchanged — plain-constructor workers don't go through
      * the factory.
      */
@@ -269,6 +271,11 @@ class HavenApp : Application(), Configuration.Provider {
         agentConsentManager.blockedWhileBackground
             .onEach { postConsentBlockedNotification(it) }
             .launchIn(appScope)
+
+        // Schedule the daily step-ca cert-renewal check (#133 phase 2b).
+        // Idempotent (KEEP policy); cheap when the user has no CAs
+        // configured — the worker enumerates SshKeys and exits early.
+        CertRenewalWorker.schedule(this)
 
         // Start the Mail-Rules watch. It observes the master switch and does nothing
         // until the user enables inbound-email automation (off by default).

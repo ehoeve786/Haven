@@ -59,6 +59,7 @@ object DatabaseModule {
     fun provideWorkspaceDao(db: HavenDatabase): WorkspaceDao = db.workspaceDao()
 
     @Provides
+    fun provideStepCaConfigDao(db: HavenDatabase): StepCaConfigDao = db.stepCaConfigDao()
 
     @Provides
     fun provideSyncProfileDao(db: HavenDatabase): SyncProfileDao = db.syncProfileDao()

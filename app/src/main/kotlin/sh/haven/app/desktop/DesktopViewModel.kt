@@ -1,0 +1,855 @@
+package sh.haven.app.desktop
+
+import android.graphics.Bitmap
+import android.util.Log
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import sh.haven.core.data.db.entities.ConnectionLog
+import sh.haven.core.data.db.entities.ConnectionProfile
+import sh.haven.core.data.desktop.CursorSnapshot
+import sh.haven.core.data.desktop.DesktopFrameHandle
+import sh.haven.core.data.desktop.DesktopInputHandle
+import sh.haven.core.data.desktop.DesktopStatus
+import sh.haven.core.data.preferences.UserPreferencesRepository
+import sh.haven.core.data.repository.ConnectionLogRepository
+import sh.haven.core.data.repository.ConnectionRepository
+import sh.haven.core.knock.KnockSequence
+import sh.haven.core.knock.PortKnocker
+import sh.haven.core.local.DesktopManager
+import sh.haven.core.local.LocalSessionManager
+import sh.haven.core.local.ProotManager
+import sh.haven.core.local.proot.Distro
+import sh.haven.core.ssh.SshClient
+import sh.haven.core.ssh.SshConnection
+import sh.haven.core.ssh.SshSessionManager
+import sh.haven.core.tunnel.TunnelResolver
+import sh.haven.core.tunnel.TunneledConnection
+import sh.haven.core.tunnel.TunneledSocket
+import java.util.UUID
+import java.util.concurrent.ConcurrentLinkedQueue
+import javax.inject.Inject
+import sh.haven.core.redact.LogRedact
+
+private const val TAG = "DesktopViewModel"
+
+private sealed class DesktopStartOutcome {
+    object Ready : DesktopStartOutcome()
+    object Timeout : DesktopStartOutcome()
+    data class Error(val message: String) : DesktopStartOutcome()
+}
+
+@HiltViewModel
+class DesktopViewModel @Inject constructor(
+    private val sshSessionManager: SshSessionManager,
+    private val connectionLogRepository: ConnectionLogRepository,
+    private val preferencesRepository: UserPreferencesRepository,
+    private val connectionRepository: ConnectionRepository,
+    private val tunnelResolver: TunnelResolver,
+    private val portKnocker: PortKnocker,
+    private val agentUiCommandBus: sh.haven.core.data.agent.AgentUiCommandBus,
+    private val localSessionManager: LocalSessionManager,
+    private val desktopSessionRegistry: sh.haven.core.data.desktop.DesktopSessionRegistry,
+    private val usbDriveVmManager: sh.haven.app.usb.UsbDriveVmManager,
+    private val umlRecoveryManager: sh.haven.app.usb.UmlRecoveryManager,
+) : ViewModel() {
+
+    // --- Distro / DE management (issue #162 Phase 3c) ---
+    //
+    // The Connections topbar used to host a dialog with the distro picker,
+    // rootfs setup state, and DE install/start/stop rows. That UI moved
+    // to a "Manage" view inside the Desktop tab in 3c (`DesktopManagerScreen`).
+    // These StateFlows + methods are the data layer the new screen reads;
+    // every accessor is a thin pass-through to ProotManager / DesktopManager
+    // so the source of truth stays in one place.
+
+    private val prootManager: ProotManager get() = localSessionManager.prootManager
+    private val desktopManager: DesktopManager get() = localSessionManager.desktopManager
+
+    val activeDistroId: StateFlow<String> get() = prootManager.activeDistroIdFlow
+
+    val rootfsSetupState: StateFlow<ProotManager.SetupState> get() = prootManager.state
+
+    val desktopSetupState: StateFlow<ProotManager.DesktopSetupState>
+        get() = prootManager.desktopState
+
+    val desktopStates: StateFlow<Map<ProotManager.DesktopEnvironment, DesktopManager.DesktopInstance>>
+        get() = desktopManager.desktops
+
+    val installedDistros: List<Distro> get() = prootManager.installedDistros
+    val availableDistros: List<Distro> get() = prootManager.availableDistros
+    val availableForeignDistros: List<Pair<Distro, sh.haven.core.local.proot.Arch>>
+        get() = prootManager.availableForeignDistros
+    val installedDesktops: Set<ProotManager.DesktopEnvironment>
+        get() = prootManager.installedDesktops
+
+    val isRootfsReady: Boolean get() = prootManager.isReady
+
+    fun switchActiveDistro(distroId: String) {
+        prootManager.setActiveDistroId(distroId)
+    }
+
+    /** Selected package-mirror region (#263). Pass-through to ProotManager. */
+    val mirrorRegion: StateFlow<sh.haven.core.local.proot.MirrorRegion>
+        get() = prootManager.mirrorRegionFlow
+
+    fun setMirrorRegion(region: sh.haven.core.local.proot.MirrorRegion) {
+        prootManager.setMirrorRegion(region)
+    }
+
+    /** #300: remap privileged (<1024) guest binds up by +2000. Pass-through. */
+    val remapLowPorts: StateFlow<Boolean> get() = prootManager.remapLowPortsFlow
+
+    fun setRemapLowPorts(enabled: Boolean) {
+        prootManager.setRemapLowPorts(enabled)
+    }
+
+    /** #301: share the device's /storage with the local guest. Pass-through. */
+    val shareStorageWithGuest: StateFlow<Boolean> get() = prootManager.shareStorageWithGuestFlow
+
+    fun setShareStorageWithGuest(enabled: Boolean) {
+        prootManager.setShareStorageWithGuest(enabled)
+    }
+
+    /** #304: bind Android's read-only system partitions into the guest. Pass-through. */
+    val bindAndroidSystem: StateFlow<Boolean> get() = prootManager.bindAndroidSystemFlow
+
+    fun setBindAndroidSystem(enabled: Boolean) {
+        prootManager.setBindAndroidSystem(enabled)
+    }
+
+    /** #446: which resolvers the local guest's /etc/resolv.conf gets. Pass-through. */
+    val dnsMode: StateFlow<sh.haven.core.local.ProotDnsMode> get() = prootManager.dnsModeFlow
+
+    fun setDnsMode(mode: sh.haven.core.local.ProotDnsMode) {
+        prootManager.setDnsMode(mode)
+    }
+
+    /** #446: custom nameservers, used when [dnsMode] is CUSTOM. Pass-through. */
+    val dnsServers: StateFlow<String> get() = prootManager.dnsServersFlow
+
+    fun setDnsServers(servers: String) {
+        prootManager.setDnsServers(servers)
+    }
+
+    /**
+     * Local-shell open requests keyed by the resolved profile id. Collected
+     * by HavenNavHost (which is always composed, unlike TerminalScreen) so
+     * the request is never dropped while the user is on the Desktop tab.
+     * HavenNavHost sets a pending-profile state and animates to the Terminal
+     * page; TerminalScreen consumes it once composed and calls
+     * addLocalTabForProfile. SharedFlow with replay=0 — a screen rotation
+     * shouldn't re-open a shell. See GlassHaven/Haven#168.
+     */
+    /** A request to open a local shell tab, optionally joining a running desktop (#285). */
+    data class LocalShellRequest(val profileId: String, val desktopDeId: String? = null)
+
+    private val _openLocalShellRequests = MutableSharedFlow<LocalShellRequest>(extraBufferCapacity = 4)
+    val openLocalShellRequests: SharedFlow<LocalShellRequest> = _openLocalShellRequests.asSharedFlow()
+
+    /**
+     * Open a terminal tab into the given distro. Restores the entry-point
+     * removed in v5.38.0 when the Connections topbar lost its "Alpine
+     * console" icon — see GlassHaven/Haven#168. Reuses the single canonical
+     * "Local Shell" profile (mirrors McpTools.openLocalShell so the agent
+     * and the user reach the same place) and switches the active distro
+     * to [distroId] first, so the proot session boots into the right rootfs.
+     *
+     * Emits the resolved profile id on [openLocalShellRequests] rather than
+     * the AgentUiCommandBus: the bus is replay=0 and TerminalViewModel only
+     * collects it while TerminalScreen is composed, so a request fired from
+     * the Desktop tab (Terminal not in the pager's composition window) was
+     * silently dropped — the tab never opened (#168 regression). HavenNavHost
+     * is always composed, so routing through it is reliable.
+     */
+    fun openShellForDistro(distroId: String) {
+        viewModelScope.launch(Dispatchers.IO) {
+            if (prootManager.activeDistroId != distroId) {
+                prootManager.setActiveDistroId(distroId)
+            }
+            val all = connectionRepository.getAll()
+            val profile = all.firstOrNull {
+                it.connectionType == "LOCAL" && !it.useAndroidShell
+            } ?: run {
+                val seeded = ConnectionProfile(
+                    label = "Local Shell",
+                    host = "localhost",
+                    username = "",
+                    port = 0,
+                    connectionType = "LOCAL",
+                    useAndroidShell = false,
+                )
+                connectionRepository.save(seeded)
+                connectionRepository.getAll().firstOrNull {
+                    it.connectionType == "LOCAL" && it.label == "Local Shell" && !it.useAndroidShell
+                } ?: seeded
+            }
+            _openLocalShellRequests.emit(LocalShellRequest(profile.id))
+        }
+    }
+
+    /**
+     * Open a terminal tab whose environment joins the RUNNING desktop [de]
+     * (#285) — DISPLAY / WAYLAND_DISPLAY / XDG_RUNTIME_DIR — so the user can
+     * drive the desktop's apps from a shell. Reuses the canonical "Local Shell"
+     * profile; unlike [openShellForDistro] it does NOT switch the active distro
+     * (desktops run on the active distro, and their sockets live in the shared
+     * cacheDir). The deId rides the request so the terminal resolves and merges
+     * the desktop env at session creation.
+     */
+    fun openTerminalInDesktop(de: ProotManager.DesktopEnvironment) {
+        viewModelScope.launch(Dispatchers.IO) {
+            val all = connectionRepository.getAll()
+            val profile = all.firstOrNull {
+                it.connectionType == "LOCAL" && !it.useAndroidShell
+            } ?: run {
+                val seeded = ConnectionProfile(
+                    label = "Local Shell",
+                    host = "localhost",
+                    username = "",
+                    port = 0,
+                    connectionType = "LOCAL",
+                    useAndroidShell = false,
+                )
+                connectionRepository.save(seeded)
+                connectionRepository.getAll().firstOrNull {
+                    it.connectionType == "LOCAL" && it.label == "Local Shell" && !it.useAndroidShell
+                } ?: seeded
+            }
+            _openLocalShellRequests.emit(LocalShellRequest(profile.id, de.spec.id))
+        }
+    }
+
+    /**
+     * Make [distro] the active distro and install its rootfs.
+     * Mirrors the revert-on-failure semantics from ConnectionsViewModel.addDistro:1472.
+     */
+    fun addDistro(distro: Distro) {
+        val previousActive = prootManager.activeDistroId
+        prootManager.setActiveDistroId(distro.id)
+        viewModelScope.launch {
+            try {
+                prootManager.installRootfs()
+                if (prootManager.state.value is ProotManager.SetupState.Error) {
+                    Log.w(TAG, "addDistro: ${distro.id} install failed, reverting to $previousActive")
+                    prootManager.setActiveDistroId(previousActive)
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "addDistro: ${distro.id} install threw", e)
+                prootManager.setActiveDistroId(previousActive)
+            }
+        }
+    }
+
+    /**
+     * Install a catalog distro for a NON-host arch — runs under qemu-user
+     * emulation (#325). Routed through the import path, which downloads the
+     * foreign tarball, auto-detects its arch, and writes the marker that
+     * arms qemu at launch; registers under the derived "<id>-<arch>" id.
+     */
+    fun addForeignDistro(distro: Distro, arch: sh.haven.core.local.proot.Arch) {
+        val source = distro.rootfsSources[arch] ?: return
+        viewModelScope.launch {
+            try {
+                prootManager.importRootfs(
+                    id = prootManager.foreignDistroId(distro, arch),
+                    label = "${distro.label} (${arch.slug})",
+                    family = distro.family,
+                    source = source.url,
+                    format = formatFor(source.url),
+                    expectedSha256 = source.sha256,
+                )
+            } catch (e: Exception) {
+                Log.e(TAG, "addForeignDistro: ${distro.id}/${arch.slug} threw", e)
+            }
+        }
+    }
+
+    /**
+     * Import a custom rootfs tarball as a new distro (#284). [source] is an
+     * http(s) URL or an on-device file path; progress shows via the same
+     * rootfsSetupState the install path uses.
+     */
+    fun importRootfs(
+        id: String,
+        label: String,
+        family: sh.haven.core.local.proot.PackageFamily,
+        source: String,
+    ) {
+        viewModelScope.launch {
+            try {
+                prootManager.importRootfs(id, label, family, source, formatFor(source))
+            } catch (e: Exception) {
+                Log.e(TAG, "importRootfs: $id threw", e)
+            }
+        }
+    }
+
+    private fun formatFor(source: String): sh.haven.core.local.proot.RootfsFormat = when {
+        source.endsWith(".tar.xz") || source.endsWith(".txz") -> sh.haven.core.local.proot.RootfsFormat.TAR_XZ
+        source.endsWith(".tar.zst") || source.endsWith(".tar.zstd") -> sh.haven.core.local.proot.RootfsFormat.TAR_ZSTD
+        else -> sh.haven.core.local.proot.RootfsFormat.TAR_GZ
+    }
+
+    // --- Per-distro custom bind mounts (#301) ---
+
+    /** Bumped when binds change, so the Manage screen recomposes the count. */
+    val customBindsRev: StateFlow<Int> get() = prootManager.customBindsRev
+
+    fun customBinds(distroId: String): List<sh.haven.core.local.proot.CustomBind> =
+        prootManager.customBinds(distroId)
+
+    fun setCustomBinds(distroId: String, binds: List<sh.haven.core.local.proot.CustomBind>) {
+        prootManager.setCustomBinds(distroId, binds)
+    }
+
+    /**
+     * Delete a distro's rootfs. Stops any DEs running on it first so
+     * the session-viewer tabs don't outlive their backing rootfs.
+     */
+    fun deleteDistro(distroId: String) {
+        if (prootManager.activeDistroId == distroId) {
+            desktopManager.stopAll()
+        }
+        prootManager.deleteDistro(distroId)
+    }
+
+    /**
+     * Install a desktop environment on the active distro. Optional addons
+     * land in a follow-up `installAddons` call when the primary install
+     * succeeds — same shape ConnectionsViewModel.setupDesktop had before
+     * the 3c move.
+     */
+    fun setupDesktop(
+        de: ProotManager.DesktopEnvironment,
+        addons: Set<ProotManager.DesktopAddon> = emptySet(),
+    ) {
+        viewModelScope.launch {
+            // Native desktops have no VNC server; the password is unused.
+            prootManager.setupDesktop("", de)
+            if (addons.isNotEmpty() &&
+                prootManager.desktopState.value is ProotManager.DesktopSetupState.Complete
+            ) {
+                prootManager.installAddons(addons)
+            }
+        }
+    }
+
+    fun uninstallDesktop(de: ProotManager.DesktopEnvironment) {
+        viewModelScope.launch {
+            desktopManager.stopDesktop(de)
+            prootManager.uninstallDesktop(de)
+            prootManager.resetDesktopState()
+        }
+    }
+
+    /** Start a native DE and add it as a Wayland tab in the Desktop session viewer. */
+    fun startDesktop(de: ProotManager.DesktopEnvironment) {
+        viewModelScope.launch {
+            val shellCmd = preferencesRepository.waylandShellCommand.first()
+            Log.d(TAG, "startDesktop: ${LogRedact.of(de.label)} shell=$shellCmd")
+            withContext(Dispatchers.IO) {
+                desktopManager.startDesktop(de, shellCmd)
+            }
+            if (de.isNative) {
+                kotlinx.coroutines.delay(2000)
+                addWaylandTab()
+            }
+        }
+    }
+
+    fun stopDesktop(de: ProotManager.DesktopEnvironment) {
+        viewModelScope.launch(Dispatchers.IO) {
+            desktopManager.stopDesktop(de)
+        }
+    }
+
+    fun resetDesktopSetupState() {
+        prootManager.resetDesktopState()
+    }
+
+    /**
+     * Retry the failed install phase (issue #162 Phase 3d). Dispatches
+     * via `ProotManager.retry()` which inspects the current Error
+     * state and re-runs just the failing layer (or wipes-and-retries
+     * for the destructive Download/Extract phases).
+     */
+    fun retryRootfsInstall() {
+        viewModelScope.launch { prootManager.retry() }
+    }
+
+    init {
+        // Workspace launcher posts here when a DESKTOP / WAYLAND item
+        // fires. The matching pager switch happens in HavenNavHost.
+        // DesktopViewModel is hoisted to nav scope so emissions always
+        // land regardless of which tab the user is currently viewing.
+        viewModelScope.launch {
+            agentUiCommandBus.commands.collect { command ->
+                when (command) {
+                    is sh.haven.core.data.agent.AgentUiCommand.OpenWaylandDesktop ->
+                        addWaylandTab()
+                    is sh.haven.core.data.agent.AgentUiCommand.OpenUsbDrive ->
+                        openUsbDrive(command.deviceName)
+                    else -> { /* handled by other collectors */ }
+                }
+            }
+        }
+    }
+
+    /**
+     * Transient user-facing messages from background tasks (desktop start
+     * failures, etc.) that need to surface as a Toast/Snackbar. Collected
+     * by DesktopScreen. SharedFlow with replay=0 so a screen rotation
+     * doesn't re-fire the same message.
+     */
+    private val _userMessages = MutableSharedFlow<String>(extraBufferCapacity = 4)
+    val userMessages: SharedFlow<String> = _userMessages.asSharedFlow()
+
+    // --- "Open USB drive" in a VM (#287) — keyed by busid, up to
+    // QemuManager.MAX_CONCURRENT_DRIVES concurrently OPENING/READY.
+    val usbDriveSessions: StateFlow<Map<String, sh.haven.app.usb.UsbDriveVmManager.Status>> = usbDriveVmManager.sessions
+
+    // Whether the persistent USB-helper appliance is provisioned (drives the
+    // "Delete USB helper Linux" menu item; the appliance is kept across opens).
+    private val _applianceProvisioned = MutableStateFlow(usbDriveVmManager.applianceProvisioned)
+    val applianceProvisioned: StateFlow<Boolean> = _applianceProvisioned.asStateFlow()
+
+    init {
+        // Announce each drive's slow VM boot outcome on the snackbar (it then
+        // auto-opens in Files at its mount) — tracked per busid so opening a
+        // second drive doesn't re-fire the first one's message.
+        viewModelScope.launch {
+            var last = usbDriveVmManager.sessions.value.mapValues { it.value.phase }
+            usbDriveVmManager.sessions.collect { byBusid ->
+                _applianceProvisioned.value = usbDriveVmManager.applianceProvisioned
+                byBusid.forEach { (busid, s) ->
+                    if (s.phase != last[busid]) {
+                        when (s.phase) {
+                            sh.haven.app.usb.UsbDriveVmManager.Phase.READY ->
+                                _userMessages.emit("USB drive mounted — opening it in Files.")
+                            sh.haven.app.usb.UsbDriveVmManager.Phase.ERROR ->
+                                _userMessages.emit("Couldn't open USB drive: ${s.error ?: "VM failed to start"}")
+                            else -> {}
+                        }
+                    }
+                }
+                last = byBusid.mapValues { it.value.phase }
+            }
+        }
+    }
+
+    /** Delete the persistent USB-helper appliance; the next open re-provisions it. */
+    fun deleteUsbAppliance() {
+        viewModelScope.launch {
+            usbDriveVmManager.deleteAppliance()
+            _applianceProvisioned.value = usbDriveVmManager.applianceProvisioned
+            _userMessages.emit("USB helper Linux deleted — the next USB-drive open will rebuild it once.")
+        }
+    }
+
+    /**
+     * Non-null while the user must choose between several attached USB
+     * drives — the manual menu item has no deviceName, and resolveDrive
+     * refuses to guess. The Manage screen renders this as a picker dialog.
+     */
+    data class UsbDrivePicker(
+        val drives: List<sh.haven.core.usb.UsbDeviceInfo>,
+        val writable: Boolean,
+        /** true → the picker's taps open the live (route:"guest") session instead of the VM. */
+        val live: Boolean = false,
+    )
+    private val _usbDrivePicker = MutableStateFlow<UsbDrivePicker?>(null)
+    val usbDrivePicker: StateFlow<UsbDrivePicker?> = _usbDrivePicker.asStateFlow()
+
+    fun dismissUsbDrivePicker() {
+        _usbDrivePicker.value = null
+    }
+
+    /**
+     * Non-null while the user must choose a mount route for a drive Android
+     * has mounted itself (#603): browse it directly through the Files tab
+     * (no VM), or commit to the Linux-VM boot. Shown every time — correlation
+     * is a heuristic, so the choice isn't remembered.
+     */
+    data class UsbRouteChoice(
+        val deviceName: String,
+        val productName: String?,
+        val match: sh.haven.app.usb.UsbMountMatch,
+        val writable: Boolean,
+    )
+    private val _usbRouteChoice = MutableStateFlow<UsbRouteChoice?>(null)
+    val usbRouteChoice: StateFlow<UsbRouteChoice?> = _usbRouteChoice.asStateFlow()
+
+    fun dismissUsbRouteChoice() {
+        _usbRouteChoice.value = null
+    }
+
+    /** Commit to the Linux-VM boot (the pre-#603 open path, unchanged). */
+    fun openUsbDriveVm(deviceName: String?, writable: Boolean = false) {
+        viewModelScope.launch {
+            try {
+                usbDriveVmManager.open(deviceName, writable)
+                _userMessages.emit("Opening the USB drive in a Linux VM — this can take a few minutes; progress is shown below.")
+            } catch (e: sh.haven.app.usb.UsbDriveVmManager.UsbVmException) {
+                _userMessages.emit(e.message ?: "Couldn't open USB drive")
+            }
+        }
+    }
+
+    /** Open the Android-mounted volume directly in the Files tab — no VM boot. */
+    fun openUsbDriveDirectly(choice: UsbRouteChoice) {
+        _usbRouteChoice.value = null
+        agentUiCommandBus.emit(
+            sh.haven.core.data.agent.AgentUiCommand.NavigateToSftpPath("local", choice.match.volume.path),
+        )
+        val where = choice.match.volume.description ?: choice.match.volume.path
+        _userMessages.tryEmit("Browsing $where directly — no VM needed.")
+    }
+
+    /**
+     * Boot a VM that mounts the attached USB drive; its files appear as a
+     * connection. When Android has already mounted the drive (#603), a route
+     * choice is offered first; without a mount the VM path runs as before,
+     * with a one-line why (ext4/GPT/LUKS are only readable through the VM).
+     */
+    fun openUsbDrive(deviceName: String? = null, writable: Boolean = false) {
+        if (deviceName == null) {
+            val drives = usbDriveVmManager.massStorageDevices()
+            if (drives.size > 1) {
+                _usbDrivePicker.value = UsbDrivePicker(drives, writable)
+                return
+            }
+        }
+        _usbDrivePicker.value = null
+        viewModelScope.launch {
+            val match = try {
+                usbDriveVmManager.androidMount(deviceName)
+            } catch (e: sh.haven.app.usb.UsbDriveVmManager.UsbVmException) {
+                _userMessages.emit(e.message ?: "Couldn't open USB drive")
+                return@launch
+            }
+            if (match != null) {
+                val info = usbDriveVmManager.massStorageDevices().firstOrNull { it.deviceName == match.deviceName }
+                _usbRouteChoice.value = UsbRouteChoice(match.deviceName, info?.productName, match, writable)
+            } else {
+                _userMessages.emit(
+                    "Android hasn't mounted this drive — opening it in the Linux VM (the only way to read ext4/GPT/LUKS filesystems).",
+                )
+                openUsbDriveVm(deviceName, writable)
+            }
+        }
+    }
+
+    fun closeUsbDrive(busid: String) {
+        viewModelScope.launch {
+            usbDriveVmManager.close(busid)
+            _userMessages.emit("USB drive VM closed.")
+        }
+    }
+
+    // --- Live USB card via the UML guest (fast route) -----------------------
+    // Same drive set as the VM route, but the card is served raw over NBD to a
+    // UML guest that boots in seconds — ddrescue work, no filesystem mounting.
+
+    val usbLiveSessions: StateFlow<Map<String, sh.haven.app.usb.UmlRecoveryManager.Status>> = umlRecoveryManager.sessions
+
+    fun openUsbDriveLive(deviceName: String? = null, writable: Boolean = false) {
+        if (deviceName == null) {
+            val drives = umlRecoveryManager.massStorageDevices()
+            if (drives.size > 1) {
+                _usbDrivePicker.value = UsbDrivePicker(drives, writable, live = true)
+                return
+            }
+        }
+        _usbDrivePicker.value = null
+        viewModelScope.launch {
+            try {
+                umlRecoveryManager.open(deviceName, writable)
+                _userMessages.emit("Attaching the card live — open the \"USB: … (live)\" connection for the rescue console.")
+            } catch (e: sh.haven.app.usb.UmlRecoveryManager.UmlRecoveryException) {
+                _userMessages.emit(e.message ?: "Couldn't open the card live")
+            }
+        }
+    }
+
+    fun closeUsbLive(busid: String) {
+        viewModelScope.launch {
+            umlRecoveryManager.close(busid)
+            _userMessages.emit("Live card session closed.")
+        }
+    }
+
+    /** Unlock a LUKS-encrypted partition on an open USB-drive VM. */
+    fun unlockUsbDrivePartition(busid: String, devicePath: String, passphrase: String) {
+        viewModelScope.launch {
+            try {
+                usbDriveVmManager.unlockPartition(busid, devicePath, passphrase)
+                _userMessages.emit("Partition unlocked.")
+            } catch (e: sh.haven.app.usb.UsbDriveVmManager.UsbVmException) {
+                _userMessages.emit(e.message ?: "Couldn't unlock the partition")
+            }
+        }
+    }
+
+    // --- Desktop-manager dialog drafts -------------------------------------
+    //
+    // Flag AND fields together, never the flag alone. These screens sit in a
+    // HorizontalPager under a nav host that can leave the composition, so a
+    // rotation takes any open dialog with it.
+    //
+
+    /** The desktop-setup dialog: which DE it was opened for (null = closed) plus its draft. */
+    data class DesktopSetupDraft(
+        val shellCmd: String = "/bin/sh",
+        val addons: Set<ProotManager.DesktopAddon> = emptySet(),
+    )
+
+    private val _setupDesktopDe = MutableStateFlow<ProotManager.DesktopEnvironment?>(null)
+    val setupDesktopDe: StateFlow<ProotManager.DesktopEnvironment?> = _setupDesktopDe.asStateFlow()
+
+    private val _desktopSetupDraft = MutableStateFlow(DesktopSetupDraft())
+    val desktopSetupDraft: StateFlow<DesktopSetupDraft> = _desktopSetupDraft.asStateFlow()
+
+    fun openDesktopSetup(de: ProotManager.DesktopEnvironment) {
+        _desktopSetupDraft.value = DesktopSetupDraft()
+        _setupDesktopDe.value = de
+    }
+
+    fun setDesktopSetupDraft(draft: DesktopSetupDraft) { _desktopSetupDraft.value = draft }
+
+    fun dismissDesktopSetup() {
+        _setupDesktopDe.value = null
+        _desktopSetupDraft.value = DesktopSetupDraft()
+    }
+
+    /** The bring-your-own-rootfs import dialog's draft (#284). */
+    data class ImportRootfsDraft(
+        val id: String = "",
+        val label: String = "",
+        val source: String = "",
+        val family: sh.haven.core.local.proot.PackageFamily = sh.haven.core.local.proot.PackageFamily.APT,
+    )
+
+    private val _showImportRootfs = MutableStateFlow(false)
+    val showImportRootfs: StateFlow<Boolean> = _showImportRootfs.asStateFlow()
+
+    private val _importRootfsDraft = MutableStateFlow(ImportRootfsDraft())
+    val importRootfsDraft: StateFlow<ImportRootfsDraft> = _importRootfsDraft.asStateFlow()
+
+    fun openImportRootfs() {
+        _importRootfsDraft.value = ImportRootfsDraft()
+        _showImportRootfs.value = true
+    }
+
+    fun setImportRootfsDraft(draft: ImportRootfsDraft) { _importRootfsDraft.value = draft }
+
+    fun dismissImportRootfs() {
+        _showImportRootfs.value = false
+        _importRootfsDraft.value = ImportRootfsDraft()
+    }
+
+    /** The custom-binds editor's rows as (host, guest) pairs — a plain list, replaced wholesale on each edit. */
+    private val _showCustomBinds = MutableStateFlow(false)
+    val showCustomBinds: StateFlow<Boolean> = _showCustomBinds.asStateFlow()
+
+    private val _customBindsDraft = MutableStateFlow<List<Pair<String, String>>>(emptyList())
+    val customBindsDraft: StateFlow<List<Pair<String, String>>> = _customBindsDraft.asStateFlow()
+
+    fun openCustomBinds(initial: List<sh.haven.core.local.proot.CustomBind>) {
+        _customBindsDraft.value = initial.map { it.host to it.guest }
+        _showCustomBinds.value = true
+    }
+
+    fun setCustomBindsDraft(rows: List<Pair<String, String>>) { _customBindsDraft.value = rows }
+
+    fun dismissCustomBinds() {
+        _showCustomBinds.value = false
+        _customBindsDraft.value = emptyList()
+    }
+
+    private val _showUsbWritableConfirm = MutableStateFlow(false)
+    val showUsbWritableConfirm: StateFlow<Boolean> = _showUsbWritableConfirm.asStateFlow()
+
+    fun setShowUsbWritableConfirm(open: Boolean) { _showUsbWritableConfirm.value = open }
+
+    /** The distro a delete confirmation is currently asking about — the target has to survive with the flag, or the dialog returns pointing at nothing. */
+    private val _distroPendingDelete = MutableStateFlow<sh.haven.core.local.proot.Distro?>(null)
+    val distroPendingDelete: StateFlow<sh.haven.core.local.proot.Distro?> = _distroPendingDelete.asStateFlow()
+
+    fun setDistroPendingDelete(distro: sh.haven.core.local.proot.Distro?) { _distroPendingDelete.value = distro }
+
+    /**
+     * A distro add the confirm dialog is currently asking about (#620). Tapping
+     * "+ <name> (~MB)" in the distro dropdown downloads a few hundred MB, so it
+     * goes through a confirm first, mirroring [distroPendingDelete]. Holds the
+     * target (and the arch for emulated foreign adds) so the dialog can act on it.
+     */
+    sealed interface PendingAdd {
+        data class Native(val distro: Distro) : PendingAdd
+        data class Foreign(val distro: Distro, val arch: sh.haven.core.local.proot.Arch) : PendingAdd
+    }
+
+    private val _distroPendingAdd = MutableStateFlow<PendingAdd?>(null)
+    val distroPendingAdd: StateFlow<PendingAdd?> = _distroPendingAdd.asStateFlow()
+
+    fun requestAddDistro(distro: Distro) { _distroPendingAdd.value = PendingAdd.Native(distro) }
+
+    fun requestAddForeignDistro(distro: Distro, arch: sh.haven.core.local.proot.Arch) {
+        _distroPendingAdd.value = PendingAdd.Foreign(distro, arch)
+    }
+
+    fun dismissDistroPendingAdd() { _distroPendingAdd.value = null }
+
+    fun confirmDistroPendingAdd() {
+        when (val pending = _distroPendingAdd.value) {
+            is PendingAdd.Native -> addDistro(pending.distro)
+            is PendingAdd.Foreign -> addForeignDistro(pending.distro, pending.arch)
+            null -> {}
+        }
+        _distroPendingAdd.value = null
+    }
+
+    private val _tabs = MutableStateFlow<List<DesktopTab>>(emptyList())
+    val tabs: StateFlow<List<DesktopTab>> = _tabs.asStateFlow()
+
+    private val _activeTabIndex = MutableStateFlow(0)
+    val activeTabIndex: StateFlow<Int> = _activeTabIndex.asStateFlow()
+
+    /** The currently active tab, derived for convenience. */
+    val activeTab: StateFlow<DesktopTab?> = combine(_tabs, _activeTabIndex) { tabs, idx ->
+        tabs.getOrNull(idx)
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), null)
+
+    /** Whether the active tab is connected (used to disable pager swipe). */
+    val activeTabConnected: StateFlow<Boolean> = combine(_tabs, _activeTabIndex) { tabs, idx ->
+        tabs.getOrNull(idx)?.connected?.value == true
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), false)
+
+    // --- Tab management ---
+
+    fun selectTab(index: Int) {
+        val tabs = _tabs.value
+        if (index in tabs.indices) {
+            _activeTabIndex.value = index
+        }
+    }
+
+    fun moveTab(fromIndex: Int, direction: Int) {
+        val tabs = _tabs.value.toMutableList()
+        val toIndex = fromIndex + direction
+        if (fromIndex !in tabs.indices || toIndex !in tabs.indices) return
+        val tab = tabs.removeAt(fromIndex)
+        tabs.add(toIndex, tab)
+        _tabs.value = tabs
+        if (_activeTabIndex.value == fromIndex) _activeTabIndex.value = toIndex
+        else if (_activeTabIndex.value == toIndex) _activeTabIndex.value = fromIndex
+    }
+
+    fun closeTab(tabId: String) {
+        val tabs = _tabs.value.toMutableList()
+        val index = tabs.indexOfFirst { it.id == tabId }
+        if (index < 0) return
+        val tab = tabs.removeAt(index)
+        disconnectTab(tab)
+        _tabs.value = tabs
+        if (_activeTabIndex.value >= tabs.size && tabs.isNotEmpty()) {
+            _activeTabIndex.value = tabs.size - 1
+        }
+    }
+
+    // --- Wayland ---
+
+    fun addWaylandTab() {
+        val tabs = _tabs.value
+        val existing = tabs.indexOfFirst { it is DesktopTab.Wayland }
+        if (existing >= 0) {
+            selectTab(existing)
+            return
+        }
+        val newTabs = tabs.toMutableList()
+        newTabs.add(DesktopTab.Wayland())
+        _tabs.value = newTabs
+        _activeTabIndex.value = newTabs.size - 1
+    }
+
+    fun removeWaylandTab() {
+        val tabs = _tabs.value.toMutableList()
+        val index = tabs.indexOfFirst { it is DesktopTab.Wayland }
+        if (index >= 0) {
+            tabs.removeAt(index)
+            _tabs.value = tabs
+            if (_activeTabIndex.value >= tabs.size && tabs.isNotEmpty()) {
+                _activeTabIndex.value = tabs.size - 1
+            }
+        }
+    }
+
+    /**
+     * Per-Desktop-view orientation override. Stored in the ViewModel
+     * so it survives any composable subtree recreation that happens
+     * when the conditional tab-bar in DesktopScreen comes/goes during
+     * an orientation change — that recreation reset a Composable-
+     * local `remember` state to its initial value and the
+     * LaunchedEffect immediately wrote that back, so the lock never
+     * took effect.
+     *
+     * Default is UNSPECIFIED (auto / follow system) so the Desktop
+     * tab behaves like its neighbours when no desktop session is
+     * active and the user hasn't explicitly chosen landscape —
+     * the previous LANDSCAPE default rotated the activity as soon
+     * as the user landed on the empty Desktop tab, breaking the
+     * left/right swipe-to-change-tab gesture for anyone using
+     * Haven without a desktop connection. Users who want landscape
+     * cycle to it via the orientation toolbar button.
+     *
+     * Values are the raw `ActivityInfo.SCREEN_ORIENTATION_*`
+     * constants since the enum is private to feature modules. Cycle
+     * order from the toolbar button: Auto -> Landscape -> Portrait
+     * -> Auto.
+     */
+    private val _desktopOrientation = MutableStateFlow(
+        android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
+    )
+    val desktopOrientation: StateFlow<Int> = _desktopOrientation.asStateFlow()
+
+    fun cycleDesktopOrientation() {
+        _desktopOrientation.value = when (_desktopOrientation.value) {
+            android.content.pm.ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE ->
+                android.content.pm.ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
+            android.content.pm.ActivityInfo.SCREEN_ORIENTATION_PORTRAIT ->
+                android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
+            else ->
+                android.content.pm.ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
+        }
+    }
+
+    // --- Lifecycle ---
+
+    private fun disconnectTab(tab: DesktopTab) {
+        viewModelScope.launch(Dispatchers.IO) {
+            when (tab) {
+                is DesktopTab.Wayland -> {} // compositor lifecycle managed externally
+            }
+        }
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+        _tabs.value.forEach { disconnectTab(it) }
+    }
+}

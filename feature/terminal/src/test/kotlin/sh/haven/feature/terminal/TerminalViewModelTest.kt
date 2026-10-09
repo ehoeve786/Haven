@@ -18,6 +18,7 @@ import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
+import sh.haven.core.local.LocalSessionManager
 import sh.haven.core.ssh.SshClient
 import sh.haven.core.ssh.SshSessionManager
 

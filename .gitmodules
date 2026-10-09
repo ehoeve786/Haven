@@ -1,0 +1,16 @@
+[submodule "termlib"]
+	path = termlib
+	url = https://github.com/GlassOnTin/termlib.git
+	branch = main
+[submodule "build-proot/proot-termux"]
+	path = build-proot/proot-termux
+	url = https://github.com/GlassOnTin/proot
+	branch = haven-299-fd-fix
+[submodule "wayland-android"]
+	path = wayland-android
+	url = https://github.com/GlassOnTin/wayland-android.git
+	branch = main
+[submodule "prns"]
+	path = prns
+	url = https://github.com/GlassOnTin/Prns.git
+	branch = trunk

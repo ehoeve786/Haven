@@ -8,6 +8,9 @@ import com.jcraft.jsch.Identity
 import com.jcraft.jsch.JSchException
 import com.jcraft.jsch.Proxy
 import com.jcraft.jsch.Session
+import sh.haven.core.fido.FidoAuthenticator
+import sh.haven.core.fido.FidoIdentity
+import sh.haven.core.fido.SkKeyData
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope

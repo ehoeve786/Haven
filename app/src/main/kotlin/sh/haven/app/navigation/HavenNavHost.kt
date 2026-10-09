@@ -78,10 +78,12 @@ import sh.haven.core.data.preferences.UserPreferencesRepository
 import sh.haven.core.data.repository.ConnectionRepository
 import androidx.activity.compose.LocalActivity
 import androidx.hilt.navigation.compose.hiltViewModel
+import sh.haven.app.desktop.DesktopViewModel
 import sh.haven.feature.connections.ConnectionsScreen
 import sh.haven.feature.connections.ConnectionsViewModel
 import sh.haven.feature.chat.ChatScreen
 import sh.haven.feature.keys.KeysScreen
+import sh.haven.feature.mail.MailScreen
 import sh.haven.feature.settings.SettingsScreen
 import androidx.compose.ui.unit.dp
 import sh.haven.feature.sftp.SftpScreen
@@ -318,6 +320,7 @@ fun HavenNavHost(
                 is sh.haven.core.data.agent.AgentUiCommand.OpenRemoteDesktop -> Screen.Desktop
                 is sh.haven.core.data.agent.AgentUiCommand.OpenWaylandDesktop -> Screen.Desktop
                 is sh.haven.core.data.agent.AgentUiCommand.OpenUsbDrive -> Screen.Desktop
+                is sh.haven.core.data.agent.AgentUiCommand.RegenerateStepCaCert -> Screen.Keys
                 is sh.haven.core.data.agent.AgentUiCommand.OpenInEditor -> Screen.Sftp
                 is sh.haven.core.data.agent.AgentUiCommand.EncryptFile -> Screen.Sftp
                 is sh.haven.core.data.agent.AgentUiCommand.DecryptFile -> Screen.Sftp

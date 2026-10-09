@@ -23,6 +23,7 @@ import sh.haven.core.data.db.entities.PortForwardRule
 import sh.haven.core.data.db.entities.ProotInstallLog
 import sh.haven.core.data.db.entities.SshKey
 import sh.haven.core.data.db.entities.StandingPolicy
+import sh.haven.core.data.db.entities.StepCaConfig
 import sh.haven.core.data.db.entities.SyncProfile
 import sh.haven.core.data.db.entities.TotpSecret
 import sh.haven.core.data.db.entities.TunnelConfig
@@ -43,6 +44,7 @@ import sh.haven.core.data.db.entities.WorkspaceProfile
         PasteQueueEntry::class,
         WorkspaceProfile::class,
         WorkspaceItem::class,
+        StepCaConfig::class,
         SyncProfile::class,
         ProotInstallLog::class,
         TotpSecret::class,
@@ -71,6 +73,7 @@ abstract class HavenDatabase : RoomDatabase() {
     abstract fun tunnelConfigDao(): TunnelConfigDao
     abstract fun pasteQueueDao(): PasteQueueDao
     abstract fun workspaceDao(): WorkspaceDao
+    abstract fun stepCaConfigDao(): StepCaConfigDao
     abstract fun syncProfileDao(): SyncProfileDao
     abstract fun prootInstallLogDao(): ProotInstallLogDao
     abstract fun totpSecretDao(): TotpSecretDao

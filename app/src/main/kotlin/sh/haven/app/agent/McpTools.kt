@@ -37,6 +37,14 @@ import sh.haven.core.data.preferences.ToolbarLayout
 import sh.haven.core.data.preferences.UserPreferencesRepository
 import sh.haven.core.data.repository.ConnectionRepository
 import sh.haven.core.data.repository.PortForwardRepository
+import sh.haven.core.local.LocalSessionManager
+import sh.haven.core.ffmpeg.FfmpegExecutor
+import sh.haven.core.ffmpeg.HlsStreamServer
+import sh.haven.core.ffmpeg.TranscodeCommand
+import sh.haven.core.local.WaylandSocketHelper
+import sh.haven.core.local.proot.GuestAppCatalog
+import sh.haven.core.local.proot.buildPackInstallScript
+import sh.haven.core.rclone.RcloneClient
 import sh.haven.core.security.posixShellQuote
 import sh.haven.core.ssh.SessionManagerRegistry
 import sh.haven.core.ssh.SshSessionManager
@@ -68,8 +76,11 @@ internal class McpTools(
     private val sshSessionManager: SshSessionManager,
     private val sessionManagerRegistry: SessionManagerRegistry,
     private val rcloneClient: RcloneClient,
+    private val mailSessionManager: sh.haven.core.mail.MailSessionManager,
     private val sftpStreamServer: SftpStreamServer,
-            private val preferencesRepository: UserPreferencesRepository,
+    private val hlsStreamServer: HlsStreamServer,
+    private val ffmpegExecutor: FfmpegExecutor,
+    private val preferencesRepository: UserPreferencesRepository,
     private val terminalFontInstaller: TerminalFontInstaller,
     private val localSessionManager: LocalSessionManager,
     private val agentUiCommandBus: sh.haven.core.data.agent.AgentUiCommandBus,
@@ -84,11 +95,14 @@ internal class McpTools(
     private val connectionLogRepository: sh.haven.core.data.repository.ConnectionLogRepository,
     private val servedFileTracker: sh.haven.core.data.agent.ServedFileTracker,
     private val syncProfileRepository: sh.haven.core.data.repository.SyncProfileRepository,
+    private val mailRuleRepository: sh.haven.core.data.repository.MailRuleRepository,
+    private val mailWatchManager: sh.haven.app.agent.mailrules.MailWatchManager,
     private val agentActivityHolder: sh.haven.core.data.agent.AgentActivityHolder,
     private val terminalInputQueue: TerminalInputQueue,
     private val prootInstallLogRepository: sh.haven.core.data.repository.ProotInstallLogRepository,
     private val sshKeyRepository: sh.haven.core.data.repository.SshKeyRepository,
     private val knownHostDao: sh.haven.core.data.db.KnownHostDao,
+    private val stepCaConfigRepository: sh.haven.core.data.repository.StepCaConfigRepository,
     private val totpSecretRepository: sh.haven.core.data.repository.TotpSecretRepository,
     private val ageIdentityRepository: sh.haven.core.data.repository.AgeIdentityRepository,
     private val desktopSessionRegistry: sh.haven.core.data.desktop.DesktopSessionRegistry,
@@ -242,6 +256,9 @@ internal class McpTools(
     private val hostKeyProvider = HostKeyToolProvider(
         knownHostDao = knownHostDao,
     )
+    private val stepCaProvider = StepCaToolProvider(
+        stepCaConfigRepository = stepCaConfigRepository,
+    )
     private val rcloneProvider = RcloneToolProvider(
         rcloneClient = rcloneClient,
         syncProfileRepository = syncProfileRepository,
@@ -273,6 +290,17 @@ internal class McpTools(
         ctx = toolContext,
         desktopSessionRegistry = desktopSessionRegistry,
         localSessionManager = localSessionManager,
+    )
+    private val mailProvider = MailToolProvider(
+        ctx = toolContext,
+        mailSessionManager = mailSessionManager,
+        mailRuleRepository = mailRuleRepository,
+        mailWatchManager = mailWatchManager,
+        transportSelector = transportSelector,
+        preferencesRepository = preferencesRepository,
+        connectionLogRepository = connectionLogRepository,
+        connectionRepository = connectionRepository,
+        agentUiCommandBus = agentUiCommandBus,
     )
     // Null when the OpenAI session manager (or its tunnel resolver) isn't
     // supplied — e.g. a manual test construction — in which case no openai_*
@@ -372,7 +400,7 @@ internal class McpTools(
     private val tools: Map<String, ToolHandler> =
         toolsPart1() + toolsPart2() + toolsPart3() + toolsPart4() +
             keyStoreProvider.tools() + tunnelProvider.tools() + sshKeyProvider.tools() +
-            hostKeyProvider.tools() +
+            hostKeyProvider.tools() + stepCaProvider.tools() + rcloneProvider.tools() + usbProvider.tools() +
             desktopProvider.tools() + mailProvider.tools() + (openAiProvider?.tools() ?: emptyMap()) +
                 serialBridgeProvider.tools() +
             sensesProvider.tools() + gpsProvider.tools() + notificationProvider.tools() + reflexProvider.tools() +
