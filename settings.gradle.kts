@@ -3,8 +3,6 @@ pluginManagement {
         google()
         mavenCentral()
         gradlePluginPortal()
-    }
-}
 
 @Suppress("UnstableApiUsage")
 dependencyResolutionManagement {
@@ -30,28 +28,16 @@ dependencyResolutionManagement {
                 // mik3y/usb-serial-for-android — the USB-serial terminal driver
                 // (CDC-ACM + CH34x/FTDI/CP21xx). JitPack-only, not on Central.
                 includeGroup("com.github.mik3y")
-            }
-        }
-    }
-}
 
 // Build termlib from source (submodule fork with popScrollbackLine fix).
 // Drop this includeBuild once the fix is merged upstream and released.
-}
 
-// Prns (Personal Reticulum, Rust engine) JVM SDK — upstream's own Gradle
-// project inside the submodule, consumed unmodified so the submodule tracks
-// pure upstream trunk (Prns#94: app-supplied Pipe transports). The native
-// capsule (libprns_host.so) is cross-built by :core:prns's buildPrnsNative,
-// not by this included build.
-}
 
 // Go bridge compiled via gomobile, single libgojni.so containing:
 //   - rcbridge: rclone for cloud storage backends
 //   - wgbridge: wireguard-go + gVisor netstack for per-app WireGuard (#102)
 // Having both in one gomobile build avoids duplicate `go.Seq` runtime
 // classes and duplicate `libgojni.so` collisions.
-}
 
 rootProject.name = "Haven"
 

@@ -16,10 +16,10 @@ import java.util.Base64
  * a wire-format binary that's a superset of the underlying public-key
  * blob. Phase 2b of #133 uses this to:
  *  - surface accurate `valid_before` on the Keys screen badge
- *  - drive lazy-renewal (`CertRenewalGate`) — compares [validBefore]
+ *  - drive lazy-renewal — compares [validBefore]
  *    against `now + leeway`
  *  - power CA-signed host-key trust (`HostKeyVerifier` matches
- *    [signatureKey] against `StepCaConfig.sshHostCaPublicKey` rows).
+ *    [signatureKey] against configured host-CA public keys).
  *
  * We don't verify the trailing signature here — that's the SSH server's
  * job, not ours. We only need the metadata.
@@ -49,7 +49,7 @@ data class OpenSshCertificate(
     /**
      * Wire-format public key of the issuing CA (type-name string +
      * algorithm-specific key blob). Hash it for `signatureKeyFingerprintSha256`
-     * to look up the matching `StepCaConfig.sshHostCaPublicKey`.
+     * to look up the matching host-CA public key.
      */
     val signatureKey: ByteArray,
 ) {

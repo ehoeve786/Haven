@@ -88,7 +88,6 @@ class MainActivity : AppCompatActivity() {
     // intent extra; routed via this holder's latched flag so a cold-start tap
     // (or one behind the biometric lock) isn't dropped (#239).
     @Inject lateinit var mcpStatusHolder: sh.haven.core.data.agent.McpStatusHolder
-    // Cert renewal request bus: notifications fire haven://renew-cert/<id>
     // intents which land here and we re-publish via the existing
     // AgentUiCommandBus so HavenNavHost flips to Keys and KeysViewModel
     // picks up the regenerate request. (#133 phase 2b)
@@ -176,7 +175,6 @@ class MainActivity : AppCompatActivity() {
         setIntent(intent)
         exitIfDisconnected()
         handleWorkspaceShortcut(intent)
-        handleRenewCertDeepLink(intent)
         handleConnectDeepLink(intent)
         handleOpenUsbDriveIntent(intent)
         handleOpenMailRulesIntent(intent)
@@ -311,13 +309,6 @@ class MainActivity : AppCompatActivity() {
     }.getOrNull()
 
     /**
-     * Parse `haven://renew-cert/<keyId>` deep links posted by
-     * [sh.haven.core.stepca.RenewalNotifier] and re-publish onto the
-     * existing UI command bus. The notifier never imports the bus
-     * directly — that would couple core/stepca to core/data — so the
-     * Activity bridges the two.
-     */
-    /**
      * True the first time a given deep-link URI is seen, false for a repeat
      * within [DEEP_LINK_DEDUPE_MS].
      *
@@ -347,17 +338,6 @@ class MainActivity : AppCompatActivity() {
         return true
     }
 
-    private fun handleRenewCertDeepLink(intent: Intent?) {
-        val data = intent?.data ?: return
-        if (data.scheme != "haven" || data.host != "renew-cert") return
-        if (!isFreshDeepLink(data)) return
-        val keyId = data.lastPathSegment ?: return
-        Log.d("MainActivity", "renew-cert deep link for key $keyId")
-        agentUiCommandBus.emit(
-            sh.haven.core.data.agent.AgentUiCommand.RegenerateStepCaCert(keyId),
-        )
-        intent.data = null
-    }
 
     /**
      * Parse a `haven://connect?host=…&user=…&port=…&transport=…&session=…`
@@ -417,7 +397,6 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         handleWorkspaceShortcut(intent)
-        handleRenewCertDeepLink(intent)
         handleConnectDeepLink(intent)
         handleOpenUsbDriveIntent(intent)
         handleOpenMailRulesIntent(intent)
@@ -576,7 +555,6 @@ class MainActivity : AppCompatActivity() {
      */
     fun handleDeepLinkUri(uri: android.net.Uri) {
         val intent = Intent().apply { data = uri }
-        handleRenewCertDeepLink(intent)
         handleConnectDeepLink(intent)
     }
 
