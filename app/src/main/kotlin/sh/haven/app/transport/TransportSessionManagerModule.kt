@@ -8,7 +8,6 @@ import dagger.multibindings.IntoSet
 import sh.haven.core.bleserial.BleSerialSessionManager
 import sh.haven.core.btserial.BtSerialSessionManager
 import sh.haven.core.local.LocalSessionManager
-import sh.haven.core.mail.MailSessionManager
 import sh.haven.core.openai.OpenAiSessionManager
 import sh.haven.core.rclone.RcloneSessionManager
 import sh.haven.core.smb.SmbSessionManager

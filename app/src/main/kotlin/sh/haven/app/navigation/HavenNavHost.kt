@@ -83,7 +83,6 @@ import sh.haven.feature.connections.ConnectionsScreen
 import sh.haven.feature.connections.ConnectionsViewModel
 import sh.haven.feature.chat.ChatScreen
 import sh.haven.feature.keys.KeysScreen
-import sh.haven.feature.mail.MailScreen
 import sh.haven.feature.settings.SettingsScreen
 import androidx.compose.ui.unit.dp
 import sh.haven.feature.sftp.SftpScreen

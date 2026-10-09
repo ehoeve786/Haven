@@ -76,7 +76,6 @@ internal class McpTools(
     private val sshSessionManager: SshSessionManager,
     private val sessionManagerRegistry: SessionManagerRegistry,
     private val rcloneClient: RcloneClient,
-    private val mailSessionManager: sh.haven.core.mail.MailSessionManager,
     private val sftpStreamServer: SftpStreamServer,
     private val hlsStreamServer: HlsStreamServer,
     private val ffmpegExecutor: FfmpegExecutor,
@@ -95,8 +94,6 @@ internal class McpTools(
     private val connectionLogRepository: sh.haven.core.data.repository.ConnectionLogRepository,
     private val servedFileTracker: sh.haven.core.data.agent.ServedFileTracker,
     private val syncProfileRepository: sh.haven.core.data.repository.SyncProfileRepository,
-    private val mailRuleRepository: sh.haven.core.data.repository.MailRuleRepository,
-    private val mailWatchManager: sh.haven.app.agent.mailrules.MailWatchManager,
     private val agentActivityHolder: sh.haven.core.data.agent.AgentActivityHolder,
     private val terminalInputQueue: TerminalInputQueue,
     private val prootInstallLogRepository: sh.haven.core.data.repository.ProotInstallLogRepository,
@@ -290,17 +287,6 @@ internal class McpTools(
         ctx = toolContext,
         desktopSessionRegistry = desktopSessionRegistry,
         localSessionManager = localSessionManager,
-    )
-    private val mailProvider = MailToolProvider(
-        ctx = toolContext,
-        mailSessionManager = mailSessionManager,
-        mailRuleRepository = mailRuleRepository,
-        mailWatchManager = mailWatchManager,
-        transportSelector = transportSelector,
-        preferencesRepository = preferencesRepository,
-        connectionLogRepository = connectionLogRepository,
-        connectionRepository = connectionRepository,
-        agentUiCommandBus = agentUiCommandBus,
     )
     // Null when the OpenAI session manager (or its tunnel resolver) isn't
     // supplied — e.g. a manual test construction — in which case no openai_*
