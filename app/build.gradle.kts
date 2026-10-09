@@ -52,9 +52,13 @@ android {
     }
 
     // The terminal flavour's Go library lives outside the module, next to the
+    // full one that :core:rclone contributes. Both are build outputs and both
+    // are gitignored; running rclone-android/tools/build-android.sh produces
+    // the pair. A terminal build made without it would package :core:rclone's
     // full library instead — 20 MB larger, and correct, just not smaller.
     sourceSets {
         getByName("terminal") {
+            jniLibs.srcDir("${rootProject.projectDir}/rclone-android/jniLibs-terminal")
         }
     }
 
@@ -125,15 +129,18 @@ android {
         jniLibs {
             useLegacyPackaging = true
             // #510: the terminal flavour ships a libgojni.so built without
+            // rclone (see rclone-android/tools/build-android.sh) — ~8 MB
             // against ~28 MB, keeping tailscale, WireGuard and Proton mail.
             //
             // gomobile always names its output libgojni.so, so the two cannot
             // be told apart by name and both reach the merge: the app's own
+            // flavour source set, and :core:rclone's copy of the full one.
             // pickFirsts resolves that in the app's favour. An exclude cannot
             // do this job — the pattern would match both and leave the flavour
             // with no Go library at all.
             //
             // The full flavour has no app-level copy, so it takes
+            // :core:rclone's unchanged.
             pickFirsts += "**/libgojni.so"
         }
     }
@@ -237,16 +244,22 @@ dependencies {
     implementation(project(":core:data"))
     implementation(project(":core:btserial"))
     implementation(project(":core:bleserial"))
+    implementation(project(":core:usbserial"))
+    implementation(project(":core:prns"))
     implementation(project(":core:smb"))
+    implementation(project(":core:rclone"))
+    implementation(project(":core:ffmpeg"))
     implementation(project(":core:fido"))
     implementation(project(":core:usb"))
     implementation(project(":core:local"))
+    implementation(project(":core:wayland"))
     implementation(project(":core:terminal-haven"))
     // Direct termlib pull-in so the MCP agent transport can name termlib
     // public types (TerminalEmulator, ScrollController, SelectionController,
     // SelectionRange, AgentSnapshot) by class. core:terminal-haven uses
     // `implementation(libs.termlib)` so the dependency doesn't leak.
     implementation(libs.termlib)
+    implementation(project(":core:stepca"))
     implementation(project(":core:tunnel"))
     implementation(project(":core:knock"))
     implementation(project(":core:mcp"))
@@ -255,8 +268,10 @@ dependencies {
     implementation(project(":feature:connections"))
     implementation(project(":feature:terminal"))
     implementation(project(":feature:sftp"))
-        implementation(project(":feature:chat"))
-        implementation(project(":core:openai"))
+    implementation(project(":feature:mail"))
+    implementation(project(":feature:chat"))
+    implementation(project(":core:mail"))
+    implementation(project(":core:openai"))
     implementation(project(":feature:keys"))
     implementation(project(":feature:settings"))
     implementation(project(":feature:editor"))

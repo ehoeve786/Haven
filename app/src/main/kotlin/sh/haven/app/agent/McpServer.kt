@@ -31,6 +31,9 @@ import sh.haven.core.data.font.TerminalFontInstaller
 import sh.haven.core.data.preferences.UserPreferencesRepository
 import sh.haven.core.data.repository.ConnectionRepository
 import sh.haven.core.data.repository.PortForwardRepository
+import sh.haven.core.ffmpeg.FfmpegExecutor
+import sh.haven.core.ffmpeg.HlsStreamServer
+import sh.haven.core.local.LocalSessionManager
 import sh.haven.core.mcp.HttpResponse
 import sh.haven.core.mcp.McpError
 import sh.haven.core.mcp.ParsedHttpRequest
@@ -41,6 +44,7 @@ import sh.haven.core.mcp.jsonRpcResult
 import sh.haven.core.mcp.serveHttpConnection
 import sh.haven.core.mcp.textResponse
 import sh.haven.core.mcp.writeHttpResponse
+import sh.haven.core.rclone.RcloneClient
 import sh.haven.core.ssh.SessionManagerRegistry
 import sh.haven.core.ssh.SshSessionManager
 import sh.haven.feature.sftp.SftpStreamServer
@@ -177,6 +181,7 @@ class McpServer @Inject constructor(
     private val sshSessionManager: SshSessionManager,
     private val sessionManagerRegistry: SessionManagerRegistry,
     private val rcloneClient: RcloneClient,
+    private val mailSessionManager: sh.haven.core.mail.MailSessionManager,
     private val sftpStreamServer: SftpStreamServer,
     private val hlsStreamServer: HlsStreamServer,
     private val ffmpegExecutor: FfmpegExecutor,
@@ -197,11 +202,14 @@ class McpServer @Inject constructor(
     private val connectionLogRepository: sh.haven.core.data.repository.ConnectionLogRepository,
     private val servedFileTracker: sh.haven.core.data.agent.ServedFileTracker,
     private val syncProfileRepository: sh.haven.core.data.repository.SyncProfileRepository,
+    private val mailRuleRepository: sh.haven.core.data.repository.MailRuleRepository,
+    private val mailWatchManager: sh.haven.app.agent.mailrules.MailWatchManager,
     private val agentActivityHolder: sh.haven.core.data.agent.AgentActivityHolder,
     private val terminalInputQueue: TerminalInputQueue,
     private val prootInstallLogRepository: sh.haven.core.data.repository.ProotInstallLogRepository,
     private val sshKeyRepository: sh.haven.core.data.repository.SshKeyRepository,
     private val knownHostDao: sh.haven.core.data.db.KnownHostDao,
+    private val stepCaConfigRepository: sh.haven.core.data.repository.StepCaConfigRepository,
     private val totpSecretRepository: sh.haven.core.data.repository.TotpSecretRepository,
     private val ageIdentityRepository: sh.haven.core.data.repository.AgeIdentityRepository,
     private val desktopSessionRegistry: sh.haven.core.data.desktop.DesktopSessionRegistry,
@@ -489,6 +497,7 @@ class McpServer @Inject constructor(
         prootInstallLogRepository = prootInstallLogRepository,
         sshKeyRepository = sshKeyRepository,
         knownHostDao = knownHostDao,
+        stepCaConfigRepository = stepCaConfigRepository,
         totpSecretRepository = totpSecretRepository,
         ageIdentityRepository = ageIdentityRepository,
         desktopSessionRegistry = desktopSessionRegistry,

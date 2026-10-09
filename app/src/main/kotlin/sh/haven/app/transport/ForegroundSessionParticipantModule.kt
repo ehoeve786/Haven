@@ -5,7 +5,9 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import dagger.multibindings.IntoSet
+import sh.haven.core.local.LocalSessionManager
 import sh.haven.core.smb.SmbSessionManager
+import sh.haven.core.local.uml.UmlGuestManager
 import sh.haven.core.ssh.ForegroundSessionParticipant
 import sh.haven.core.ssh.SshSessionManager
 
