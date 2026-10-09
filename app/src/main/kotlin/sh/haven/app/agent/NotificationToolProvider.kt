@@ -9,7 +9,6 @@ import android.service.notification.StatusBarNotification
 import org.json.JSONArray
 import org.json.JSONObject
 import sh.haven.core.data.agent.ConsentLevel
-import sh.haven.core.local.WaylandSocketHelper
 import sh.haven.core.mcp.McpError
 import java.util.concurrent.atomic.AtomicBoolean
 

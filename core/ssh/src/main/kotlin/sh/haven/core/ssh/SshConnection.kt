@@ -1,6 +1,5 @@
 package sh.haven.core.ssh
 
-import sh.haven.core.fido.FidoAuthenticator
 import sh.haven.core.ssh.sftp.SftpSession
 import java.io.Closeable
 

@@ -29,8 +29,6 @@ import sh.haven.core.data.db.entities.StepCaConfig
 import sh.haven.core.data.repository.ConnectionRepository
 import sh.haven.core.data.repository.SshKeyRepository
 import sh.haven.core.data.repository.StepCaConfigRepository
-import sh.haven.core.fido.SkKeyData
-import sh.haven.core.fido.SkKeyParser
 import sh.haven.core.security.Keystore
 import sh.haven.core.security.KeystoreEntry
 import sh.haven.core.security.KeystoreFlag

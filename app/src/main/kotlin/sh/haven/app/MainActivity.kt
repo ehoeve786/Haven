@@ -50,7 +50,6 @@ import sh.haven.core.data.agent.AgentConsentManager
 import sh.haven.app.navigation.HavenNavHost
 import sh.haven.core.data.preferences.UserPreferencesRepository
 import sh.haven.core.data.repository.ConnectionRepository
-import sh.haven.core.fido.FidoAuthenticator
 import sh.haven.core.security.BiometricAuthenticator
 import sh.haven.core.ssh.SshConnectionService
 import sh.haven.core.ui.KeyEventInterceptor

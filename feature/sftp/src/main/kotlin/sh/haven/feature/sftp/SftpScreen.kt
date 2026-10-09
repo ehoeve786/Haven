@@ -141,9 +141,6 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import sh.haven.core.data.db.entities.ConnectionProfile
 import kotlinx.coroutines.launch
-import sh.haven.core.rclone.SyncConfig
-import sh.haven.core.rclone.SyncFilters
-import sh.haven.core.rclone.SyncMode
 import sh.haven.feature.sftp.SftpViewModel.Companion.isMediaFile
 import java.text.SimpleDateFormat
 import java.util.Date

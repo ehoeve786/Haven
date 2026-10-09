@@ -13,7 +13,6 @@ import sh.haven.core.mcp.McpError
 import sh.haven.core.ssh.SessionManagerRegistry
 import sh.haven.core.ssh.SessionStatus
 import sh.haven.core.ssh.Transport
-import sh.haven.core.wayland.WaylandBridge
 import sh.haven.feature.sftp.SftpEntry
 import sh.haven.feature.sftp.transport.TransportSelector
 

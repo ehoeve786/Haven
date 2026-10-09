@@ -17,7 +17,6 @@ import sh.haven.core.data.repository.WorkspaceRepository
 import sh.haven.core.ssh.SessionManagerRegistry
 import sh.haven.core.ssh.SessionStatus
 import sh.haven.core.ssh.Transport
-import sh.haven.core.wayland.WaylandBridge
 import javax.inject.Inject
 
 private const val TAG = "WorkspaceViewModel"

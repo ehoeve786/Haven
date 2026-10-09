@@ -6,7 +6,6 @@ import org.connectbot.sshlib.PublicKey
 import org.connectbot.sshlib.SftpResult
 import org.connectbot.sshlib.SshClient as SshlibClient
 import org.connectbot.sshlib.transport.TransportFactory
-import sh.haven.core.fido.FidoAuthenticator
 import sh.haven.core.ssh.ConnectionConfig
 import sh.haven.core.ssh.ExecResult
 import sh.haven.core.ssh.HavenProxy

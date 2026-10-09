@@ -6,7 +6,6 @@ import kotlinx.coroutines.flow.first
 import org.json.JSONObject
 import sh.haven.core.data.agent.ConsentLevel
 import sh.haven.core.data.preferences.UserPreferencesRepository
-import sh.haven.core.local.LocalSessionManager
 import sh.haven.core.mcp.McpError
 
 /**

@@ -5,18 +5,12 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import dagger.multibindings.IntoSet
-import sh.haven.core.bleserial.BleSerialSessionManager
-import sh.haven.core.btserial.BtSerialSessionManager
-import sh.haven.core.local.LocalSessionManager
 import sh.haven.core.openai.OpenAiSessionManager
-import sh.haven.core.rclone.RcloneSessionManager
 import sh.haven.core.smb.SmbSessionManager
 import sh.haven.core.ssh.SessionManager
 import sh.haven.core.ssh.SshSessionManager
 import sh.haven.core.ssh.Transport
 import sh.haven.core.ssh.TransportSessionManager
-import sh.haven.core.local.uml.UmlGuestManager
-import sh.haven.core.usbserial.UsbSerialSessionManager
 
 /**
  * Binds each transport into [sh.haven.core.ssh.SessionManagerRegistry].
