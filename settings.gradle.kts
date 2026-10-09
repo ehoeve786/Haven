@@ -48,10 +48,6 @@ includeBuild("termlib") {
 // pure upstream trunk (Prns#94: app-supplied Pipe transports). The native
 // capsule (libprns_host.so) is cross-built by :core:prns's buildPrnsNative,
 // not by this included build.
-includeBuild("prns/prns-host/bindings/jvm") {
-    dependencySubstitution {
-        substitute(module("rs.reticulum:personal-rns")).using(project(":"))
-    }
 }
 
 // Go bridge compiled via gomobile, single libgojni.so containing:
@@ -80,7 +76,6 @@ include(":core:tunnel")
 include(":core:knock")
 include(":core:mcp")
 include(":core:spa")
-include(":core:stepca")
 
 include(":feature:connections")
 include(":feature:terminal")
@@ -88,7 +83,6 @@ include(":feature:sftp")
 include(":feature:chat")
 include(":feature:keys")
 include(":feature:tunnel")
-include(":core:prns")
 include(":core:smb")
 include(":core:openai")
 

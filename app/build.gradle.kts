@@ -237,7 +237,6 @@ dependencies {
     implementation(project(":core:data"))
     implementation(project(":core:btserial"))
     implementation(project(":core:bleserial"))
-    implementation(project(":core:prns"))
     implementation(project(":core:smb"))
     implementation(project(":core:fido"))
     implementation(project(":core:usb"))
@@ -248,7 +247,6 @@ dependencies {
     // SelectionRange, AgentSnapshot) by class. core:terminal-haven uses
     // `implementation(libs.termlib)` so the dependency doesn't leak.
     implementation(libs.termlib)
-    implementation(project(":core:stepca"))
     implementation(project(":core:tunnel"))
     implementation(project(":core:knock"))
     implementation(project(":core:mcp"))
