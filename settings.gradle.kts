@@ -37,10 +37,6 @@ dependencyResolutionManagement {
 
 // Build termlib from source (submodule fork with popScrollbackLine fix).
 // Drop this includeBuild once the fix is merged upstream and released.
-includeBuild("termlib") {
-    dependencySubstitution {
-        substitute(module("org.connectbot:termlib")).using(project(":lib"))
-    }
 }
 
 // Prns (Personal Reticulum, Rust engine) JVM SDK — upstream's own Gradle
@@ -55,10 +51,6 @@ includeBuild("termlib") {
 //   - wgbridge: wireguard-go + gVisor netstack for per-app WireGuard (#102)
 // Having both in one gomobile build avoids duplicate `go.Seq` runtime
 // classes and duplicate `libgojni.so` collisions.
-includeBuild("rclone-android") {
-    dependencySubstitution {
-        substitute(module("sh.haven:rclone-transport")).using(project(":"))
-    }
 }
 
 rootProject.name = "Haven"
