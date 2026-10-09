@@ -38,9 +38,6 @@ import sh.haven.core.data.preferences.UserPreferencesRepository
 import sh.haven.core.data.repository.ConnectionRepository
 import sh.haven.core.data.repository.PortForwardRepository
 import sh.haven.core.local.LocalSessionManager
-import sh.haven.core.ffmpeg.FfmpegExecutor
-import sh.haven.core.ffmpeg.HlsStreamServer
-import sh.haven.core.ffmpeg.TranscodeCommand
 import sh.haven.core.local.WaylandSocketHelper
 import sh.haven.core.local.proot.GuestAppCatalog
 import sh.haven.core.local.proot.buildPackInstallScript
@@ -77,9 +74,7 @@ internal class McpTools(
     private val sessionManagerRegistry: SessionManagerRegistry,
     private val rcloneClient: RcloneClient,
     private val sftpStreamServer: SftpStreamServer,
-    private val hlsStreamServer: HlsStreamServer,
-    private val ffmpegExecutor: FfmpegExecutor,
-    private val preferencesRepository: UserPreferencesRepository,
+            private val preferencesRepository: UserPreferencesRepository,
     private val terminalFontInstaller: TerminalFontInstaller,
     private val localSessionManager: LocalSessionManager,
     private val agentUiCommandBus: sh.haven.core.data.agent.AgentUiCommandBus,

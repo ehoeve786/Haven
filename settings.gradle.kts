@@ -99,7 +99,6 @@ include(":core:fido")
 include(":core:usb")
 include(":core:local")
 include(":core:wayland")
-include(":core:ffmpeg")
 include(":core:scan")
 
 include(":feature:settings")
